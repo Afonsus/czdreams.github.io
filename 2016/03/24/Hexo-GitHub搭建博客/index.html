@@ -11,7 +11,7 @@
 <meta property="og:url" content="http://yoursite.com/2016/03/24/Hexo-GitHub搭建博客/index.html">
 <meta property="og:site_name" content="Hexo">
 <meta property="og:description" content="经过各种找资料，踩过何种坑，终于搭建好了hexo，域名目前用得时github的，我的hexo是3.1.1版本，hexo不同的版本，很多配置都不一样。好吧，废话不多说了，开始吧。">
-<meta property="og:updated_time" content="2016-03-24T05:42:45.309Z">
+<meta property="og:updated_time" content="2016-03-24T05:44:40.852Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="Hexo+GitHub搭建博客">
 <meta name="twitter:description" content="经过各种找资料，踩过何种坑，终于搭建好了hexo，域名目前用得时github的，我的hexo是3.1.1版本，hexo不同的版本，很多配置都不一样。好吧，废话不多说了，开始吧。">
@@ -119,7 +119,7 @@ Usage: hexo
 <pre><code>hexo-server
 </code></pre><p>得到:</p>
 <pre><code>INFO  Hexo is running at http://0.0.0.0:4000/. Press Ctrl+C to stop.
-</code></pre><p>这个时候再点击<a href="http://0.0.0.0:4000，正常情况下应该是最原始的画面，但是我看到的是：" target="_blank" rel="external">http://0.0.0.0:4000，正常情况下应该是最原始的画面，但是我看到的是：</a></p>
+</code></pre><p>这个时候再点击<a href="http://0.0.0.0:4000" target="_blank" rel="external">http://0.0.0.0:4000</a> ，正常情况下应该是最原始的画面，但是我看到的是：</p>
 <pre><code>白板和Cannot GET / 几个字
 </code></pre><p>原因：<br>由于2.6以后就更新了，我们需要手动配置些东西，我们需要输入下面三行命令：</p>
 <pre><code>npm install hexo-renderer-ejs --save
@@ -129,7 +129,7 @@ npm install hexo-renderer-marked --save
 <pre><code>hexo generate （或hexo g）
 </code></pre><p>启动本地服务器：</p>
 <pre><code>hexo server （或hexo s）
-</code></pre><p>再点击网址<a href="http://0.0.0.0:4000OK终于可以看到属于你自己的blog啦，虽然很简陋，但好歹有了一个属于自己的小窝了。参考链接，本地已经简单的设置好了，但是现在域名和服务器都是基于自己的电脑，接下来需要跟github进行关联。" target="_blank" rel="external">http://0.0.0.0:4000OK终于可以看到属于你自己的blog啦，虽然很简陋，但好歹有了一个属于自己的小窝了。参考链接，本地已经简单的设置好了，但是现在域名和服务器都是基于自己的电脑，接下来需要跟github进行关联。</a><br>配置Github<br>建立Repository<br>建立与你用户名对应的仓库，仓库名必须为【your_user_name.github.io】，固定写法，然后建立关联，我的blog在本地/Users/leopard/blog，blog是我之前建的东西也全在这里面，有：</p>
+</code></pre><p>再点击网址<a href="http://0.0.0.0:4000" target="_blank" rel="external">http://0.0.0.0:4000</a> OK终于可以看到属于你自己的blog啦，虽然很简陋，但好歹有了一个属于自己的小窝了。参考链接，本地已经简单的设置好了，但是现在域名和服务器都是基于自己的电脑，接下来需要跟github进行关联。<br>配置Github<br>建立Repository<br>建立与你用户名对应的仓库，仓库名必须为【your_user_name.github.io】，固定写法，然后建立关联，我的blog在本地/Users/leopard/blog，blog是我之前建的东西也全在这里面，有：</p>
 <pre><code>_config.yml    node_modules    publicsourcedb.json      package.json    scaffolds    themes
 </code></pre><p>现在我们需要_config.yml文件，来建立关联，命令：</p>
 <pre><code>vim _config.yml
@@ -139,7 +139,7 @@ repository: https://github.com/leopardpan/leopardpan.github.io.git
 branch: master
 </code></pre><p>网上会有很多说法，有的type是github, 还有repository 最后面的后缀也不一样，是github.com.git，我也踩了很多坑，我现在的版本是hexo: 3.1.1，执行命令hexo -vsersion就出来了,貌似3.0后全部改成我上面这种格式了。如果采用SSH协议，参看另外一篇-使用SSH密钥连接Github文章<br>然后，执行配置命令：</p>
 <pre><code>hexo deploy
-</code></pre><p>然后再浏览器中输入<a href="http://leopardpan.github.io/就行了，我的github的账户叫leopardpan,把这个改成你github的账户名就行了" target="_blank" rel="external">http://leopardpan.github.io/就行了，我的github的账户叫leopardpan,把这个改成你github的账户名就行了</a><br>部署步骤<br>每次部署的步骤，可按以下三步来进行。</p>
+</code></pre><p>然后再浏览器中输入<a href="http://leopardpan.github.io/" target="_blank" rel="external">http://leopardpan.github.io/</a> 就行了，我的github的账户叫leopardpan,把这个改成你github的账户名就行了<br>部署步骤<br>每次部署的步骤，可按以下三步来进行。</p>
 <pre><code>hexo clean
 hexo generate
 hexo deploy
@@ -158,7 +158,7 @@ hexo version #查看Hexo的版本
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2016/03/24/Hexo-GitHub搭建博客/" data-id="cim5urodj000088ucr5bdcyu9" class="article-share-link">Share</a>
+      <a data-url="http://yoursite.com/2016/03/24/Hexo-GitHub搭建博客/" data-id="cim5uu3z2000220ucyfy48zoy" class="article-share-link">Share</a>
       
       
   <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Hexo-GitHub/">Hexo GitHub</a></li></ul>
