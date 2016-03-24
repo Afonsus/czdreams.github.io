@@ -11,7 +11,7 @@
 <meta property="og:url" content="http://yoursite.com/2016/03/24/使用SSH密钥连接Github/index.html">
 <meta property="og:site_name" content="Hexo">
 <meta property="og:description" content="使用Github，也许大家觉得比较麻烦的就是在每次push的时候，都需要输入用户名和密码。如果使用SSH，就可以记住用户名，并创建属于自己的密码来保证安全操作，还有神奇的一招可以“不用输入密码”哦。下面将介绍如何创建SSH Keys并将公钥加到GitHub账户中，使用SSH Keys在本机和GitHub之间建立一个安全的连接。">
-<meta property="og:updated_time" content="2016-03-24T05:55:04.661Z">
+<meta property="og:updated_time" content="2016-03-24T05:59:34.213Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="使用SSH密钥连接Github">
 <meta name="twitter:description" content="使用Github，也许大家觉得比较麻烦的就是在每次push的时候，都需要输入用户名和密码。如果使用SSH，就可以记住用户名，并创建属于自己的密码来保证安全操作，还有神奇的一招可以“不用输入密码”哦。下面将介绍如何创建SSH Keys并将公钥加到GitHub账户中，使用SSH Keys在本机和GitHub之间建立一个安全的连接。">
@@ -52,9 +52,9 @@
       </nav>
       <nav id="sub-nav">
         
-          <a id="nav-rss-link" class="nav-icon" href="/atom.xml" title="RSS Feed"></a>
+          <a id="nav-rss-link" class="nav-icon" href="/atom.xml" title="Flux RSS"></a>
         
-        <a id="nav-search-btn" class="nav-icon" title="Search"></a>
+        <a id="nav-search-btn" class="nav-icon" title="Rechercher"></a>
       </nav>
       <div id="search-form-wrap">
         <form action="//google.com/search" method="get" accept-charset="UTF-8" class="search-form"><input type="search" name="q" results="0" class="search-form-input" placeholder="Search"><button type="submit" class="search-form-submit">&#xF002;</button><input type="hidden" name="sitesearch" value="http://yoursite.com"></form>
@@ -86,9 +86,10 @@
     <div class="article-entry" itemprop="articleBody">
       
         <p>使用Github，也许大家觉得比较麻烦的就是在每次push的时候，都需要输入用户名和密码。如果使用SSH，就可以记住用户名，并创建属于自己的密码来保证安全操作，还有神奇的一招可以“不用输入密码”哦。下面将介绍如何创建SSH Keys并将公钥加到GitHub账户中，使用SSH Keys在本机和GitHub之间建立一个安全的连接。<br><a id="more"></a></p>
-<p>#一、Windows环境下生成SSH key且连接GitHub<br>第一步、看看是否存在SSH密钥(keys)<br>首先，我们需要看看是否看看本机是否存在SSH keys,打开Git Bash,并运行:</p>
+<h2 id="一、Windows环境下生成SSH-key且连接GitHub"><a href="#一、Windows环境下生成SSH-key且连接GitHub" class="headerlink" title="一、Windows环境下生成SSH key且连接GitHub"></a>一、Windows环境下生成SSH key且连接GitHub</h2><h3 id="第一步、看看是否存在SSH密钥-keys"><a href="#第一步、看看是否存在SSH密钥-keys" class="headerlink" title="第一步、看看是否存在SSH密钥(keys)"></a>第一步、看看是否存在SSH密钥(keys)</h3><p>首先，我们需要看看是否看看本机是否存在SSH keys,打开Git Bash,并运行:</p>
 <pre><code>$cd ~/.ssh#
-</code></pre><p>检查你本机用户home目录下是否存在.ssh目录<br>如果，不存在此目录，则进行第二步操作，否则，你本机已经存在ssh公钥和私钥，可以略过第二步，直接进入第三步操作。<br>第二步、创建一对新的SSH密钥(keys)<br>输入如下命令：</p>
+</code></pre><p>检查你本机用户home目录下是否存在.ssh目录<br>如果，不存在此目录，则进行第二步操作，否则，你本机已经存在ssh公钥和私钥，可以略过第二步，直接进入第三步操作。</p>
+<h3 id="第二步、创建一对新的SSH密钥-keys"><a href="#第二步、创建一对新的SSH密钥-keys" class="headerlink" title="第二步、创建一对新的SSH密钥(keys)"></a>第二步、创建一对新的SSH密钥(keys)</h3><p>输入如下命令：</p>
 <pre><code>$ssh-keygen -t rsa -C “your_email@example.com”
 </code></pre><p>#这将按照你提供的邮箱地址，创建一对密钥<br>Generating public/private rsa key pair.<br>Enter file in which to save the key (/c/Users/you/.ssh/id_rsa): [Press enter]</p>
 <p>直接回车，则将密钥按默认文件进行存储。此时也可以输入特定的文件名，比如/c/Users/you/.ssh/github_rsa<br>接着，根据提示，你需要输入密码和确认密码（说到这里，如果你很放心，其实可以不用密码，就是到输密码的地方，都直接回车，所以每次push就只管回车就行了。所谓的最安全的密码，就是没有密码 – – 哈哈）。相关提示如下：</p>
@@ -99,7 +100,7 @@ Enter same passphrase again: [Type passphrase again]
 Your public key has been saved in /c/Users/you/.ssh/id_rsa.pub.
 The key fingerprint is:
 01:0f:f4:3b:ca:85:d6:17:a1:7d:f0:68:9d:f0:a2:db your_email@example.com
-</code></pre><p>第三步、在GitHub账户中添加你的公钥<br>运行如下命令，将公钥的内容复制到系统粘贴板(clipboard)中。</p>
+</code></pre><h3 id="第三步、在GitHub账户中添加你的公钥"><a href="#第三步、在GitHub账户中添加你的公钥" class="headerlink" title="第三步、在GitHub账户中添加你的公钥"></a>第三步、在GitHub账户中添加你的公钥</h3><p>运行如下命令，将公钥的内容复制到系统粘贴板(clipboard)中。</p>
 <pre><code>clip &lt; ~/.ssh/id_rsa.pub
 </code></pre><p>接着：</p>
 <pre><code>登陆GitHub,进入你的Account Settings.
@@ -114,7 +115,7 @@ ssh-key-paste
 ssh-add-key
 再弹出窗口，输入你的GitHub密码，点击确认按钮。
 到此，大功告成了！
-</code></pre><p>第四步、测试<br>为了确认我们可以通过SSH连接GitHub，我们输入下面命令。输入后，会要求我们提供验证密码，输入之前创建的密码就ok了。</p>
+</code></pre><h3 id="第四步、测试"><a href="#第四步、测试" class="headerlink" title="第四步、测试"></a>第四步、测试</h3><p>为了确认我们可以通过SSH连接GitHub，我们输入下面命令。输入后，会要求我们提供验证密码，输入之前创建的密码就ok了。</p>
 <pre><code>$ssh -T git@github.com
 </code></pre><p>你可能会看到告警信息，如下：</p>
 <pre><code>The authenticity of host ‘github.com (207.97.227.239)’ can’t be established.
@@ -122,9 +123,10 @@ RSA key fingerprint is 16:27:ac:a5:76:28:2d:36:63:1b:56:4d:eb:df:a6:48.
 Are you sure you want to continue connecting (yes/no)?
 </code></pre><p>不用担心，直接输入yes。<br>如果看到下面信息，就说明一切完美！</p>
 <pre><code>Hi username! You’ve successfully authenticated, but GitHub does not provide shell access.
-</code></pre><p>#二、Mac环境下生成SSH key且连接GitHub<br>第一步、看看是否存在SSH密钥(keys)<br>首先，我们需要看看是否看看本机是否存在SSH keys,打开终端(Terminal),并运行:</p>
+</code></pre><h2 id="二、Mac环境下生成SSH-key且连接GitHub"><a href="#二、Mac环境下生成SSH-key且连接GitHub" class="headerlink" title="二、Mac环境下生成SSH key且连接GitHub"></a>二、Mac环境下生成SSH key且连接GitHub</h2><h3 id="第一步、看看是否存在SSH密钥-keys-1"><a href="#第一步、看看是否存在SSH密钥-keys-1" class="headerlink" title="第一步、看看是否存在SSH密钥(keys)"></a>第一步、看看是否存在SSH密钥(keys)</h3><p>首先，我们需要看看是否看看本机是否存在SSH keys,打开终端(Terminal),并运行:</p>
 <pre><code>$cd ~/.ssh
-</code></pre><p>检查你本机用户home目录下是否存在.ssh目录<br>如果，不存在此目录，则进行第二步操作，否则，你本机已经存在ssh公钥和私钥，可以略过第二步，直接进入第三步操作。<br>第二步、创建一对新的SSH密钥(keys)<br>输入如下命令：</p>
+</code></pre><p>检查你本机用户home目录下是否存在.ssh目录<br>如果，不存在此目录，则进行第二步操作，否则，你本机已经存在ssh公钥和私钥，可以略过第二步，直接进入第三步操作。</p>
+<h3 id="第二步、创建一对新的SSH密钥-keys-1"><a href="#第二步、创建一对新的SSH密钥-keys-1" class="headerlink" title="第二步、创建一对新的SSH密钥(keys)"></a>第二步、创建一对新的SSH密钥(keys)</h3><p>输入如下命令：</p>
 <pre><code>$ssh-keygen -t rsa -C “your_email@example.com”
 </code></pre><p>#这将按照你提供的邮箱地址，创建一对密钥</p>
 <pre><code>Generating public/private rsa key pair.
@@ -137,7 +139,7 @@ Enter same passphrase again: [Type passphrase again]
 Your public key has been saved in /Users/you/.ssh/id_rsa.pub.
 The key fingerprint is:
 01:0f:f4:3b:ca:85:d6:17:a1:7d:f0:68:9d:f0:a2:db your_email@example.com
-</code></pre><p>第三步、在GitHub账户中添加你的公钥<br>运行如下命令，将公钥的内容复制到系统粘贴板(clipboard)中。</p>
+</code></pre><h3 id="第三步、在GitHub账户中添加你的公钥-1"><a href="#第三步、在GitHub账户中添加你的公钥-1" class="headerlink" title="第三步、在GitHub账户中添加你的公钥"></a>第三步、在GitHub账户中添加你的公钥</h3><p>运行如下命令，将公钥的内容复制到系统粘贴板(clipboard)中。</p>
 <pre><code>pbcopy &lt; ~/.ssh/id_rsa.pub
 </code></pre><p>接着：</p>
 <pre><code>登陆GitHub,进入你的Account Settings.
@@ -152,7 +154,7 @@ ssh-key-paste
 ssh-add-key
 再弹出窗口，输入你的GitHub密码，点击确认按钮。
 到此，大功告成了！
-</code></pre><p>第四步、测试<br>为了确认我们可以通过SSH连接GitHub，我们输入下面命令。输入后，会要求我们提供验证密码，输入之前创建的密码就ok了。</p>
+</code></pre><h3 id="第四步、测试-1"><a href="#第四步、测试-1" class="headerlink" title="第四步、测试"></a>第四步、测试</h3><p>为了确认我们可以通过SSH连接GitHub，我们输入下面命令。输入后，会要求我们提供验证密码，输入之前创建的密码就ok了。</p>
 <pre><code>$ ssh -T git@github.com
 </code></pre><p>你可能会看到告警信息，如下：</p>
 <pre><code>The authenticity of host ‘github.com (207.97.227.239)’ can’t be established.
@@ -162,7 +164,7 @@ Are you sure you want to continue connecting (yes/no)?=
 <pre><code>Hi username! You’ve successfully authenticated, but GitHub does not provide shell access.
 </code></pre><p>【注意】<br>如果前面没有将生成的密钥存放在默认的文件id_rsa中（而是my_rsa中）,那么ssh -T git@github.com命令就需要添加参数来执行。如下：</p>
 <pre><code>$ ssh -T -i my_rsa git@github.com
-</code></pre><p>三、单机如何控制不同的SSH Keys连不同的Git环境?<br>其实，一套SSH密钥是可以用在不同的SSH环境的.<br>但是如果由于某种要求，需要用不同的SSH密钥连接不同的Git环境。假设具体场景是，已经建了密钥github_rsa，还需要创建work_rsa连接工作环境git仓库，那么，可以按下面操作进行：</p>
+</code></pre><h2 id="三、单机如何控制不同的SSH-Keys连不同的Git环境"><a href="#三、单机如何控制不同的SSH-Keys连不同的Git环境" class="headerlink" title="三、单机如何控制不同的SSH Keys连不同的Git环境?"></a>三、单机如何控制不同的SSH Keys连不同的Git环境?</h2><p>其实，一套SSH密钥是可以用在不同的SSH环境的.<br>但是如果由于某种要求，需要用不同的SSH密钥连接不同的Git环境。假设具体场景是，已经建了密钥github_rsa，还需要创建work_rsa连接工作环境git仓库，那么，可以按下面操作进行：</p>
 <pre><code>创建另一对密钥work_rsa.
 $ssh-keygen -t rsa -C “work@mail.com”
 #保存密钥为work_rsa
@@ -184,7 +186,7 @@ IdentityFile ~/.ssh/work_rsa
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2016/03/24/使用SSH密钥连接Github/" data-id="cim5v7loy0003twucb159zqp8" class="article-share-link">Share</a>
+      <a data-url="http://yoursite.com/2016/03/24/使用SSH密钥连接Github/" data-id="cim5vdb020002f8uc9as6jji1" class="article-share-link">Partager</a>
       
       
     </footer>
@@ -195,7 +197,7 @@ IdentityFile ~/.ssh/work_rsa
   
   
     <a href="/2016/03/24/Hexo-GitHub搭建博客/" id="article-nav-older" class="article-nav-link-wrap">
-      <strong class="article-nav-caption">Older</strong>
+      <strong class="article-nav-caption">Ancien</strong>
       <div class="article-nav-title">Hexo+GitHub搭建博客</div>
     </a>
   
@@ -213,7 +215,7 @@ IdentityFile ~/.ssh/work_rsa
   
     
   <div class="widget-wrap">
-    <h3 class="widget-title">Tags</h3>
+    <h3 class="widget-title">Mot-clés</h3>
     <div class="widget">
       <ul class="tag-list"><li class="tag-list-item"><a class="tag-list-link" href="/tags/Hexo-GitHub/">Hexo GitHub</a></li></ul>
     </div>
@@ -223,7 +225,7 @@ IdentityFile ~/.ssh/work_rsa
   
     
   <div class="widget-wrap">
-    <h3 class="widget-title">Tag Cloud</h3>
+    <h3 class="widget-title">Nuage de mot-clés</h3>
     <div class="widget tagcloud">
       <a href="/tags/Hexo-GitHub/" style="font-size: 10px;">Hexo GitHub</a>
     </div>
@@ -242,7 +244,7 @@ IdentityFile ~/.ssh/work_rsa
   
     
   <div class="widget-wrap">
-    <h3 class="widget-title">Recent Posts</h3>
+    <h3 class="widget-title">Articles récents</h3>
     <div class="widget">
       <ul>
         
@@ -271,7 +273,7 @@ IdentityFile ~/.ssh/work_rsa
   <div class="outer">
     <div id="footer-info" class="inner">
       &copy; 2016 John Doe<br>
-      Powered by <a href="http://hexo.io/" target="_blank">Hexo</a>
+      Propulsé by <a href="http://hexo.io/" target="_blank">Hexo</a>
     </div>
   </div>
 </footer>
