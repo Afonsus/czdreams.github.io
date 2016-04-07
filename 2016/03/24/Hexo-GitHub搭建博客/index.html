@@ -1,185 +1,249 @@
-<!DOCTYPE html>
-<html>
+<!doctype html>
 
+
+
+  
+
+
+<html class="theme-next muse use-motion">
 <head>
-  <meta http-equiv="Content-Type" content="text/html" charset="UTF-8" >
-  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1"/>
-  <title>Hexo+GitHub搭建博客 | 遗世而独立</title>
-  <meta name="description" content="Coder" />
-  <meta name="HandheldFriendly" content="True" />
-  <meta name="MobileOptimized" content="320" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <link rel="stylesheet" type="text/css" href="/css/component.css" />
-  <link rel="stylesheet" type="text/css" href="/css/screen.css" />
-  <meta name="generator" content="遗世而独立">
-  <script src="http://static.duoshuo.com/embed.js"></script>
-  
-  
-  
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
 
-  
 
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+  <link href="/vendors/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css"/>
+
+
+
+
+  <link href="//fonts.googleapis.com/css?family=Lato:300,400,700,400italic&subset=latin,latin-ext" rel="stylesheet" type="text/css">
+
+
+
+<link href="/vendors/font-awesome/css/font-awesome.min.css?v=4.4.0" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=0.5.0" rel="stylesheet" type="text/css" />
+
+
+  <meta name="keywords" content="Hexo GitHub," />
+
+
+
+
+
+
+
+
+  <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico?v=0.5.0" />
+
+
+
+
+
+
+<meta name="description" content="经过各种找资料，踩过何种坑，终于搭建好了hexo，域名目前用得时github的，我的hexo是3.1.1版本，hexo不同的版本，很多配置都不一样。好吧，废话不多说了，开始吧。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Hexo+GitHub搭建博客">
+<meta property="og:url" content="http://yoursite.com/2016/03/24/Hexo-GitHub搭建博客/index.html">
+<meta property="og:site_name" content="遗世而独立">
+<meta property="og:description" content="经过各种找资料，踩过何种坑，终于搭建好了hexo，域名目前用得时github的，我的hexo是3.1.1版本，hexo不同的版本，很多配置都不一样。好吧，废话不多说了，开始吧。">
+<meta property="og:updated_time" content="2016-03-24T06:02:49.573Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Hexo+GitHub搭建博客">
+<meta name="twitter:description" content="经过各种找资料，踩过何种坑，终于搭建好了hexo，域名目前用得时github的，我的hexo是3.1.1版本，hexo不同的版本，很多配置都不一样。好吧，废话不多说了，开始吧。">
+
+
+
+<script type="text/javascript" id="hexo.configuration">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    scheme: 'Muse',
+    sidebar: {"position":"left","display":"post"},
+    fancybox: true,
+    motion: true,
+    duoshuo: {
+      userId: 0,
+      author: 'Author'
+    }
+  };
+</script>
+
+  <title> Hexo+GitHub搭建博客 | 遗世而独立 </title>
 </head>
-<body>
-<div class="container">
-    <div class="mp-pusher" id="mp-pusher">
-        <i id="scroll-up" class="fa fa-angle-up"></i>
-        <nav id="mp-menu" class="mp-menu">
-            <div class="mp-level">
-                <a data-pjax class="back-home" style="font-size: 20px" href="/"><h2 ><i class="fa fa-home"></i>
-                        Home</h2></a>
-                <ul class="first-level">
-                    <li>
-                        <a class="fa fa-archive" href="#"><i class="fa fa-angle-left">
-                            </i>&nbsp;&nbsp;Archive</a>
-                        <div class="mp-level page-list">
-                            <h2 ><i class="fa fa-archive"></i>
-                                Archive</h2>
-                            <a class="mp-back" href="#">back</a>
-                            <form id="search-form" action="">
-                                <input type="text" class="search search-archive" placeholder="Search.."/>
-                            </form>
-                            <ul>
-                                <div class="mp-scroll">
-                                
-                                <li class="search-archive-li mp-pjax">
-                                    <a href="/2016/03/24/使用SSH密钥连接Github/">使用SSH密钥连接Github</a>
-                                </li>
-                                
-                                <li class="search-archive-li mp-pjax">
-                                    <a href="/2016/03/24/Hexo-GitHub搭建博客/">Hexo+GitHub搭建博客</a>
-                                </li>
-                                
-                                <li class="search-archive-li mp-pjax">
-                                    <a href="/2016/03/24/hello-world/">Hello World</a>
-                                </li>
-                                
-                                </div>
-                            </ul>
-                        </div>
-                    </li>
-                    <li>
-                        <a class="fa fa-copy" href="#"><i class="fa fa-angle-left">
-                            </i>&nbsp;&nbsp;Categories</a>
 
-                        <div class="mp-level page-list">
-                            <h2 ><i class="fa fa-copy"></i>
-                                Categories</h2>
-                            <a class="mp-back" href="#">back</a>
-                            <form id="search-form" action="">
-                                <input type="text" class="search search-category" placeholder="Search.."/>
-                            </form>
-                            <ul>
-                                <div class="mp-scroll">
-                                
-                                </div>
-                            </ul>
-                        </div>
-                    </li>
-                    <li>
-                        <a class="fa fa-tags" href="#"><i class="fa fa-angle-left">
-                            </i>&nbsp;&nbsp;Tags</a>
-                        <div class="mp-level page-list">
-                            <h2 ><i class="fa fa-tags"></i>
-                                Tags</h2>
-                            <a class="mp-back" href="#">back</a>
-                            <form id="search-form" action="">
-                                <input type="text" class="search search-tag" placeholder="Search.."/>
-                            </form>
-                            <ul>
-                                <div class="mp-scroll">
-                                
-                                <li class="search-tag-li mp-pjax">
-                                    <a href="/tags/Hexo-GitHub/">&nbsp;&nbsp;&nbsp;Hexo GitHub</a>
-                                    <small>1</small>
-                                </li>
-                                
-                                <li class="search-tag-li mp-pjax">
-                                    <a href="/tags/SSH-GitHub/">&nbsp;&nbsp;&nbsp;SSH GitHub</a>
-                                    <small>1</small>
-                                </li>
-                                
-                                </div>
-                            </ul>
-                        </div>
-                    </li>
-                    
-                    <li class="mp-pjax"><a class="fa fa-user" href="/about">&nbsp;&nbsp;&nbsp;About me</a></li>
-                    <li><a class="fa fa-github" href="#">&nbsp;&nbsp;&nbsp;Github</a></li>
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-CN">
 
-                </ul>
-
-            </div>
-        </nav>
-        <div id="pjax">
-            <div class="pjax-hidden" style="display: none">
-                
-                    <a  data-pjax href="/2016/03/24/使用SSH密钥连接Github/">使用SSH密钥连接Github</a>
-                
-                    <a  data-pjax href="/2016/03/24/Hexo-GitHub搭建博客/">Hexo+GitHub搭建博客</a>
-                
-                    <a  data-pjax href="/2016/03/24/hello-world/">Hello World</a>
-                
-                
-                
-                    <a data-pjax href="/tags/Hexo-GitHub/">&nbsp;&nbsp;Hexo GitHub</a>
-                
-                    <a data-pjax href="/tags/SSH-GitHub/">&nbsp;&nbsp;SSH GitHub</a>
-                
-                <a data-pjax class="fa fa-user" href="/about">&nbsp;&nbsp;&nbsp;About me</a>
-            </div>
-            <nav class="nexus">
-                <li  style="border-left: 1px solid #c6d0da;">
-                    <a id="trigger" href="#"><i class="fa fa-bars"></i></a>
-                </li>
-                <li ><a id="nexus-back" data-pjax href="/">遗世而独立</a></li>
-                
-                <div id="nav-container">
-                    <div class="post-navbar" style="line-height: 63px;display:none">
-                        <li id="navbar-title"><a href="#">Hexo+GitHub搭建博客</a></li>
-                        <li id="navbar-toc" style="border-left: none">
-                            <a style="padding-right: 15px">
-                                <span id="toc-content" >Introduction</span><i class="fa fa-chevron-down" ></i>
-                            </a>
-                            <div class="hidden-box">
-                                <ul id="toc"></ul>
-                            </div>
-                        </li>
-                    </div>
-                </div>
-                
-            </nav>
-
-            <div class="scroller">
-            <div class="scroller-inner">
-
-
-<!-- -->
-<!--<body class="post-template">-->
-<!---->
   
 
-<main class="content" role="main">
-    <article class="post" >
-    <span class="post-meta">
-                  <div class="tag-tile">
-                      
-                      
-                      <a data-pjax href='/tags/Hexo-GitHub/' style='color:#D5D5D5'>Hexo GitHub</a>
-                      
-                      
-                  </div>
-                <h1 class="post-title" style="margin: 14px 0;color:#50585D">Hexo+GitHub搭建博客</h1>
 
-                    <div class="post-meta">
-                        Post on<span class="fa fa-clock-o"></span>
-                        <time datetime="2016-03-24T04:55:26.000Z"
-                              itemprop="datePublished">2016-03-24</time>
-                    </div>
-    </span>
 
-        <section class="post-content">
-            <p>经过各种找资料，踩过何种坑，终于搭建好了hexo，域名目前用得时github的，我的hexo是3.1.1版本，hexo不同的版本，很多配置都不一样。好吧，废话不多说了，开始吧。<br><a id="more"></a></p>
+
+
+
+
+
+
+
+  
+  
+    
+  
+
+  <div class="container one-collumn sidebar-position-left page-post-detail ">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-meta ">
+  
+
+  <div class="custom-logo-site-title">
+    <a href="/"  class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <span class="site-title">遗世而独立</span>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+  </div>
+  <p class="site-subtitle">Coder</p>
+</div>
+
+<div class="site-nav-toggle">
+  <button>
+    <span class="btn-bar"></span>
+    <span class="btn-bar"></span>
+    <span class="btn-bar"></span>
+  </button>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-home fa-fw"></i> <br />
+            
+            Home
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives" rel="section">
+            
+              <i class="menu-item-icon fa fa-archive fa-fw"></i> <br />
+            
+            Archives
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags" rel="section">
+            
+              <i class="menu-item-icon fa fa-tags fa-fw"></i> <br />
+            
+            Tags
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+            
+            
+              
+                Hexo+GitHub搭建博客
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            <span class="post-meta-item-icon">
+              <i class="fa fa-calendar-o"></i>
+            </span>
+            <span class="post-meta-item-text">Posted on</span>
+            <time itemprop="dateCreated" datetime="2016-03-24T12:55:26+08:00" content="2016-03-24">
+              2016-03-24
+            </time>
+          </span>
+
+          
+
+          
+            
+          
+
+          
+
+          
+          
+
+        </div>
+      </header>
+    
+
+
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <p>经过各种找资料，踩过何种坑，终于搭建好了hexo，域名目前用得时github的，我的hexo是3.1.1版本，hexo不同的版本，很多配置都不一样。好吧，废话不多说了，开始吧。<br><a id="more"></a></p>
 <h1 id="正文："><a href="#正文：" class="headerlink" title="正文："></a>正文：</h1><p>  这边教程是针对与Mac的，参考链接，由于原文讲到的hexo是以前的老版本，所以现在的版本配置的时候会有些改动。<br>  之前是想着写博客，一方面是给自己做笔记，可以提升自己的写作、总结能力，一个技术点我们会使用，并不难，但是要做到让让别人也能听懂我们讲得，还是需要一定的技巧和经验的。很多类似于CSDN、博客园也都可以写文章，但是页面的样式我，不是太喜欢，简书还算好点得。最近看到一些大神们的博客（在我的友情链接里有），貌似都是用hexo写得，我也依葫芦画瓢的搭建了一个。不罗嗦了，直接上搭建步骤。</p>
 <p>配置环境<br>安装Node（必须）<br>作用：用来生成静态页面的<br>到Node.js官网下载相应平台的最新版本，一路安装即可。</p>
 <p>安装Git（必须）<br>作用：把本地的hexo内容提交到github上去.<br>安装Xcode就自带有Git，我就不多说了。</p>
@@ -250,71 +314,425 @@ hexo version #查看Hexo的版本
 <p>都有详细的介绍，我就不多说了。<br>我这里有几款个人认为不错的主题，免去你们，一个一个的选了，欢迎吐槽我的审美，😄<br>Cover- A chic theme with facebook-like cover photo<br>Oishi- A white theme based on Landscape plus and Writing.<br>Sidebar- Another theme based on Light with a simple sidebar<br>TKL- A responsive design theme for Hexo. 一个设计优雅的响应式主题<br>Tinnypp- A clean, simple theme based on Tinny<br>Writing- A small and simple hexo theme based on Light<br>Yilia- Responsive and simple style 优雅简洁响应式主题，我用得就是这个。<br>Pacman voidy- A theme with dynamic tagcloud and dynamic snow</p>
 <p>一些基本路径<br>文章在source/_posts，如果你不怕麻烦的话可以跟我一样直接用vim去编辑，支持markdown语法，你有好的编辑软件，给我也推荐下，感激不尽。如果想修改头像可以直接在主题的_config.yml文件里面修改，友情链接，之类的都在这里，修改名字在public/index.html里修改，开始打理你的博客吧，有什么问题或者建议，都可以提出来，我会继续完善的。</p>
 
-        </section>
-        <hr/>
-        <nav class="pagination" style="width:auto" role="pagination">
-            
-            <a data-pjax class="newer-posts" href="/2016/03/24/使用SSH密钥连接Github/">← Prev Post</a>
-            
-            <a class="share-button" data-original-title title>Share this Post</a>
-            
-            <a data-pjax class="older-posts" href="/2016/03/24/hello-world/">Next Post →</a>
-            
-        </nav>
-        <br/>
-        <br/>
-        <section id="comment">
-            <div id="comment-box"></div>
-        </section>
-
-
-    </article>
-</main>
-
-
-  
-<footer class="site-footer">
-    
-    <div class="inner">
-        <section class="copyright"><a href="/"></a> &copy; 遗世而独立 2014</section>
-        <section class="poweredby">Published with <a target="_blank" href="http://hexo.io/">Hexo   </a> and Theme by <a target="_blank" href="https://github.com/yuche/hexo-theme-kael">Kael</a></section>
+      
     </div>
-</footer>
-</div>
-</div><!-- /scroller -->
 
-</div><!-- /pusher -->
-</div><!-- /container -->
-</div>
+    <div>
+      
+        
+      
+    </div>
 
-<!-- Easter eggs -->
-
-<div class="egg animated">
-    <a id="close-button" href="#">X</a>
-    <div class="block">
-        <div class="loading">
-            <span class="ball1"></span>
-            <span class="ball2"></span>
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/Hexo-GitHub/" rel="tag">#Hexo GitHub</a>
+          
         </div>
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2016/03/24/hello-world/" rel="next" title="Hello World">
+                <i class="fa fa-chevron-left"></i> Hello World
+              </a>
+            
+          </div>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2016/03/24/使用SSH密钥连接Github/" rel="prev" title="使用SSH密钥连接Github">
+                使用SSH密钥连接Github <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </article>
+
+
+
+    <div class="post-spread">
+      
     </div>
-</div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+  <div class="comments" id="comments">
+    
+  </div>
+
+
+        </div>
+        
+          
   
-<script src="//cdn.staticfile.org/jquery/1.11.0/jquery.min.js"></script>
-<script>
-    if (!window.jQuery) {
-        var script = document.createElement('script');
-        script.src = "/js/jquery.min.js";
-        document.body.appendChild(script);
-    }
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap" >
+            Table of Contents
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview">
+            Overview
+          </li>
+        </ul>
+      
+
+      <section class="site-overview sidebar-panel ">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+          <img class="site-author-image" itemprop="image"
+               src="/images/default_avatar.jpg"
+               alt="Chenzhi" />
+          <p class="site-author-name" itemprop="name">Chenzhi</p>
+          <p class="site-description motion-element" itemprop="description">Java NodeJs NoSql</p>
+        </div>
+        <nav class="site-state motion-element">
+          <div class="site-state-item site-state-posts">
+            <a href="/archives">
+              <span class="site-state-item-count">3</span>
+              <span class="site-state-item-name">posts</span>
+            </a>
+          </div>
+
+          
+
+          
+            <div class="site-state-item site-state-tags">
+              <a href="/tags">
+                <span class="site-state-item-count">2</span>
+                <span class="site-state-item-name">tags</span>
+              </a>
+            </div>
+          
+
+        </nav>
+
+        
+
+        <div class="links-of-author motion-element">
+          
+        </div>
+
+        
+        
+
+        
+        <div class="links-of-blogroll motion-element">
+          
+        </div>
+
+      </section>
+
+      
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc-indicator-top post-toc-indicator">
+            <i class="fa fa-angle-double-up"></i>
+          </div>
+          <div class="post-toc">
+            
+              
+            
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#正文："><span class="nav-number">1.</span> <span class="nav-text">正文：</span></a></li></ol></div>
+            
+          </div>
+          <div class="post-toc-indicator-bottom post-toc-indicator">
+            <i class="fa fa-angle-double-down"></i>
+          </div>
+        </section>
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright" >
+  
+  &copy; 
+  <span itemprop="copyrightYear">2016</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Chenzhi</span>
+</div>
+
+<div class="powered-by">
+  Powered by <a class="theme-link" href="http://hexo.io">Hexo</a>
+</div>
+
+<div class="theme-info">
+  Theme -
+  <a class="theme-link" href="https://github.com/iissnan/hexo-theme-next">
+    NexT.Muse
+  </a>
+</div>
+
+
+
+      </div>
+    </footer>
+
+    <div class="back-to-top">
+      <i class="fa fa-arrow-up"></i>
+    </div>
+  </div>
+
+  
+
+
+  
+
+
+
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
 </script>
-<script type="text/javascript" src="/js/lib.js"></script>
-<script type="text/javascript" src="/js/main.js"></script>
+
+
+  <script type="text/javascript" src="/vendors/jquery/index.js?v=2.1.3"></script>
+
+  <script type="text/javascript" src="/vendors/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+
+  <script type="text/javascript" src="/vendors/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+
+  <script type="text/javascript" src="/vendors/velocity/velocity.min.js"></script>
+
+  <script type="text/javascript" src="/vendors/velocity/velocity.ui.min.js"></script>
+
+  <script type="text/javascript" src="/vendors/fancybox/source/jquery.fancybox.pack.js"></script>
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=0.5.0"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=0.5.0"></script>
 
 
 
+  
+  
+
+  
+  
+<script type="text/javascript" src="/js/src/scrollspy.js?v=0.5.0"></script>
+
+<script type="text/javascript" id="sidebar.toc.highlight">
+  $(document).ready(function () {
+    var tocSelector = '.post-toc';
+    var $tocSelector = $(tocSelector);
+    var activeCurrentSelector = '.active-current';
+
+    $tocSelector
+      .on('activate.bs.scrollspy', function () {
+        var $currentActiveElement = $(tocSelector + ' .active').last();
+
+        removeCurrentActiveClass();
+        $currentActiveElement.addClass('active-current');
+
+        $tocSelector[0].scrollTop = $currentActiveElement.position().top;
+      })
+      .on('clear.bs.scrollspy', function () {
+        removeCurrentActiveClass();
+      });
+
+    function removeCurrentActiveClass () {
+      $(tocSelector + ' ' + activeCurrentSelector)
+        .removeClass(activeCurrentSelector.substring(1));
+    }
+
+    function processTOC () {
+      getTOCMaxHeight();
+      toggleTOCOverflowIndicators();
+    }
+
+    function getTOCMaxHeight () {
+      var height = $('.sidebar').height() -
+                   $tocSelector.position().top -
+                   $('.post-toc-indicator-bottom').height();
+
+      $tocSelector.css('height', height);
+
+      return height;
+    }
+
+    function toggleTOCOverflowIndicators () {
+      tocOverflowIndicator(
+        '.post-toc-indicator-top',
+        $tocSelector.scrollTop() > 0 ? 'show' : 'hide'
+      );
+
+      tocOverflowIndicator(
+        '.post-toc-indicator-bottom',
+        $tocSelector.scrollTop() >= $tocSelector.find('ol').height() - $tocSelector.height() ? 'hide' : 'show'
+      )
+    }
+
+    $(document).on('sidebar.motion.complete', function () {
+      processTOC();
+    });
+
+    $('body').scrollspy({ target: tocSelector });
+    $(window).on('resize', function () {
+      if ( $('.sidebar').hasClass('sidebar-active') ) {
+        processTOC();
+      }
+    });
+
+    onScroll($tocSelector);
+
+    function onScroll (element) {
+      element.on('mousewheel DOMMouseScroll', function (event) {
+          var oe = event.originalEvent;
+          var delta = oe.wheelDelta || -oe.detail;
+
+          this.scrollTop += ( delta < 0 ? 1 : -1 ) * 30;
+          event.preventDefault();
+
+          toggleTOCOverflowIndicators();
+      });
+    }
+
+    function tocOverflowIndicator (indicator, action) {
+      var $indicator = $(indicator);
+      var opacity = action === 'show' ? 1 : 0;
+      $indicator.velocity ?
+        $indicator.velocity('stop').velocity({
+          opacity: opacity
+        }, { duration: 100 }) :
+        $indicator.stop().animate({
+          opacity: opacity
+        }, 100);
+    }
+
+  });
+</script>
+
+<script type="text/javascript" id="sidebar.nav">
+  $(document).ready(function () {
+    var html = $('html');
+    var TAB_ANIMATE_DURATION = 200;
+    var hasVelocity = $.isFunction(html.velocity);
+
+    $('.sidebar-nav li').on('click', function () {
+      var item = $(this);
+      var activeTabClassName = 'sidebar-nav-active';
+      var activePanelClassName = 'sidebar-panel-active';
+      if (item.hasClass(activeTabClassName)) {
+        return;
+      }
+
+      var currentTarget = $('.' + activePanelClassName);
+      var target = $('.' + item.data('target'));
+
+      hasVelocity ?
+        currentTarget.velocity('transition.slideUpOut', TAB_ANIMATE_DURATION, function () {
+          target
+            .velocity('stop')
+            .velocity('transition.slideDownIn', TAB_ANIMATE_DURATION)
+            .addClass(activePanelClassName);
+        }) :
+        currentTarget.animate({ opacity: 0 }, TAB_ANIMATE_DURATION, function () {
+          currentTarget.hide();
+          target
+            .stop()
+            .css({'opacity': 0, 'display': 'block'})
+            .animate({ opacity: 1 }, TAB_ANIMATE_DURATION, function () {
+              currentTarget.removeClass(activePanelClassName);
+              target.addClass(activePanelClassName);
+            });
+        });
+
+      item.siblings().removeClass(activeTabClassName);
+      item.addClass(activeTabClassName);
+    });
+
+    $('.post-toc a').on('click', function (e) {
+      e.preventDefault();
+      var targetSelector = NexT.utils.escapeSelector(this.getAttribute('href'));
+      var offset = $(targetSelector).offset().top;
+      hasVelocity ?
+        html.velocity('stop').velocity('scroll', {
+          offset: offset  + 'px',
+          mobileHA: false
+        }) :
+        $('html, body').stop().animate({
+          scrollTop: offset
+        }, 500);
+    });
+
+    // Expand sidebar on post detail page by default, when post has a toc.
+    NexT.motion.middleWares.sidebar = function () {
+      var $tocContent = $('.post-toc-content');
+
+      if (CONFIG.sidebar.display === 'post' || CONFIG.sidebar.display === 'always') {
+        if ($tocContent.length > 0 && $tocContent.html().trim().length > 0) {
+          NexT.utils.displaySidebar();
+        }
+      }
+    };
+  });
+</script>
 
 
 
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=0.5.0"></script>
+
+
+
+  
+
+
+
+  
+
+
+
+  
+  
+  
+
+  
+
+  
 
 </body>
 </html>
