@@ -1,0 +1,353 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta http-equiv="Content-Type" content="text/html" charset="UTF-8" >
+  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1"/>
+  <title>使用SSH密钥连接Github | 遗世而独立</title>
+  <meta name="description" content="Coder" />
+  <meta name="HandheldFriendly" content="True" />
+  <meta name="MobileOptimized" content="320" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link rel="stylesheet" type="text/css" href="/css/component.css" />
+  <link rel="stylesheet" type="text/css" href="/css/screen.css" />
+  <meta name="generator" content="遗世而独立">
+  <script src="http://static.duoshuo.com/embed.js"></script>
+  
+  
+  
+
+  
+
+</head>
+<body>
+<div class="container">
+    <div class="mp-pusher" id="mp-pusher">
+        <i id="scroll-up" class="fa fa-angle-up"></i>
+        <nav id="mp-menu" class="mp-menu">
+            <div class="mp-level">
+                <a data-pjax class="back-home" style="font-size: 20px" href="/"><h2 ><i class="fa fa-home"></i>
+                        Home</h2></a>
+                <ul class="first-level">
+                    <li>
+                        <a class="fa fa-archive" href="#"><i class="fa fa-angle-left">
+                            </i>&nbsp;&nbsp;Archive</a>
+                        <div class="mp-level page-list">
+                            <h2 ><i class="fa fa-archive"></i>
+                                Archive</h2>
+                            <a class="mp-back" href="#">back</a>
+                            <form id="search-form" action="">
+                                <input type="text" class="search search-archive" placeholder="Search.."/>
+                            </form>
+                            <ul>
+                                <div class="mp-scroll">
+                                
+                                <li class="search-archive-li mp-pjax">
+                                    <a href="/2016/04/07/七牛云图床/"></a>
+                                </li>
+                                
+                                <li class="search-archive-li mp-pjax">
+                                    <a href="/2016/03/24/使用SSH密钥连接Github/">使用SSH密钥连接Github</a>
+                                </li>
+                                
+                                <li class="search-archive-li mp-pjax">
+                                    <a href="/2016/03/24/Hexo-GitHub搭建博客/">Hexo+GitHub搭建博客</a>
+                                </li>
+                                
+                                <li class="search-archive-li mp-pjax">
+                                    <a href="/2016/03/24/hello-world/">Hello World</a>
+                                </li>
+                                
+                                </div>
+                            </ul>
+                        </div>
+                    </li>
+                    <li>
+                        <a class="fa fa-copy" href="#"><i class="fa fa-angle-left">
+                            </i>&nbsp;&nbsp;Categories</a>
+
+                        <div class="mp-level page-list">
+                            <h2 ><i class="fa fa-copy"></i>
+                                Categories</h2>
+                            <a class="mp-back" href="#">back</a>
+                            <form id="search-form" action="">
+                                <input type="text" class="search search-category" placeholder="Search.."/>
+                            </form>
+                            <ul>
+                                <div class="mp-scroll">
+                                
+                                </div>
+                            </ul>
+                        </div>
+                    </li>
+                    <li>
+                        <a class="fa fa-tags" href="#"><i class="fa fa-angle-left">
+                            </i>&nbsp;&nbsp;Tags</a>
+                        <div class="mp-level page-list">
+                            <h2 ><i class="fa fa-tags"></i>
+                                Tags</h2>
+                            <a class="mp-back" href="#">back</a>
+                            <form id="search-form" action="">
+                                <input type="text" class="search search-tag" placeholder="Search.."/>
+                            </form>
+                            <ul>
+                                <div class="mp-scroll">
+                                
+                                <li class="search-tag-li mp-pjax">
+                                    <a href="/tags/Hexo-GitHub/">&nbsp;&nbsp;&nbsp;Hexo GitHub</a>
+                                    <small>1</small>
+                                </li>
+                                
+                                <li class="search-tag-li mp-pjax">
+                                    <a href="/tags/SSH-GitHub/">&nbsp;&nbsp;&nbsp;SSH GitHub</a>
+                                    <small>1</small>
+                                </li>
+                                
+                                </div>
+                            </ul>
+                        </div>
+                    </li>
+                    
+                    <li class="mp-pjax"><a class="fa fa-user" href="/about">&nbsp;&nbsp;&nbsp;About me</a></li>
+                    <li><a class="fa fa-github" href="#">&nbsp;&nbsp;&nbsp;Github</a></li>
+
+                </ul>
+
+            </div>
+        </nav>
+        <div id="pjax">
+            <div class="pjax-hidden" style="display: none">
+                
+                    <a  data-pjax href="/2016/04/07/七牛云图床/"></a>
+                
+                    <a  data-pjax href="/2016/03/24/使用SSH密钥连接Github/">使用SSH密钥连接Github</a>
+                
+                    <a  data-pjax href="/2016/03/24/Hexo-GitHub搭建博客/">Hexo+GitHub搭建博客</a>
+                
+                    <a  data-pjax href="/2016/03/24/hello-world/">Hello World</a>
+                
+                
+                
+                    <a data-pjax href="/tags/Hexo-GitHub/">&nbsp;&nbsp;Hexo GitHub</a>
+                
+                    <a data-pjax href="/tags/SSH-GitHub/">&nbsp;&nbsp;SSH GitHub</a>
+                
+                <a data-pjax class="fa fa-user" href="/about">&nbsp;&nbsp;&nbsp;About me</a>
+            </div>
+            <nav class="nexus">
+                <li  style="border-left: 1px solid #c6d0da;">
+                    <a id="trigger" href="#"><i class="fa fa-bars"></i></a>
+                </li>
+                <li ><a id="nexus-back" data-pjax href="/">遗世而独立</a></li>
+                
+                <div id="nav-container">
+                    <div class="post-navbar" style="line-height: 63px;display:none">
+                        <li id="navbar-title"><a href="#">使用SSH密钥连接Github</a></li>
+                        <li id="navbar-toc" style="border-left: none">
+                            <a style="padding-right: 15px">
+                                <span id="toc-content" >Introduction</span><i class="fa fa-chevron-down" ></i>
+                            </a>
+                            <div class="hidden-box">
+                                <ul id="toc"></ul>
+                            </div>
+                        </li>
+                    </div>
+                </div>
+                
+            </nav>
+
+            <div class="scroller">
+            <div class="scroller-inner">
+
+
+<!-- -->
+<!--<body class="post-template">-->
+<!---->
+  
+
+<main class="content" role="main">
+    <article class="post" >
+    <span class="post-meta">
+                  <div class="tag-tile">
+                      
+                      
+                      <a data-pjax href='/tags/SSH-GitHub/' style='color:#D5D5D5'>SSH GitHub</a>
+                      
+                      
+                  </div>
+                <h1 class="post-title" style="margin: 14px 0;color:#50585D">使用SSH密钥连接Github</h1>
+
+                    <div class="post-meta">
+                        Post on<span class="fa fa-clock-o"></span>
+                        <time datetime="2016-03-24T05:01:41.000Z"
+                              itemprop="datePublished">2016-03-24</time>
+                    </div>
+    </span>
+
+        <section class="post-content">
+            <p>使用Github，也许大家觉得比较麻烦的就是在每次push的时候，都需要输入用户名和密码。如果使用SSH，就可以记住用户名，并创建属于自己的密码来保证安全操作，还有神奇的一招可以“不用输入密码”哦。下面将介绍如何创建SSH Keys并将公钥加到GitHub账户中，使用SSH Keys在本机和GitHub之间建立一个安全的连接。<br><a id="more"></a></p>
+<h2 id="一、Windows环境下生成SSH-key且连接GitHub"><a href="#一、Windows环境下生成SSH-key且连接GitHub" class="headerlink" title="一、Windows环境下生成SSH key且连接GitHub"></a>一、Windows环境下生成SSH key且连接GitHub</h2><h3 id="第一步、看看是否存在SSH密钥-keys"><a href="#第一步、看看是否存在SSH密钥-keys" class="headerlink" title="第一步、看看是否存在SSH密钥(keys)"></a>第一步、看看是否存在SSH密钥(keys)</h3><p>首先，我们需要看看是否看看本机是否存在SSH keys,打开Git Bash,并运行:</p>
+<pre><code>$cd ~/.ssh#
+</code></pre><p>检查你本机用户home目录下是否存在.ssh目录<br>如果，不存在此目录，则进行第二步操作，否则，你本机已经存在ssh公钥和私钥，可以略过第二步，直接进入第三步操作。</p>
+<h3 id="第二步、创建一对新的SSH密钥-keys"><a href="#第二步、创建一对新的SSH密钥-keys" class="headerlink" title="第二步、创建一对新的SSH密钥(keys)"></a>第二步、创建一对新的SSH密钥(keys)</h3><p>输入如下命令：</p>
+<pre><code>$ssh-keygen -t rsa -C “your_email@example.com”
+</code></pre><p>#这将按照你提供的邮箱地址，创建一对密钥<br>Generating public/private rsa key pair.<br>Enter file in which to save the key (/c/Users/you/.ssh/id_rsa): [Press enter]</p>
+<p>直接回车，则将密钥按默认文件进行存储。此时也可以输入特定的文件名，比如/c/Users/you/.ssh/github_rsa<br>接着，根据提示，你需要输入密码和确认密码（说到这里，如果你很放心，其实可以不用密码，就是到输密码的地方，都直接回车，所以每次push就只管回车就行了。所谓的最安全的密码，就是没有密码 – – 哈哈）。相关提示如下：</p>
+<pre><code>Enter passphrase (empty for no passphrase): [Type a passphrase]
+Enter same passphrase again: [Type passphrase again]
+</code></pre><p>输入完成之后，屏幕会显示如下信息：</p>
+<pre><code>Your identification has been saved in /c/Users/you/.ssh/id_rsa.
+Your public key has been saved in /c/Users/you/.ssh/id_rsa.pub.
+The key fingerprint is:
+01:0f:f4:3b:ca:85:d6:17:a1:7d:f0:68:9d:f0:a2:db your_email@example.com
+</code></pre><h3 id="第三步、在GitHub账户中添加你的公钥"><a href="#第三步、在GitHub账户中添加你的公钥" class="headerlink" title="第三步、在GitHub账户中添加你的公钥"></a>第三步、在GitHub账户中添加你的公钥</h3><p>运行如下命令，将公钥的内容复制到系统粘贴板(clipboard)中。</p>
+<pre><code>clip &lt; ~/.ssh/id_rsa.pub
+</code></pre><p>接着：</p>
+<pre><code>登陆GitHub,进入你的Account Settings.
+userbar-account-settings
+在左边菜单，点击”SSH Keys”.
+settings-sidebar-ssh-keys
+点击”Add SSH key”按钮.
+ssh-add-ssh-key
+粘贴你的密钥到key输入框中.
+ssh-key-paste
+点击”Add Key”按钮。
+ssh-add-key
+再弹出窗口，输入你的GitHub密码，点击确认按钮。
+到此，大功告成了！
+</code></pre><h3 id="第四步、测试"><a href="#第四步、测试" class="headerlink" title="第四步、测试"></a>第四步、测试</h3><p>为了确认我们可以通过SSH连接GitHub，我们输入下面命令。输入后，会要求我们提供验证密码，输入之前创建的密码就ok了。</p>
+<pre><code>$ssh -T git@github.com
+</code></pre><p>你可能会看到告警信息，如下：</p>
+<pre><code>The authenticity of host ‘github.com (207.97.227.239)’ can’t be established.
+RSA key fingerprint is 16:27:ac:a5:76:28:2d:36:63:1b:56:4d:eb:df:a6:48.
+Are you sure you want to continue connecting (yes/no)?
+</code></pre><p>不用担心，直接输入yes。<br>如果看到下面信息，就说明一切完美！</p>
+<pre><code>Hi username! You’ve successfully authenticated, but GitHub does not provide shell access.
+</code></pre><h2 id="二、Mac环境下生成SSH-key且连接GitHub"><a href="#二、Mac环境下生成SSH-key且连接GitHub" class="headerlink" title="二、Mac环境下生成SSH key且连接GitHub"></a>二、Mac环境下生成SSH key且连接GitHub</h2><h3 id="第一步、看看是否存在SSH密钥-keys-1"><a href="#第一步、看看是否存在SSH密钥-keys-1" class="headerlink" title="第一步、看看是否存在SSH密钥(keys)"></a>第一步、看看是否存在SSH密钥(keys)</h3><p>首先，我们需要看看是否看看本机是否存在SSH keys,打开终端(Terminal),并运行:</p>
+<pre><code>$cd ~/.ssh
+</code></pre><p>检查你本机用户home目录下是否存在.ssh目录<br>如果，不存在此目录，则进行第二步操作，否则，你本机已经存在ssh公钥和私钥，可以略过第二步，直接进入第三步操作。</p>
+<h3 id="第二步、创建一对新的SSH密钥-keys-1"><a href="#第二步、创建一对新的SSH密钥-keys-1" class="headerlink" title="第二步、创建一对新的SSH密钥(keys)"></a>第二步、创建一对新的SSH密钥(keys)</h3><p>输入如下命令：</p>
+<pre><code>$ssh-keygen -t rsa -C “your_email@example.com”
+</code></pre><p>#这将按照你提供的邮箱地址，创建一对密钥</p>
+<pre><code>Generating public/private rsa key pair.
+Enter file in which to save the key (/Users/you/.ssh/id_rsa): [Press enter]
+</code></pre><p>直接回车，则将密钥按默认文件进行存储。此时也可以输入特定的文件名，比如/Users/you/.ssh/github_rsa<br>接着，根据提示，你需要输入密码和确认密码。相关提示如下：</p>
+<pre><code>Enter passphrase (empty for no passphrase): [Type a passphrase]
+Enter same passphrase again: [Type passphrase again]
+</code></pre><p>输入完成之后，屏幕会显示如下信息：</p>
+<pre><code>Your identification has been saved in /Users/you/.ssh/id_rsa.
+Your public key has been saved in /Users/you/.ssh/id_rsa.pub.
+The key fingerprint is:
+01:0f:f4:3b:ca:85:d6:17:a1:7d:f0:68:9d:f0:a2:db your_email@example.com
+</code></pre><h3 id="第三步、在GitHub账户中添加你的公钥-1"><a href="#第三步、在GitHub账户中添加你的公钥-1" class="headerlink" title="第三步、在GitHub账户中添加你的公钥"></a>第三步、在GitHub账户中添加你的公钥</h3><p>运行如下命令，将公钥的内容复制到系统粘贴板(clipboard)中。</p>
+<pre><code>pbcopy &lt; ~/.ssh/id_rsa.pub
+</code></pre><p>接着：</p>
+<pre><code>登陆GitHub,进入你的Account Settings.
+userbar-account-settings
+在左边菜单，点击”SSH Keys”.
+settings-sidebar-ssh-keys
+点击”Add SSH key”按钮.
+ssh-add-ssh-key
+粘贴你的密钥到key输入框中.
+ssh-key-paste
+点击”Add Key”按钮。
+ssh-add-key
+再弹出窗口，输入你的GitHub密码，点击确认按钮。
+到此，大功告成了！
+</code></pre><h3 id="第四步、测试-1"><a href="#第四步、测试-1" class="headerlink" title="第四步、测试"></a>第四步、测试</h3><p>为了确认我们可以通过SSH连接GitHub，我们输入下面命令。输入后，会要求我们提供验证密码，输入之前创建的密码就ok了。</p>
+<pre><code>$ ssh -T git@github.com
+</code></pre><p>你可能会看到告警信息，如下：</p>
+<pre><code>The authenticity of host ‘github.com (207.97.227.239)’ can’t be established.
+RSA key fingerprint is 16:27:ac:a5:76:28:2d:36:63:1b:56:4d:eb:df:a6:48.
+Are you sure you want to continue connecting (yes/no)?=
+</code></pre><p>不用担心，直接输入yes。<br>如果看到下面信息，就说明一切完美！</p>
+<pre><code>Hi username! You’ve successfully authenticated, but GitHub does not provide shell access.
+</code></pre><p>【注意】<br>如果前面没有将生成的密钥存放在默认的文件id_rsa中（而是my_rsa中）,那么ssh -T git@github.com命令就需要添加参数来执行。如下：</p>
+<pre><code>$ ssh -T -i my_rsa git@github.com
+</code></pre><h2 id="三、单机如何控制不同的SSH-Keys连不同的Git环境"><a href="#三、单机如何控制不同的SSH-Keys连不同的Git环境" class="headerlink" title="三、单机如何控制不同的SSH Keys连不同的Git环境?"></a>三、单机如何控制不同的SSH Keys连不同的Git环境?</h2><p>其实，一套SSH密钥是可以用在不同的SSH环境的.<br>但是如果由于某种要求，需要用不同的SSH密钥连接不同的Git环境。假设具体场景是，已经建了密钥github_rsa，还需要创建work_rsa连接工作环境git仓库，那么，可以按下面操作进行：</p>
+<pre><code>创建另一对密钥work_rsa.
+$ssh-keygen -t rsa -C “work@mail.com”
+#保存密钥为work_rsa
+添加新身份信息
+$ssh-add ～/.ssh/work_rsa
+配置.ssh/config
+</code></pre><p>我们需要通过Host别名，将不同的账号区分开来。</p>
+<pre><code>Host me.github.com
+HostName github.com
+PreferredAuthentications publickey
+IdentityFile ~/.ssh/github_rsa
+
+Host work.comp.com
+HostName comp.com
+PreferredAuthentications publickey
+IdentityFile ~/.ssh/work_rsa
+</code></pre><p>参考文档:GitHub官方文档Generating SSH Keys</p>
+
+        </section>
+        <hr/>
+        <nav class="pagination" style="width:auto" role="pagination">
+            
+            <a data-pjax class="newer-posts" href="/2016/04/07/七牛云图床/">← Prev Post</a>
+            
+            <a class="share-button" data-original-title title>Share this Post</a>
+            
+            <a data-pjax class="older-posts" href="/2016/03/24/Hexo-GitHub搭建博客/">Next Post →</a>
+            
+        </nav>
+        <br/>
+        <br/>
+        <section id="comment">
+            <div id="comment-box"></div>
+        </section>
+
+
+    </article>
+</main>
+
+
+  
+<footer class="site-footer">
+    
+    <div class="inner">
+        <section class="copyright"><a href="/"></a> &copy; 遗世而独立 2014</section>
+        <section class="poweredby">Published with <a target="_blank" href="http://hexo.io/">Hexo   </a> and Theme by <a target="_blank" href="https://github.com/yuche/hexo-theme-kael">Kael</a></section>
+    </div>
+</footer>
+</div>
+</div><!-- /scroller -->
+
+</div><!-- /pusher -->
+</div><!-- /container -->
+</div>
+
+<!-- Easter eggs -->
+
+<div class="egg animated">
+    <a id="close-button" href="#">X</a>
+    <div class="block">
+        <div class="loading">
+            <span class="ball1"></span>
+            <span class="ball2"></span>
+        </div>
+    </div>
+</div>
+  
+<script src="//cdn.staticfile.org/jquery/1.11.0/jquery.min.js"></script>
+<script>
+    if (!window.jQuery) {
+        var script = document.createElement('script');
+        script.src = "/js/jquery.min.js";
+        document.body.appendChild(script);
+    }
+</script>
+<script type="text/javascript" src="/js/lib.js"></script>
+<script type="text/javascript" src="/js/main.js"></script>
+
+
+
+
+
+
+
+</body>
+</html>
