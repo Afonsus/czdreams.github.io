@@ -1,0 +1,400 @@
+
+
+<!DOCTYPE HTML>
+<html>
+<head>
+  <meta charset="utf-8">
+  <script type="text/javascript" src="http://tajs.qq.com/stats?sId=44218032" charset="UTF-8"></script>
+  <script>
+	var _hmt = _hmt || [];
+	(function() {
+	  var hm = document.createElement("script");
+	  hm.src = "//hm.baidu.com/hm.js?7192fa361f5cabb11d8a22de41c1ba8f";
+	  var s = document.getElementsByTagName("script")[0]; 
+	  s.parentNode.insertBefore(hm, s);
+	})();
+	</script>
+  
+  <title>使用SSH密钥连接Github | 遗世而独立</title>
+  <meta name="author" content="Chenzhi">
+  
+  <meta name="description" content="Java NodeJs NoSql">
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+
+  <meta property="og:title" content="使用SSH密钥连接Github"/>
+  <meta property="og:site_name" content="遗世而独立"/>
+
+  
+    <meta property="og:image" content="undefined"/>
+  
+
+  <link href="/imgs/favicon.ico" rel="icon" type="image/x-ico">
+  <link rel="alternate" href="/atom.xml" title="遗世而独立" type="application/atom+xml">
+  <link rel="stylesheet" href="/css/style.css" media="screen" type="text/css">
+  <!--[if lt IE 9]><script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script><![endif]-->
+  <script src="//libs.baidu.com/jquery/1.8.0/jquery.min.js"></script>
+</head>
+
+
+<body>
+  <header><div>
+		
+			<div id="imglogo">
+				<a href="/"><img src="/imgs/logo.png" alt="遗世而独立" title="遗世而独立"/></a>
+			</div>
+			
+			<div id="textlogo">
+				<h1 class="site-name">遗世而独立</h1>
+				<h2 class="blog-motto">Coder</h2>
+			</div>
+			<nav class="animated">
+				<ul>
+					
+						<li><a href="/">Home</a></li>
+					
+						<li><a href="/archives">Archives</a></li>
+					
+						<li><a href="/about">About</a></li>
+					
+					<li> <a href="/atom.xml">RSS</a> </li>
+				</ul>
+			</nav>			
+</div>
+</header>
+  <div id="content" class="inner">
+    <div id="main-col" class="alignleft"><div id="wrapper"><article class="post">
+  
+    <div class="gallery">
+  <div class="photoset">
+    
+      <img src="">
+    
+  </div>
+  <div class="control">
+    <div class="prev"></div>
+    <div class="next"></div>
+  </div>
+</div>
+  
+  <div class="post-content">
+    <header class="article-info clearfix">
+  <h1 itemprop="name">
+	使用SSH密钥连接Github
+  </h1>
+  <p class="article-author">By
+    
+      <a href="http://yoursite.com" title="Chenzhi">Chenzhi</a>
+    </p>
+  <p class="article-time">
+    <time datetime="2016-03-24T05:01:41.000Z" itemprop="datePublished">2016-03-24</time>
+    更新日期:<time datetime="2016-03-24T06:17:40.596Z" itemprop="dateModified">2016-03-24</time>
+    
+  </p>
+</header>
+    <div class="entry">
+		
+        <p>使用Github，也许大家觉得比较麻烦的就是在每次push的时候，都需要输入用户名和密码。如果使用SSH，就可以记住用户名，并创建属于自己的密码来保证安全操作，还有神奇的一招可以“不用输入密码”哦。下面将介绍如何创建SSH Keys并将公钥加到GitHub账户中，使用SSH Keys在本机和GitHub之间建立一个安全的连接。<br><a id="more"></a></p>
+<h2 id="一、Windows环境下生成SSH-key且连接GitHub"><a href="#一、Windows环境下生成SSH-key且连接GitHub" class="headerlink" title="一、Windows环境下生成SSH key且连接GitHub"></a>一、Windows环境下生成SSH key且连接GitHub</h2><h3 id="第一步、看看是否存在SSH密钥-keys"><a href="#第一步、看看是否存在SSH密钥-keys" class="headerlink" title="第一步、看看是否存在SSH密钥(keys)"></a>第一步、看看是否存在SSH密钥(keys)</h3><p>首先，我们需要看看是否看看本机是否存在SSH keys,打开Git Bash,并运行:</p>
+<pre><code>$cd ~/.ssh#
+</code></pre><p>检查你本机用户home目录下是否存在.ssh目录<br>如果，不存在此目录，则进行第二步操作，否则，你本机已经存在ssh公钥和私钥，可以略过第二步，直接进入第三步操作。</p>
+<h3 id="第二步、创建一对新的SSH密钥-keys"><a href="#第二步、创建一对新的SSH密钥-keys" class="headerlink" title="第二步、创建一对新的SSH密钥(keys)"></a>第二步、创建一对新的SSH密钥(keys)</h3><p>输入如下命令：</p>
+<pre><code>$ssh-keygen -t rsa -C “your_email@example.com”
+</code></pre><p>#这将按照你提供的邮箱地址，创建一对密钥<br>Generating public/private rsa key pair.<br>Enter file in which to save the key (/c/Users/you/.ssh/id_rsa): [Press enter]</p>
+<p>直接回车，则将密钥按默认文件进行存储。此时也可以输入特定的文件名，比如/c/Users/you/.ssh/github_rsa<br>接着，根据提示，你需要输入密码和确认密码（说到这里，如果你很放心，其实可以不用密码，就是到输密码的地方，都直接回车，所以每次push就只管回车就行了。所谓的最安全的密码，就是没有密码 – – 哈哈）。相关提示如下：</p>
+<pre><code>Enter passphrase (empty for no passphrase): [Type a passphrase]
+Enter same passphrase again: [Type passphrase again]
+</code></pre><p>输入完成之后，屏幕会显示如下信息：</p>
+<pre><code>Your identification has been saved in /c/Users/you/.ssh/id_rsa.
+Your public key has been saved in /c/Users/you/.ssh/id_rsa.pub.
+The key fingerprint is:
+01:0f:f4:3b:ca:85:d6:17:a1:7d:f0:68:9d:f0:a2:db your_email@example.com
+</code></pre><h3 id="第三步、在GitHub账户中添加你的公钥"><a href="#第三步、在GitHub账户中添加你的公钥" class="headerlink" title="第三步、在GitHub账户中添加你的公钥"></a>第三步、在GitHub账户中添加你的公钥</h3><p>运行如下命令，将公钥的内容复制到系统粘贴板(clipboard)中。</p>
+<pre><code>clip &lt; ~/.ssh/id_rsa.pub
+</code></pre><p>接着：</p>
+<pre><code>登陆GitHub,进入你的Account Settings.
+userbar-account-settings
+在左边菜单，点击”SSH Keys”.
+settings-sidebar-ssh-keys
+点击”Add SSH key”按钮.
+ssh-add-ssh-key
+粘贴你的密钥到key输入框中.
+ssh-key-paste
+点击”Add Key”按钮。
+ssh-add-key
+再弹出窗口，输入你的GitHub密码，点击确认按钮。
+到此，大功告成了！
+</code></pre><h3 id="第四步、测试"><a href="#第四步、测试" class="headerlink" title="第四步、测试"></a>第四步、测试</h3><p>为了确认我们可以通过SSH连接GitHub，我们输入下面命令。输入后，会要求我们提供验证密码，输入之前创建的密码就ok了。</p>
+<pre><code>$ssh -T git@github.com
+</code></pre><p>你可能会看到告警信息，如下：</p>
+<pre><code>The authenticity of host ‘github.com (207.97.227.239)’ can’t be established.
+RSA key fingerprint is 16:27:ac:a5:76:28:2d:36:63:1b:56:4d:eb:df:a6:48.
+Are you sure you want to continue connecting (yes/no)?
+</code></pre><p>不用担心，直接输入yes。<br>如果看到下面信息，就说明一切完美！</p>
+<pre><code>Hi username! You’ve successfully authenticated, but GitHub does not provide shell access.
+</code></pre><h2 id="二、Mac环境下生成SSH-key且连接GitHub"><a href="#二、Mac环境下生成SSH-key且连接GitHub" class="headerlink" title="二、Mac环境下生成SSH key且连接GitHub"></a>二、Mac环境下生成SSH key且连接GitHub</h2><h3 id="第一步、看看是否存在SSH密钥-keys-1"><a href="#第一步、看看是否存在SSH密钥-keys-1" class="headerlink" title="第一步、看看是否存在SSH密钥(keys)"></a>第一步、看看是否存在SSH密钥(keys)</h3><p>首先，我们需要看看是否看看本机是否存在SSH keys,打开终端(Terminal),并运行:</p>
+<pre><code>$cd ~/.ssh
+</code></pre><p>检查你本机用户home目录下是否存在.ssh目录<br>如果，不存在此目录，则进行第二步操作，否则，你本机已经存在ssh公钥和私钥，可以略过第二步，直接进入第三步操作。</p>
+<h3 id="第二步、创建一对新的SSH密钥-keys-1"><a href="#第二步、创建一对新的SSH密钥-keys-1" class="headerlink" title="第二步、创建一对新的SSH密钥(keys)"></a>第二步、创建一对新的SSH密钥(keys)</h3><p>输入如下命令：</p>
+<pre><code>$ssh-keygen -t rsa -C “your_email@example.com”
+</code></pre><p>#这将按照你提供的邮箱地址，创建一对密钥</p>
+<pre><code>Generating public/private rsa key pair.
+Enter file in which to save the key (/Users/you/.ssh/id_rsa): [Press enter]
+</code></pre><p>直接回车，则将密钥按默认文件进行存储。此时也可以输入特定的文件名，比如/Users/you/.ssh/github_rsa<br>接着，根据提示，你需要输入密码和确认密码。相关提示如下：</p>
+<pre><code>Enter passphrase (empty for no passphrase): [Type a passphrase]
+Enter same passphrase again: [Type passphrase again]
+</code></pre><p>输入完成之后，屏幕会显示如下信息：</p>
+<pre><code>Your identification has been saved in /Users/you/.ssh/id_rsa.
+Your public key has been saved in /Users/you/.ssh/id_rsa.pub.
+The key fingerprint is:
+01:0f:f4:3b:ca:85:d6:17:a1:7d:f0:68:9d:f0:a2:db your_email@example.com
+</code></pre><h3 id="第三步、在GitHub账户中添加你的公钥-1"><a href="#第三步、在GitHub账户中添加你的公钥-1" class="headerlink" title="第三步、在GitHub账户中添加你的公钥"></a>第三步、在GitHub账户中添加你的公钥</h3><p>运行如下命令，将公钥的内容复制到系统粘贴板(clipboard)中。</p>
+<pre><code>pbcopy &lt; ~/.ssh/id_rsa.pub
+</code></pre><p>接着：</p>
+<pre><code>登陆GitHub,进入你的Account Settings.
+userbar-account-settings
+在左边菜单，点击”SSH Keys”.
+settings-sidebar-ssh-keys
+点击”Add SSH key”按钮.
+ssh-add-ssh-key
+粘贴你的密钥到key输入框中.
+ssh-key-paste
+点击”Add Key”按钮。
+ssh-add-key
+再弹出窗口，输入你的GitHub密码，点击确认按钮。
+到此，大功告成了！
+</code></pre><h3 id="第四步、测试-1"><a href="#第四步、测试-1" class="headerlink" title="第四步、测试"></a>第四步、测试</h3><p>为了确认我们可以通过SSH连接GitHub，我们输入下面命令。输入后，会要求我们提供验证密码，输入之前创建的密码就ok了。</p>
+<pre><code>$ ssh -T git@github.com
+</code></pre><p>你可能会看到告警信息，如下：</p>
+<pre><code>The authenticity of host ‘github.com (207.97.227.239)’ can’t be established.
+RSA key fingerprint is 16:27:ac:a5:76:28:2d:36:63:1b:56:4d:eb:df:a6:48.
+Are you sure you want to continue connecting (yes/no)?=
+</code></pre><p>不用担心，直接输入yes。<br>如果看到下面信息，就说明一切完美！</p>
+<pre><code>Hi username! You’ve successfully authenticated, but GitHub does not provide shell access.
+</code></pre><p>【注意】<br>如果前面没有将生成的密钥存放在默认的文件id_rsa中（而是my_rsa中）,那么ssh -T git@github.com命令就需要添加参数来执行。如下：</p>
+<pre><code>$ ssh -T -i my_rsa git@github.com
+</code></pre><h2 id="三、单机如何控制不同的SSH-Keys连不同的Git环境"><a href="#三、单机如何控制不同的SSH-Keys连不同的Git环境" class="headerlink" title="三、单机如何控制不同的SSH Keys连不同的Git环境?"></a>三、单机如何控制不同的SSH Keys连不同的Git环境?</h2><p>其实，一套SSH密钥是可以用在不同的SSH环境的.<br>但是如果由于某种要求，需要用不同的SSH密钥连接不同的Git环境。假设具体场景是，已经建了密钥github_rsa，还需要创建work_rsa连接工作环境git仓库，那么，可以按下面操作进行：</p>
+<pre><code>创建另一对密钥work_rsa.
+$ssh-keygen -t rsa -C “work@mail.com”
+#保存密钥为work_rsa
+添加新身份信息
+$ssh-add ～/.ssh/work_rsa
+配置.ssh/config
+</code></pre><p>我们需要通过Host别名，将不同的账号区分开来。</p>
+<pre><code>Host me.github.com
+HostName github.com
+PreferredAuthentications publickey
+IdentityFile ~/.ssh/github_rsa
+
+Host work.comp.com
+HostName comp.com
+PreferredAuthentications publickey
+IdentityFile ~/.ssh/work_rsa
+</code></pre><p>参考文档:GitHub官方文档Generating SSH Keys</p>
+
+    </div>
+    <footer>
+        
+        
+  
+  <div class="tags">
+    <a href="/tags/SSH-GitHub/">SSH GitHub</a>
+  </div>
+
+		<div class="bdsharebuttonbox">
+	<a href="#" class="bds_qzone" data-cmd="qzone" title="分享到QQ空间"></a>
+	<a href="#" class="bds_tsina" data-cmd="tsina" title="分享到新浪微博"></a>
+	<a href="#" class="bds_tqq" data-cmd="tqq" title="分享到腾讯微博"></a>
+	<a href="#" class="bds_renren" data-cmd="renren" title="分享到人人网"></a>
+	<a href="#" class="bds_weixin" data-cmd="weixin" title="分享到微信"></a>
+	<a href="#" class="bds_fbook" data-cmd="fbook" title="分享到Facebook"></a>
+	<a href="#" class="bds_twi" data-cmd="twi" title="分享到Twitter"></a>
+	<a href="#" class="bds_more" data-cmd="more"></a>
+	<a href="#" class="bds_count" data-cmd="count"></a>
+</div>
+<script>
+window._bd_share_config=
+{
+	"common":{
+		"bdSnsKey":{},
+		"bdText":"",
+		"bdMini":"2",
+		"bdMiniList":false,
+		"bdPic":"",
+		"bdStyle":"0",
+		"bdSize":"24"
+	},
+	"share":{},
+	"image":{
+		"viewList":["qzone","tsina","tqq","renren","weixin","fbook","twi"],
+		"viewText":"分享到：",
+		"viewSize":"24"
+	},
+	"selectShare":{
+		"bdContainerClass":null,
+		"bdSelectMiniList":["qzone","tsina","tqq","renren","weixin","fbook","twi"]
+	}
+};
+with(document)0[
+	(getElementsByTagName('head')[0]||body).appendChild(createElement('script')).src='http://bdimg.share.baidu.com/static/api/js/share.js?v=89860593.js?cdnversion='+~(-new Date()/36e5)
+];
+</script>    
+        <div class="clearfix"></div>
+    </footer>
+  </div>
+</article>
+
+ <nav id="pagination" >
+    
+    <a href="/2016/04/07/使用七牛云图床/" class="alignleft prev" title="使用七牛云图床">使用七牛云图床</a>
+    
+    
+    <a href="/2016/03/24/Hexo-GitHub搭建博客/" class="alignright next" title="Hexo+GitHub搭建博客">Hexo+GitHub搭建博客</a>
+    
+    <div class="clearfix"></div>
+</nav>
+
+
+
+	
+	<section id="comment">
+		<!-- 多说评论框 start -->
+		<div class="ds-thread" data-thread-key="2016/03/24/使用SSH密钥连接Github/" data-title="使用SSH密钥连接Github" data-url="http://yoursite.com/2016/03/24/使用SSH密钥连接Github/"></div>
+		<!-- 多说评论框 end -->
+		<!-- 多说公共JS代码 start (一个网页只需插入一次) -->
+		<script type="text/javascript">
+		var duoshuoQuery = {short_name:""};
+		(function() {
+			var ds = document.createElement('script');
+			ds.type = 'text/javascript';ds.async = true;
+			ds.src = (document.location.protocol == 'https:' ? 'https:' : 'http:') + '//static.duoshuo.com/embed.js';
+			ds.charset = 'UTF-8';
+			(document.getElementsByTagName('head')[0] 
+			 || document.getElementsByTagName('body')[0]).appendChild(ds);
+		})();
+		</script>
+		<!-- 多说公共JS代码 end -->
+	</section>
+	
+</div></div>
+    <aside id="sidebar" class="alignright">
+  <div class="search">
+  <form action="//google.com/search" method="get" accept-charset="utf-8">
+    <input type="search" name="q" results="0" placeholder="搜索">
+    <input type="hidden" name="q" value="site:yoursite.com">
+  </form>
+</div>
+
+  
+
+  
+<div class="widget tagcloud">
+  <h3 class="title">标签云</h3>
+  <div class="entry">
+    <a href="/tags/Hexo-GitHub/" style="font-size: 10px;">Hexo GitHub</a> <a href="/tags/SSH-GitHub/" style="font-size: 10px;">SSH GitHub</a> <a href="/tags/web-wrk-测试/" style="font-size: 10px;">web wrk 测试</a> <a href="/tags/图床/" style="font-size: 10px;">图床</a>
+  </div>
+</div>
+
+
+  <iframe width="100%" height="140" class="share_self"  frameborder="0" scrolling="no" src="http://widget.weibo.com/weiboshow/index.php?language=&width=0&height=550&fansRow=2&ptype=1&speed=0&skin=1&isTitle=1&noborder=1&isWeibo=0&isFans=0&uid=1923610190&verifier=6af5ad6a&colors=fafafa,fafafa,666666,0082cb,ecfbfd&dpc=1"></iframe>
+
+  <div class="widget tag">
+<h3 class="title">友情链接</h3>
+<ul class="entry">
+<li><a href="http://opiece.me" title="Chillax's Blog" target="_blank">Chillax</a></li>
+</ul>
+</div>
+</aside>
+    <div class="clearfix"></div>
+  </div>
+  <footer id="footer"><div id="footer" >
+	
+	<div class="line">
+		<span></span>
+		<div class="author"></div>
+	</div>
+	
+	
+	<section class="info">
+		<p> Hi,I&#39;m the designer of this theme. <br/>
+			You can download this theme on my github.</p>
+	</section>
+	 
+	<div class="social-font clearfix">
+		
+		<a href="http://weibo.com/1923610190" target="_blank" title="weibo"></a>
+		
+		
+		
+		<a href="https://github.com/huangjunhui" target="_blank" title="github"></a>
+		
+		
+		<a href="https://www.facebook.com/huangjunhui" target="_blank" title="facebook"></a>
+		
+		
+		
+		<a href="mailto:jhhuang1993@foxmail.com" target="_blank" class="icon-email" title="Email Me"></a>
+		
+	</div>
+		<p class="copyright">Powered by <a href="http://hexo.io" target="_blank" title="hexo">hexo</a> and Theme by <a href="https://github.com/huangjunhui/concise" target="_blank" title="Concise">Concise</a> © 2016 
+		
+		<a href="http://yoursite.com/about" target="_blank" title="Chenzhi">Chenzhi</a>
+		
+		</p>
+</div>
+</footer>
+  <script src="//libs.baidu.com/jquery/2.0.3/jquery.min.js"></script>
+<script src="/js/jquery.imagesloaded.min.js"></script>
+<script src="/js/gallery.js"></script>
+<script src="/js/counter.js"></script>
+
+
+
+
+<link rel="stylesheet" href="/fancybox/jquery.fancybox.css" media="screen" type="text/css">
+<script src="/fancybox/jquery.fancybox.pack.js"></script>
+<script type="text/javascript">
+(function($){
+  $('.fancybox').fancybox();
+})(jQuery);
+</script>
+
+<div id="totop" style="position:fixed;bottom:100px;right:10px;cursor: pointer;">
+<a title="返回顶部"><img src="/imgs/scrollup.png"/></a>
+</div>
+<script src="/js/totop.js"></script>
+<!-- mathjax config similar to math.stackexchange -->
+
+<script type="text/x-mathjax-config">
+  MathJax.Hub.Config({
+    tex2jax: {
+      inlineMath: [ ['$','$'], ["\\(","\\)"] ],
+      processEscapes: true
+    }
+  });
+</script>
+
+<script type="text/x-mathjax-config">
+    MathJax.Hub.Config({
+      tex2jax: {
+        skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+      }
+    });
+</script>
+
+<script type="text/x-mathjax-config">
+    MathJax.Hub.Queue(function() {
+        var all = MathJax.Hub.getAllJax(), i;
+        for(i=0; i < all.length; i += 1) {
+            all[i].SourceElement().parentNode.className += ' has-jax';
+        }
+    });
+</script>
+
+<script type="text/javascript" src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
+</script>
+</body>
+</html>
+
+
