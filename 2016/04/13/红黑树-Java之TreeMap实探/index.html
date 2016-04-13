@@ -41,7 +41,7 @@
 <link href="/css/main.css?v=0.5.0" rel="stylesheet" type="text/css" />
 
 
-  <meta name="keywords" content="Hexo, NexT" />
+  <meta name="keywords" content="红黑树 RedBlackTree Java TreeMap," />
 
 
 
@@ -57,15 +57,46 @@
 
 
 
-<meta name="description" content="Java NodeJs NoSql">
-<meta property="og:type" content="website">
-<meta property="og:title" content="遗世而独立">
-<meta property="og:url" content="http://yoursite.com/index.html">
+<meta name="description" content="TreeMap的实现是红黑树算法的实现，所以要了解TreeMap就必须对红黑树有一定的了解,其实这篇博文的名字叫做：根据红黑树的算法来分析TreeMap的实现，但是为了与Java提高篇系列博文保持一致还是叫做TreeMap比较好。通过这篇博文你可以获得如下知识点：
+1、红黑树的基本概念。
+2、红黑树增加节点、删除节点的实现过程。
+3、红黑树左旋转、右旋转的复杂过程。
+4、Java 中TreeMap">
+<meta property="og:type" content="article">
+<meta property="og:title" content="红黑树-Java之TreeMap实探">
+<meta property="og:url" content="http://yoursite.com/2016/04/13/红黑树-Java之TreeMap实探/index.html">
 <meta property="og:site_name" content="遗世而独立">
-<meta property="og:description" content="Java NodeJs NoSql">
+<meta property="og:description" content="TreeMap的实现是红黑树算法的实现，所以要了解TreeMap就必须对红黑树有一定的了解,其实这篇博文的名字叫做：根据红黑树的算法来分析TreeMap的实现，但是为了与Java提高篇系列博文保持一致还是叫做TreeMap比较好。通过这篇博文你可以获得如下知识点：
+1、红黑树的基本概念。
+2、红黑树增加节点、删除节点的实现过程。
+3、红黑树左旋转、右旋转的复杂过程。
+4、Java 中TreeMap">
+<meta property="og:image" content="http://7xsp7e.com2.z0.glb.clouddn.com/image/jpg/tech/algorithms/rbtree/2014051700001_thumb.png">
+<meta property="og:image" content="http://7xsp7e.com2.z0.glb.clouddn.com/image/jpg/tech/algorithms/rbtree/2014051700002_thumb.png">
+<meta property="og:image" content="http://7xsp7e.com2.z0.glb.clouddn.com/image/jpg/tech/algorithms/rbtree/2014051700004_thumb.gif">
+<meta property="og:image" content="http://7xsp7e.com2.z0.glb.clouddn.com/image/jpg/tech/algorithms/rbtree/2014051700005_thumb.gif">
+<meta property="og:image" content="http://7xsp7e.com2.z0.glb.clouddn.com/image/jpg/tech/algorithms/rbtree/2014051700007_thumb.png">
+<meta property="og:image" content="http://7xsp7e.com2.z0.glb.clouddn.com/image/jpg/tech/algorithms/rbtree/2014051700008_thumb.png">
+<meta property="og:image" content="http://7xsp7e.com2.z0.glb.clouddn.com/image/jpg/tech/algorithms/rbtree/2014051700009_thumb.png">
+<meta property="og:image" content="http://7xsp7e.com2.z0.glb.clouddn.com/image/jpg/tech/algorithms/rbtree/20140517000010_thumb.png">
+<meta property="og:image" content="http://7xsp7e.com2.z0.glb.clouddn.com/image/jpg/tech/algorithms/rbtree/20140517000011_thumb.png">
+<meta property="og:image" content="http://7xsp7e.com2.z0.glb.clouddn.com/image/jpg/tech/algorithms/rbtree/2014051700004_thumb.gif">
+<meta property="og:image" content="http://7xsp7e.com2.z0.glb.clouddn.com/image/jpg/tech/algorithms/rbtree/2014051700005_thumb.gif">
+<meta property="og:image" content="http://7xsp7e.com2.z0.glb.clouddn.com/image/jpg/tech/algorithms/rbtree/20140517000012_thumb.png">
+<meta property="og:image" content="http://7xsp7e.com2.z0.glb.clouddn.com/image/jpg/tech/algorithms/rbtree/20140517000013_thumb.png">
+<meta property="og:image" content="http://7xsp7e.com2.z0.glb.clouddn.com/image/jpg/tech/algorithms/rbtree/20140517000014_thumb.png">
+<meta property="og:image" content="http://7xsp7e.com2.z0.glb.clouddn.com/image/jpg/tech/algorithms/rbtree/20140517000015_thumb.png">
+<meta property="og:image" content="http://7xsp7e.com2.z0.glb.clouddn.com/image/jpg/tech/algorithms/rbtree/20140517000016_thumb.png">
+<meta property="og:image" content="http://7xsp7e.com2.z0.glb.clouddn.com/image/jpg/tech/algorithms/rbtree/20140517000017_thumb.png">
+<meta property="og:updated_time" content="2016-04-13T09:32:06.392Z">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="遗世而独立">
-<meta name="twitter:description" content="Java NodeJs NoSql">
+<meta name="twitter:title" content="红黑树-Java之TreeMap实探">
+<meta name="twitter:description" content="TreeMap的实现是红黑树算法的实现，所以要了解TreeMap就必须对红黑树有一定的了解,其实这篇博文的名字叫做：根据红黑树的算法来分析TreeMap的实现，但是为了与Java提高篇系列博文保持一致还是叫做TreeMap比较好。通过这篇博文你可以获得如下知识点：
+1、红黑树的基本概念。
+2、红黑树增加节点、删除节点的实现过程。
+3、红黑树左旋转、右旋转的复杂过程。
+4、Java 中TreeMap">
+<meta name="twitter:image" content="http://7xsp7e.com2.z0.glb.clouddn.com/image/jpg/tech/algorithms/rbtree/2014051700001_thumb.png">
 
 
 
@@ -83,7 +114,7 @@
   };
 </script>
 
-  <title> 遗世而独立 </title>
+  <title> 红黑树-Java之TreeMap实探 | 遗世而独立 </title>
 </head>
 
 <body itemscope itemtype="http://schema.org/WebPage" lang="zh-CN">
@@ -104,9 +135,7 @@
     
   
 
-  <div class="container one-collumn sidebar-position-left 
-   page-home 
- ">
+  <div class="container one-collumn sidebar-position-left page-post-detail ">
     <div class="headband"></div>
 
     <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
@@ -183,9 +212,9 @@
         <div class="content-wrap">
           <div id="content" class="content">
             
-  <section id="posts" class="posts-expand">
+
+  <div id="posts" class="posts-expand">
     
-      
 
   
   
@@ -205,10 +234,7 @@
             
             
               
-                
-                <a class="post-title-link" href="/2016/04/13/红黑树-Java之TreeMap实探/" itemprop="url">
-                  红黑树-Java之TreeMap实探
-                </a>
+                红黑树-Java之TreeMap实探
               
             
           </h1>
@@ -247,9 +273,7 @@
       
 
       
-        
-          
-            <p>TreeMap的实现是红黑树算法的实现，所以要了解TreeMap就必须对红黑树有一定的了解,其实这篇博文的名字叫做：根据红黑树的算法来分析TreeMap的实现，但是为了与Java提高篇系列博文保持一致还是叫做TreeMap比较好。通过这篇博文你可以获得如下知识点：</p>
+        <p>TreeMap的实现是红黑树算法的实现，所以要了解TreeMap就必须对红黑树有一定的了解,其实这篇博文的名字叫做：根据红黑树的算法来分析TreeMap的实现，但是为了与Java提高篇系列博文保持一致还是叫做TreeMap比较好。通过这篇博文你可以获得如下知识点：</p>
 <p>1、红黑树的基本概念。</p>
 <p>2、红黑树增加节点、删除节点的实现过程。</p>
 <p>3、红黑树左旋转、右旋转的复杂过程。</p>
@@ -760,396 +784,51 @@ private void fixAfterInsertion(Entry&lt;K,V&gt; x) {
 <h2 id="五、写在最后"><a href="#五、写在最后" class="headerlink" title="五、写在最后"></a>五、写在最后</h2><p>这篇博文确实是有点儿长，在这里非常感谢各位看客能够静下心来读完，我想你通过读完这篇博文一定收获不小。同时这篇博文很大篇幅都在阐述红黑树的实现过程，对Java 的TreeMap聊的比较少，但是我认为如果理解了红黑树的实现过程，对TreeMap那是手到擒来，小菜一碟。</p>
 <p>同时这篇博文我写了四天，看了、参考了大量的博文。同时不免会有些地方存在借鉴之处，在这里对其表示感谢。LZ大二开始学习数据结构，自认为学的不错，现在发现数据结构我还有太多的地方需要学习了，同时也再一次体味了算法的魅力！！！！</p>
 
-          
-        
       
     </div>
 
     <div>
       
+        
+      
     </div>
 
     <footer class="post-footer">
       
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </article>
-
-
-    
-      
-
-  
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
-
-    
-      <header class="post-header">
-
-        
-        
-          <h1 class="post-title" itemprop="name headline">
-            
-            
-              
-                
-                <a class="post-title-link" href="/2016/04/08/WEB压力测试工具wrk/" itemprop="url">
-                  WEB压力测试工具wrk
-                </a>
-              
-            
-          </h1>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            <span class="post-meta-item-icon">
-              <i class="fa fa-calendar-o"></i>
-            </span>
-            <span class="post-meta-item-text">Posted on</span>
-            <time itemprop="dateCreated" datetime="2016-04-08T11:19:10+08:00" content="2016-04-08">
-              2016-04-08
-            </time>
-          </span>
-
+        <div class="post-tags">
           
-
+            <a href="/tags/红黑树-RedBlackTree-Java-TreeMap/" rel="tag">#红黑树 RedBlackTree Java TreeMap</a>
           
-            
-          
-
-          
-
-          
-          
-
         </div>
-      </header>
-    
-
-
-    <div class="post-body" itemprop="articleBody">
-
-      
       
 
       
-        
-          <h2 id="wrk-是一个比较先进的-HTTP-压力测试工具。"><a href="#wrk-是一个比较先进的-HTTP-压力测试工具。" class="headerlink" title="wrk 是一个比较先进的 HTTP 压力测试工具。"></a>wrk 是一个比较先进的 HTTP 压力测试工具。</h2>
-          <div class="post-more-link text-center">
-            <a class="btn" href="/2016/04/08/WEB压力测试工具wrk/#more" rel="contents">
-              Read more &raquo;
-            </a>
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2016/04/08/WEB压力测试工具wrk/" rel="next" title="WEB压力测试工具wrk">
+                <i class="fa fa-chevron-left"></i> WEB压力测试工具wrk
+              </a>
+            
           </div>
-        
-      
-    </div>
 
-    <div>
-      
-    </div>
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </article>
-
-
-    
-      
-
-  
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
-
-    
-      <header class="post-header">
-
-        
-        
-          <h1 class="post-title" itemprop="name headline">
+          <div class="post-nav-prev post-nav-item">
             
-            
-              
-                
-                <a class="post-title-link" href="/2016/03/24/使用SSH密钥连接Github/" itemprop="url">
-                  使用SSH密钥连接Github
-                </a>
-              
-            
-          </h1>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            <span class="post-meta-item-icon">
-              <i class="fa fa-calendar-o"></i>
-            </span>
-            <span class="post-meta-item-text">Posted on</span>
-            <time itemprop="dateCreated" datetime="2016-03-24T13:01:41+08:00" content="2016-03-24">
-              2016-03-24
-            </time>
-          </span>
-
-          
-
-          
-            
-          
-
-          
-
-          
-          
-
+          </div>
         </div>
-      </header>
-    
-
-
-    <div class="post-body" itemprop="articleBody">
-
-      
       
 
       
-        
-          <p>使用Github，也许大家觉得比较麻烦的就是在每次push的时候，都需要输入用户名和密码。如果使用SSH，就可以记住用户名，并创建属于自己的密码来保证安全操作，还有神奇的一招可以“不用输入密码”哦。下面将介绍如何创建SSH Keys并将公钥加到GitHub账户中，使用SSH Keys在本机和GitHub之间建立一个安全的连接。<br>
-          <div class="post-more-link text-center">
-            <a class="btn" href="/2016/03/24/使用SSH密钥连接Github/#more" rel="contents">
-              Read more &raquo;
-            </a>
-          </div>
-        
-      
-    </div>
-
-    <div>
-      
-    </div>
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
       
     </footer>
   </article>
 
 
-    
-      
 
-  
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
-
-    
-      <header class="post-header">
-
-        
-        
-          <h1 class="post-title" itemprop="name headline">
-            
-            
-              
-                
-                <a class="post-title-link" href="/2016/03/24/Hexo-GitHub搭建博客/" itemprop="url">
-                  Hexo+GitHub搭建博客
-                </a>
-              
-            
-          </h1>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            <span class="post-meta-item-icon">
-              <i class="fa fa-calendar-o"></i>
-            </span>
-            <span class="post-meta-item-text">Posted on</span>
-            <time itemprop="dateCreated" datetime="2016-03-24T12:55:26+08:00" content="2016-03-24">
-              2016-03-24
-            </time>
-          </span>
-
-          
-
-          
-            
-          
-
-          
-
-          
-          
-
-        </div>
-      </header>
-    
-
-
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          <p>经过各种找资料，踩过何种坑，终于搭建好了hexo，域名目前用得时github的，我的hexo是3.1.1版本，hexo不同的版本，很多配置都不一样。好吧，废话不多说了，开始吧。<br>
-          <div class="post-more-link text-center">
-            <a class="btn" href="/2016/03/24/Hexo-GitHub搭建博客/#more" rel="contents">
-              Read more &raquo;
-            </a>
-          </div>
-        
+    <div class="post-spread">
       
     </div>
-
-    <div>
-      
-    </div>
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </article>
-
-
-    
-      
-
-  
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
-
-    
-      <header class="post-header">
-
-        
-        
-          <h1 class="post-title" itemprop="name headline">
-            
-            
-              
-                
-                <a class="post-title-link" href="/2016/03/24/hello-world/" itemprop="url">
-                  Hello World
-                </a>
-              
-            
-          </h1>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            <span class="post-meta-item-icon">
-              <i class="fa fa-calendar-o"></i>
-            </span>
-            <span class="post-meta-item-text">Posted on</span>
-            <time itemprop="dateCreated" datetime="2016-03-24T11:06:15+08:00" content="2016-03-24">
-              2016-03-24
-            </time>
-          </span>
-
-          
-
-          
-            
-          
-
-          
-
-          
-          
-
-        </div>
-      </header>
-    
-
-
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          <p>Welcome to <a href="https://hexo.io/">Hexo</a>! This is your very first post. Check <a href="https://hexo.io/docs/">documentation</a> for more info. If you get any problems when using Hexo, you can find the answer in <a href="https://hexo.io/docs/troubleshooting.html">troubleshooting</a> or you can ask me on <a href="https://github.com/hexojs/hexo/issues">GitHub</a>.<br>
-          <div class="post-more-link text-center">
-            <a class="btn" href="/2016/03/24/hello-world/#more" rel="contents">
-              Read more &raquo;
-            </a>
-          </div>
-        
-      
-    </div>
-
-    <div>
-      
-    </div>
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </article>
-
-
-    
-  </section>
-
-  
+  </div>
 
 
           </div>
@@ -1157,6 +836,10 @@ private void fixAfterInsertion(Entry&lt;K,V&gt; x) {
 
 
           
+  <div class="comments" id="comments">
+    
+  </div>
+
 
         </div>
         
@@ -1176,8 +859,17 @@ private void fixAfterInsertion(Entry&lt;K,V&gt; x) {
       
 
       
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap" >
+            Table of Contents
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview">
+            Overview
+          </li>
+        </ul>
+      
 
-      <section class="site-overview sidebar-panel  sidebar-panel-active ">
+      <section class="site-overview sidebar-panel ">
         <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
           <img class="site-author-image" itemprop="image"
                src="/images/default_avatar.jpg"
@@ -1222,6 +914,23 @@ private void fixAfterInsertion(Entry&lt;K,V&gt; x) {
 
       </section>
 
+      
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc-indicator-top post-toc-indicator">
+            <i class="fa fa-angle-double-up"></i>
+          </div>
+          <div class="post-toc">
+            
+              
+            
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#一、红黑树简介"><span class="nav-number">1.</span> <span class="nav-text">一、红黑树简介</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#1、每个节点都只能是红色或者黑色"><span class="nav-number">1.0.0.1.</span> <span class="nav-text">1、每个节点都只能是红色或者黑色</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#2、根节点是黑色"><span class="nav-number">1.0.0.2.</span> <span class="nav-text">2、根节点是黑色</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#3、每个叶节点（NIL节点，空节点）是黑色的。"><span class="nav-number">1.0.0.3.</span> <span class="nav-text">3、每个叶节点（NIL节点，空节点）是黑色的。</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#4、如果一个结点是红的，则它两个子节点都是黑的。也就是说在一条路径上不能出现相邻的两个红色结点。"><span class="nav-number">1.0.0.4.</span> <span class="nav-text">4、如果一个结点是红的，则它两个子节点都是黑的。也就是说在一条路径上不能出现相邻的两个红色结点。</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#5、从任一节点到其每个叶子的所有路径都包含相同数目的黑色节点。"><span class="nav-number">1.0.0.5.</span> <span class="nav-text">5、从任一节点到其每个叶子的所有路径都包含相同数目的黑色节点。</span></a></li></ol></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#二、TreeMap数据结构"><span class="nav-number">2.</span> <span class="nav-text">二、TreeMap数据结构</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#三、TreeMap-put-方法"><span class="nav-number">3.</span> <span class="nav-text">三、TreeMap put()方法</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#1、插入新节点总是红色节点-。"><span class="nav-number">3.0.0.1.</span> <span class="nav-text">1、插入新节点总是红色节点 。</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#2、如果插入节点的父节点是黑色-能维持性质-。"><span class="nav-number">3.0.0.2.</span> <span class="nav-text">2、如果插入节点的父节点是黑色, 能维持性质 。</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#3、如果插入节点的父节点是红色-破坏了性质-故插入算法就是通过重新着色或旋转-来维持性质-。"><span class="nav-number">3.0.0.3.</span> <span class="nav-text">3、如果插入节点的父节点是红色, 破坏了性质. 故插入算法就是通过重新着色或旋转, 来维持性质 。</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#1、每个节点都只能是红色或者黑色-1"><span class="nav-number">3.0.0.4.</span> <span class="nav-text">1、每个节点都只能是红色或者黑色</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#2、根节点是黑色-1"><span class="nav-number">3.0.0.5.</span> <span class="nav-text">2、根节点是黑色</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#3、每个叶节点（NIL节点，空节点）是黑色的。-1"><span class="nav-number">3.0.0.6.</span> <span class="nav-text">3、每个叶节点（NIL节点，空节点）是黑色的。</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#4、如果一个结点是红的，则它两个子节点都是黑的。也就是说在一条路径上不能出现相邻的两个红色结点。-1"><span class="nav-number">3.0.0.7.</span> <span class="nav-text">4、如果一个结点是红的，则它两个子节点都是黑的。也就是说在一条路径上不能出现相邻的两个红色结点。</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#5、从任一节点到其每个叶子的所有路径都包含相同数目的黑色节点。-1"><span class="nav-number">3.0.0.8.</span> <span class="nav-text">5、从任一节点到其每个叶子的所有路径都包含相同数目的黑色节点。</span></a></li></ol></li><li class="nav-item nav-level-4"><a class="nav-link" href="#一、为根节点"><span class="nav-number">3.0.1.</span> <span class="nav-text">一、为根节点</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#二、父节点为黑色"><span class="nav-number">3.0.2.</span> <span class="nav-text">二、父节点为黑色</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#三、若父节点P和P的兄弟节点U都为红色"><span class="nav-number">3.0.3.</span> <span class="nav-text">三、若父节点P和P的兄弟节点U都为红色</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#四、若父节点P为红色，叔父节点U为黑色或者缺少，且新增节点N为P节点的右孩子"><span class="nav-number">3.0.4.</span> <span class="nav-text">四、若父节点P为红色，叔父节点U为黑色或者缺少，且新增节点N为P节点的右孩子</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#五、父节点P为红色，叔父节点U为黑色或者缺少，新增节点N为父节点P左孩子"><span class="nav-number">3.0.5.</span> <span class="nav-text">五、父节点P为红色，叔父节点U为黑色或者缺少，新增节点N为父节点P左孩子</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#TreeMap-put-方法实现分析"><span class="nav-number">3.0.6.</span> <span class="nav-text">TreeMap put()方法实现分析</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#1、以根节点为初始节点进行检索。"><span class="nav-number">3.0.6.1.</span> <span class="nav-text">1、以根节点为初始节点进行检索。</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#2、与当前节点进行比对，若新增节点值较大，则以当前节点的右子节点作为新的当前节点。否则以当前节点的左子节点作为新的当前节点。"><span class="nav-number">3.0.6.2.</span> <span class="nav-text">2、与当前节点进行比对，若新增节点值较大，则以当前节点的右子节点作为新的当前节点。否则以当前节点的左子节点作为新的当前节点。</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#3、循环递归2步骤知道检索出合适的叶子节点为止。"><span class="nav-number">3.0.6.3.</span> <span class="nav-text">3、循环递归2步骤知道检索出合适的叶子节点为止。</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#4、将新增节点与3步骤中找到的节点进行比对，如果新增节点较大，则添加为右子节点；否则添加为左子节点。"><span class="nav-number">3.0.6.4.</span> <span class="nav-text">4、将新增节点与3步骤中找到的节点进行比对，如果新增节点较大，则添加为右子节点；否则添加为左子节点。</span></a></li></ol></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#四、TreeMap-delete-方法"><span class="nav-number">4.</span> <span class="nav-text">四、TreeMap delete()方法</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#1、每个节点都只能是红色或者黑色-2"><span class="nav-number">4.0.1.</span> <span class="nav-text">1、每个节点都只能是红色或者黑色</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#2、根节点是黑色-2"><span class="nav-number">4.0.2.</span> <span class="nav-text">2、根节点是黑色</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#3、每个叶节点（NIL节点，空节点）是黑色的。-2"><span class="nav-number">4.0.3.</span> <span class="nav-text">3、每个叶节点（NIL节点，空节点）是黑色的。</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#4、如果一个结点是红的，则它两个子节点都是黑的。也就是说在一条路径上不能出现相邻的两个红色结点。-2"><span class="nav-number">4.0.4.</span> <span class="nav-text">4、如果一个结点是红的，则它两个子节点都是黑的。也就是说在一条路径上不能出现相邻的两个红色结点。</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#5、从任一节点到其每个叶子的所有路径都包含相同数目的黑色节点。-2"><span class="nav-number">4.0.5.</span> <span class="nav-text">5、从任一节点到其每个叶子的所有路径都包含相同数目的黑色节点。</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#情况一、无子节点（红色节点）"><span class="nav-number">4.0.6.</span> <span class="nav-text">情况一、无子节点（红色节点）</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#情况二、有一个子节点"><span class="nav-number">4.0.7.</span> <span class="nav-text">情况二、有一个子节点</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#情况三、有两个子节点"><span class="nav-number">4.0.8.</span> <span class="nav-text">情况三、有两个子节点</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#五、写在最后"><span class="nav-number">5.</span> <span class="nav-text">五、写在最后</span></a></li></ol></div>
+            
+          </div>
+          <div class="post-toc-indicator-bottom post-toc-indicator">
+            <i class="fa fa-angle-double-down"></i>
+          </div>
+        </section>
       
 
     </div>
@@ -1306,6 +1015,167 @@ private void fixAfterInsertion(Entry&lt;K,V&gt; x) {
   
 
   
+  
+<script type="text/javascript" src="/js/src/scrollspy.js?v=0.5.0"></script>
+
+<script type="text/javascript" id="sidebar.toc.highlight">
+  $(document).ready(function () {
+    var tocSelector = '.post-toc';
+    var $tocSelector = $(tocSelector);
+    var activeCurrentSelector = '.active-current';
+
+    $tocSelector
+      .on('activate.bs.scrollspy', function () {
+        var $currentActiveElement = $(tocSelector + ' .active').last();
+
+        removeCurrentActiveClass();
+        $currentActiveElement.addClass('active-current');
+
+        $tocSelector[0].scrollTop = $currentActiveElement.position().top;
+      })
+      .on('clear.bs.scrollspy', function () {
+        removeCurrentActiveClass();
+      });
+
+    function removeCurrentActiveClass () {
+      $(tocSelector + ' ' + activeCurrentSelector)
+        .removeClass(activeCurrentSelector.substring(1));
+    }
+
+    function processTOC () {
+      getTOCMaxHeight();
+      toggleTOCOverflowIndicators();
+    }
+
+    function getTOCMaxHeight () {
+      var height = $('.sidebar').height() -
+                   $tocSelector.position().top -
+                   $('.post-toc-indicator-bottom').height();
+
+      $tocSelector.css('height', height);
+
+      return height;
+    }
+
+    function toggleTOCOverflowIndicators () {
+      tocOverflowIndicator(
+        '.post-toc-indicator-top',
+        $tocSelector.scrollTop() > 0 ? 'show' : 'hide'
+      );
+
+      tocOverflowIndicator(
+        '.post-toc-indicator-bottom',
+        $tocSelector.scrollTop() >= $tocSelector.find('ol').height() - $tocSelector.height() ? 'hide' : 'show'
+      )
+    }
+
+    $(document).on('sidebar.motion.complete', function () {
+      processTOC();
+    });
+
+    $('body').scrollspy({ target: tocSelector });
+    $(window).on('resize', function () {
+      if ( $('.sidebar').hasClass('sidebar-active') ) {
+        processTOC();
+      }
+    });
+
+    onScroll($tocSelector);
+
+    function onScroll (element) {
+      element.on('mousewheel DOMMouseScroll', function (event) {
+          var oe = event.originalEvent;
+          var delta = oe.wheelDelta || -oe.detail;
+
+          this.scrollTop += ( delta < 0 ? 1 : -1 ) * 30;
+          event.preventDefault();
+
+          toggleTOCOverflowIndicators();
+      });
+    }
+
+    function tocOverflowIndicator (indicator, action) {
+      var $indicator = $(indicator);
+      var opacity = action === 'show' ? 1 : 0;
+      $indicator.velocity ?
+        $indicator.velocity('stop').velocity({
+          opacity: opacity
+        }, { duration: 100 }) :
+        $indicator.stop().animate({
+          opacity: opacity
+        }, 100);
+    }
+
+  });
+</script>
+
+<script type="text/javascript" id="sidebar.nav">
+  $(document).ready(function () {
+    var html = $('html');
+    var TAB_ANIMATE_DURATION = 200;
+    var hasVelocity = $.isFunction(html.velocity);
+
+    $('.sidebar-nav li').on('click', function () {
+      var item = $(this);
+      var activeTabClassName = 'sidebar-nav-active';
+      var activePanelClassName = 'sidebar-panel-active';
+      if (item.hasClass(activeTabClassName)) {
+        return;
+      }
+
+      var currentTarget = $('.' + activePanelClassName);
+      var target = $('.' + item.data('target'));
+
+      hasVelocity ?
+        currentTarget.velocity('transition.slideUpOut', TAB_ANIMATE_DURATION, function () {
+          target
+            .velocity('stop')
+            .velocity('transition.slideDownIn', TAB_ANIMATE_DURATION)
+            .addClass(activePanelClassName);
+        }) :
+        currentTarget.animate({ opacity: 0 }, TAB_ANIMATE_DURATION, function () {
+          currentTarget.hide();
+          target
+            .stop()
+            .css({'opacity': 0, 'display': 'block'})
+            .animate({ opacity: 1 }, TAB_ANIMATE_DURATION, function () {
+              currentTarget.removeClass(activePanelClassName);
+              target.addClass(activePanelClassName);
+            });
+        });
+
+      item.siblings().removeClass(activeTabClassName);
+      item.addClass(activeTabClassName);
+    });
+
+    $('.post-toc a').on('click', function (e) {
+      e.preventDefault();
+      var targetSelector = NexT.utils.escapeSelector(this.getAttribute('href'));
+      var offset = $(targetSelector).offset().top;
+      hasVelocity ?
+        html.velocity('stop').velocity('scroll', {
+          offset: offset  + 'px',
+          mobileHA: false
+        }) :
+        $('html, body').stop().animate({
+          scrollTop: offset
+        }, 500);
+    });
+
+    // Expand sidebar on post detail page by default, when post has a toc.
+    NexT.motion.middleWares.sidebar = function () {
+      var $tocContent = $('.post-toc-content');
+
+      if (CONFIG.sidebar.display === 'post' || CONFIG.sidebar.display === 'always') {
+        if ($tocContent.length > 0 && $tocContent.html().trim().length > 0) {
+          NexT.utils.displaySidebar();
+        }
+      }
+    };
+  });
+</script>
+
+
 
   
 
