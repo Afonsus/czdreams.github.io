@@ -57,20 +57,12 @@
 
 
 
-<meta name="description" content="TreeMap的实现是红黑树算法的实现，所以要了解TreeMap就必须对红黑树有一定的了解,其实这篇博文的名字叫做：根据红黑树的算法来分析TreeMap的实现，但是为了与Java提高篇系列博文保持一致还是叫做TreeMap比较好。通过这篇博文你可以获得如下知识点：
-1、红黑树的基本概念。
-2、红黑树增加节点、删除节点的实现过程。
-3、红黑树左旋转、右旋转的复杂过程。
-4、Java 中TreeMap">
+<meta name="description" content="TreeMap的实现是红黑树算法的实现，通过本篇博文我们能对TreeMap有更深的认识。">
 <meta property="og:type" content="article">
 <meta property="og:title" content="红黑树-Java之TreeMap实探">
 <meta property="og:url" content="http://yoursite.com/2016/04/13/红黑树-Java之TreeMap实探/index.html">
 <meta property="og:site_name" content="遗世而独立">
-<meta property="og:description" content="TreeMap的实现是红黑树算法的实现，所以要了解TreeMap就必须对红黑树有一定的了解,其实这篇博文的名字叫做：根据红黑树的算法来分析TreeMap的实现，但是为了与Java提高篇系列博文保持一致还是叫做TreeMap比较好。通过这篇博文你可以获得如下知识点：
-1、红黑树的基本概念。
-2、红黑树增加节点、删除节点的实现过程。
-3、红黑树左旋转、右旋转的复杂过程。
-4、Java 中TreeMap">
+<meta property="og:description" content="TreeMap的实现是红黑树算法的实现，通过本篇博文我们能对TreeMap有更深的认识。">
 <meta property="og:image" content="http://7xsp7e.com2.z0.glb.clouddn.com/image/jpg/tech/algorithms/rbtree/2014051700001_thumb.png">
 <meta property="og:image" content="http://7xsp7e.com2.z0.glb.clouddn.com/image/jpg/tech/algorithms/rbtree/2014051700002_thumb.png">
 <meta property="og:image" content="http://7xsp7e.com2.z0.glb.clouddn.com/image/jpg/tech/algorithms/rbtree/2014051700004_thumb.gif">
@@ -88,14 +80,10 @@
 <meta property="og:image" content="http://7xsp7e.com2.z0.glb.clouddn.com/image/jpg/tech/algorithms/rbtree/20140517000015_thumb.png">
 <meta property="og:image" content="http://7xsp7e.com2.z0.glb.clouddn.com/image/jpg/tech/algorithms/rbtree/20140517000016_thumb.png">
 <meta property="og:image" content="http://7xsp7e.com2.z0.glb.clouddn.com/image/jpg/tech/algorithms/rbtree/20140517000017_thumb.png">
-<meta property="og:updated_time" content="2016-04-13T09:32:06.392Z">
+<meta property="og:updated_time" content="2016-04-13T09:35:04.455Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="红黑树-Java之TreeMap实探">
-<meta name="twitter:description" content="TreeMap的实现是红黑树算法的实现，所以要了解TreeMap就必须对红黑树有一定的了解,其实这篇博文的名字叫做：根据红黑树的算法来分析TreeMap的实现，但是为了与Java提高篇系列博文保持一致还是叫做TreeMap比较好。通过这篇博文你可以获得如下知识点：
-1、红黑树的基本概念。
-2、红黑树增加节点、删除节点的实现过程。
-3、红黑树左旋转、右旋转的复杂过程。
-4、Java 中TreeMap">
+<meta name="twitter:description" content="TreeMap的实现是红黑树算法的实现，通过本篇博文我们能对TreeMap有更深的认识。">
 <meta name="twitter:image" content="http://7xsp7e.com2.z0.glb.clouddn.com/image/jpg/tech/algorithms/rbtree/2014051700001_thumb.png">
 
 
@@ -273,7 +261,8 @@
       
 
       
-        <p>TreeMap的实现是红黑树算法的实现，所以要了解TreeMap就必须对红黑树有一定的了解,其实这篇博文的名字叫做：根据红黑树的算法来分析TreeMap的实现，但是为了与Java提高篇系列博文保持一致还是叫做TreeMap比较好。通过这篇博文你可以获得如下知识点：</p>
+        <p>TreeMap的实现是红黑树算法的实现，通过本篇博文我们能对TreeMap有更深的认识。<br><a id="more"></a></p>
+<p>TreeMap的实现是红黑树算法的实现，所以要了解TreeMap就必须对红黑树有一定的了解,通过这篇博文你可以获得如下知识点：</p>
 <p>1、红黑树的基本概念。</p>
 <p>2、红黑树增加节点、删除节点的实现过程。</p>
 <p>3、红黑树左旋转、右旋转的复杂过程。</p>
