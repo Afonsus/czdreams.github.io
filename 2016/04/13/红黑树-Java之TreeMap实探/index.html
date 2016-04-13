@@ -80,7 +80,7 @@
 <meta property="og:image" content="http://7xsp7e.com2.z0.glb.clouddn.com/image/jpg/tech/algorithms/rbtree/20140517000015_thumb.png">
 <meta property="og:image" content="http://7xsp7e.com2.z0.glb.clouddn.com/image/jpg/tech/algorithms/rbtree/20140517000016_thumb.png">
 <meta property="og:image" content="http://7xsp7e.com2.z0.glb.clouddn.com/image/jpg/tech/algorithms/rbtree/20140517000017_thumb.png">
-<meta property="og:updated_time" content="2016-04-13T09:53:22.504Z">
+<meta property="og:updated_time" content="2016-04-13T09:55:39.203Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="红黑树-Java之TreeMap实探">
 <meta name="twitter:description" content="TreeMap的实现是红黑树算法的实现，通过本篇博文我们能对TreeMap有更深的认识。">
@@ -160,7 +160,7 @@
             
               <i class="menu-item-icon fa fa-home fa-fw"></i> <br />
             
-            Home
+            Startseite
           </a>
         </li>
       
@@ -170,7 +170,7 @@
             
               <i class="menu-item-icon fa fa-archive fa-fw"></i> <br />
             
-            Archives
+            Archiv
           </a>
         </li>
       
@@ -233,7 +233,7 @@
             <span class="post-meta-item-icon">
               <i class="fa fa-calendar-o"></i>
             </span>
-            <span class="post-meta-item-text">Posted on</span>
+            <span class="post-meta-item-text">Veröffentlicht am</span>
             <time itemprop="dateCreated" datetime="2016-04-13T16:49:40+08:00" content="2016-04-13">
               2016-04-13
             </time>
@@ -347,7 +347,8 @@ boolean color = BLACK;
 <p>这种情况有可能是由于情况四而产生的，也有可能不是。对于这种情况先已P节点为中心进行右旋转，在旋转后产生的树中，节点P是节点N、G的父节点。但是这棵树并不规范，它违反了规则4，所以我们将P、G节点的颜色进行交换，使之其满足规范。开始时所有的路径都需要经过G其他们的黑色节点数一样，但是现在所有的路径改为经过P，且P为整棵树的唯一黑色节点，所以调整后的树同样满足规范5。</p>
 <p><img src="http://7xsp7e.com2.z0.glb.clouddn.com/image/jpg/tech/algorithms/rbtree/20140517000011_thumb.png" alt="hyperlink syntax"></p>
 <p>上面展示了红黑树新增节点的五种情况，这五种情况涵盖了所有的新增可能，不管这棵红黑树多么复杂，都可以根据这五种情况来进行生成。下面就来分析Java中的TreeMap是如何来实现红黑树的。</p>
-<h4 id="TreeMap-put-方法实现分析"><a href="#TreeMap-put-方法实现分析" class="headerlink" title="TreeMap put()方法实现分析"></a>TreeMap put()方法实现分析</h4><p>在TreeMap的put()的实现方法中主要分为两个步骤，第一：构建排序二叉树，第二：平衡二叉树。</p>
+<p>TreeMap put()方法实现分析</p>
+<p>在TreeMap的put()的实现方法中主要分为两个步骤，第一：构建排序二叉树，第二：平衡二叉树。</p>
 <p>对于排序二叉树的创建，其添加节点的过程如下：</p>
 <p>1、以根节点为初始节点进行检索。</p>
 <p>2、与当前节点进行比对，若新增节点值较大，则以当前节点的右子节点作为新的当前节点。否则以当前节点的左子节点作为新的当前节点。</p>
@@ -570,7 +571,7 @@ private void fixAfterInsertion(Entry&lt;K,V&gt; x) {
   if (p != null)
     p.color = c;
 }
-</code></pre><h2 id="四、TreeMap-delete-方法"><a href="#四、TreeMap-delete-方法" class="headerlink" title="四、TreeMap delete()方法"></a>四、TreeMap delete()方法</h2><p>###　红黑树删除节点　###</p>
+</code></pre><h2 id="四、TreeMap-delete-方法"><a href="#四、TreeMap-delete-方法" class="headerlink" title="四、TreeMap delete()方法"></a>四、TreeMap delete()方法</h2><p>红黑树删除节点</p>
 <p>针对于红黑树的增加节点而言，删除显得更加复杂，使原本就复杂的红黑树变得更加复杂。同时删除节点和增加节点一样，同样是找到删除的节点，删除之后调整红黑树。但是这里的删除节点并不是直接删除，而是通过走了“弯路”通过一种捷径来删除的：找到被删除的节点D的子节点C，用C来替代D，不是直接删除D，因为D被C替代了，直接删除C即可。所以这里就将删除父节点D的事情转变为了删除子节点C的事情，这样处理就将复杂的删除事件简单化了。子节点C的规则是：右分支最左边，或者 左分支最右边的。</p>
 <p><img src="http://7xsp7e.com2.z0.glb.clouddn.com/image/jpg/tech/algorithms/rbtree/20140517000012_thumb.png" alt="hyperlink syntax"></p>
 <p>红-黑二叉树删除节点，最大的麻烦是要保持 各分支黑色节点数目相等。 因为是删除，所以不用担心存在颜色冲突问题——插入才会引起颜色冲突。</p>
@@ -880,10 +881,10 @@ private void fixAfterInsertion(Entry&lt;K,V&gt; x) {
       
         <ul class="sidebar-nav motion-element">
           <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap" >
-            Table of Contents
+            Inhaltsverzeichnis
           </li>
           <li class="sidebar-nav-overview" data-target="site-overview">
-            Overview
+            Übersicht
           </li>
         </ul>
       
@@ -900,7 +901,7 @@ private void fixAfterInsertion(Entry&lt;K,V&gt; x) {
           <div class="site-state-item site-state-posts">
             <a href="/archives">
               <span class="site-state-item-count">5</span>
-              <span class="site-state-item-name">posts</span>
+              <span class="site-state-item-name">Artikel</span>
             </a>
           </div>
 
@@ -910,7 +911,7 @@ private void fixAfterInsertion(Entry&lt;K,V&gt; x) {
             <div class="site-state-item site-state-tags">
               <a href="/tags">
                 <span class="site-state-item-count">4</span>
-                <span class="site-state-item-name">tags</span>
+                <span class="site-state-item-name">Tags</span>
               </a>
             </div>
           
@@ -943,7 +944,7 @@ private void fixAfterInsertion(Entry&lt;K,V&gt; x) {
               
             
             
-              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#一、红黑树简介"><span class="nav-number">1.</span> <span class="nav-text">一、红黑树简介</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#二、TreeMap数据结构"><span class="nav-number">2.</span> <span class="nav-text">二、TreeMap数据结构</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#三、TreeMap-put-方法"><span class="nav-number">3.</span> <span class="nav-text">三、TreeMap put()方法</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#TreeMap-put-方法实现分析"><span class="nav-number">3.0.1.</span> <span class="nav-text">TreeMap put()方法实现分析</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#四、TreeMap-delete-方法"><span class="nav-number">4.</span> <span class="nav-text">四、TreeMap delete()方法</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#五、写在最后"><span class="nav-number">5.</span> <span class="nav-text">五、写在最后</span></a></li></ol></div>
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#一、红黑树简介"><span class="nav-number">1.</span> <span class="nav-text">一、红黑树简介</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#二、TreeMap数据结构"><span class="nav-number">2.</span> <span class="nav-text">二、TreeMap数据结构</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#三、TreeMap-put-方法"><span class="nav-number">3.</span> <span class="nav-text">三、TreeMap put()方法</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#四、TreeMap-delete-方法"><span class="nav-number">4.</span> <span class="nav-text">四、TreeMap delete()方法</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#五、写在最后"><span class="nav-number">5.</span> <span class="nav-text">五、写在最后</span></a></li></ol></div>
             
           </div>
           <div class="post-toc-indicator-bottom post-toc-indicator">
@@ -973,7 +974,7 @@ private void fixAfterInsertion(Entry&lt;K,V&gt; x) {
 </div>
 
 <div class="powered-by">
-  Powered by <a class="theme-link" href="http://hexo.io">Hexo</a>
+  Erstellt mit  <a class="theme-link" href="http://hexo.io">Hexo</a>
 </div>
 
 <div class="theme-info">
