@@ -63,7 +63,7 @@
 <meta property="og:url" content="http://yoursite.com/2016/05/25/Redis-Cluster学习笔记/index.html">
 <meta property="og:site_name" content="遗世而独立">
 <meta property="og:description" content="Redis在3.0版正式引入了集群这个特性。Redis集群是一个分布式（distributed）、容错（fault-tolerant）的 Redis内存K/V服务， 集群可以使用的功能是普通单机 Redis 所能使用的功能的一个子集（subset），比如Redis集群并不支持处理多个keys的命令,因为这需要在不同的节点间移动数据,从而达不到像Redis那样的性能,在高负载的情况下可能会导致不可预">
-<meta property="og:updated_time" content="2016-05-25T05:15:13.063Z">
+<meta property="og:updated_time" content="2016-05-25T05:17:49.450Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="Redis Cluster学习笔记">
 <meta name="twitter:description" content="Redis在3.0版正式引入了集群这个特性。Redis集群是一个分布式（distributed）、容错（fault-tolerant）的 Redis内存K/V服务， 集群可以使用的功能是普通单机 Redis 所能使用的功能的一个子集（subset），比如Redis集群并不支持处理多个keys的命令,因为这需要在不同的节点间移动数据,从而达不到像Redis那样的性能,在高负载的情况下可能会导致不可预">
@@ -142,7 +142,7 @@
             
               <i class="menu-item-icon fa fa-home fa-fw"></i> <br />
             
-            Home
+            Accueil
           </a>
         </li>
       
@@ -215,7 +215,7 @@
             <span class="post-meta-item-icon">
               <i class="fa fa-calendar-o"></i>
             </span>
-            <span class="post-meta-item-text">Posted on</span>
+            <span class="post-meta-item-text">Posté le</span>
             <time itemprop="dateCreated" datetime="2016-05-25T11:56:19+08:00" content="2016-05-25">
               2016-05-25
             </time>
@@ -244,9 +244,9 @@
 
       
         <p>Redis在3.0版正式引入了集群这个特性。Redis集群是一个分布式（distributed）、容错（fault-tolerant）的 Redis内存K/V服务， 集群可以使用的功能是普通单机 Redis 所能使用的功能的一个子集（subset），比如Redis集群并不支持处理多个keys的命令,因为这需要在不同的节点间移动数据,从而达不到像Redis那样的性能,在高负载的情况下可能会导致不可预料的错误。<br><a id="more"></a><br>Redis集群的几个重要特征：</p>
-<p>######(1).Redis 集群的分片特征在于将键空间分拆了16384个槽位，每一个节点负责其中一些槽位。</p>
-<p>######(2).Redis提供一定程度的可用性,可以在某个节点宕机或者不可达的情况下继续处理命令.</p>
-<p>######(3).Redis 集群中不存在中心（central）节点或者代理（proxy）节点， 集群的其中一个主要设计目标是达到线性可扩展性（linear scalability）。</p>
+<p>#####(1).Redis 集群的分片特征在于将键空间分拆了16384个槽位，每一个节点负责其中一些槽位。</p>
+<p>#####(2).Redis提供一定程度的可用性,可以在某个节点宕机或者不可达的情况下继续处理命令.</p>
+<p>#####(3).Redis 集群中不存在中心（central）节点或者代理（proxy）节点， 集群的其中一个主要设计目标是达到线性可扩展性（linear scalability）。</p>
 <p>##1. Redis的数据分片（Sharding）</p>
 <p>Redis 集群的键空间被分割为 16384 （2^14)个槽（slot）， 集群的最大节点数量也是 16384 个（推荐的最大节点数量为 1000 个），同理每个主节点可以负责处理1到16384个槽位。</p>
 <p>当16384个槽位都有主节点负责处理时，集群进入”稳定“上线状态，可以开始处理数据命令。当集群没有处理稳定状态时，可以通过执行重配置（reconfiguration）操作，使得每个哈希槽都只由一个节点进行处理。</p>
@@ -489,10 +489,10 @@ public class JedisClusterTest {
       
         <ul class="sidebar-nav motion-element">
           <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap" >
-            Table of Contents
+            Table Des Matières
           </li>
           <li class="sidebar-nav-overview" data-target="site-overview">
-            Overview
+            Ensemble
           </li>
         </ul>
       
@@ -509,7 +509,7 @@ public class JedisClusterTest {
           <div class="site-state-item site-state-posts">
             <a href="/archives">
               <span class="site-state-item-count">6</span>
-              <span class="site-state-item-name">posts</span>
+              <span class="site-state-item-name">articles</span>
             </a>
           </div>
 
@@ -586,7 +586,7 @@ public class JedisClusterTest {
 </div>
 
 <div class="theme-info">
-  Theme -
+  Thème -
   <a class="theme-link" href="https://github.com/iissnan/hexo-theme-next">
     NexT.Muse
   </a>
