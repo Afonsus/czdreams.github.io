@@ -1,0 +1,883 @@
+<!doctype html>
+
+
+
+  
+
+
+<html class="theme-next muse use-motion">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+  <link href="/vendors/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css"/>
+
+
+
+
+  <link href="//fonts.googleapis.com/css?family=Lato:300,400,700,400italic&subset=latin,latin-ext" rel="stylesheet" type="text/css">
+
+
+
+<link href="/vendors/font-awesome/css/font-awesome.min.css?v=4.4.0" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=0.5.0" rel="stylesheet" type="text/css" />
+
+
+  <meta name="keywords" content="Hexo, NexT" />
+
+
+
+
+
+
+
+
+  <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico?v=0.5.0" />
+
+
+
+
+
+
+<meta name="description" content="windows下使用RedisCluster集群简单实例">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Redis Cluster环境部署-Windows">
+<meta property="og:url" content="http://yoursite.com/2016/05/25/Redis-Cluster环境部署-Windows/index.html">
+<meta property="og:site_name" content="遗世而独立">
+<meta property="og:description" content="windows下使用RedisCluster集群简单实例">
+<meta property="og:image" content="http://7xsp7e.com1.z0.glb.clouddn.com/image/jpg/tech/redis/1463793-b7d446f160bab8cf.png">
+<meta property="og:image" content="http://7xsp7e.com1.z0.glb.clouddn.com/image/jpg/tech/redis/1463793-45de1a7750fa14c7.png">
+<meta property="og:image" content="http://7xsp7e.com1.z0.glb.clouddn.com/image/jpg/tech/redis/1463793-dca8fd8cf42f8021.png">
+<meta property="og:image" content="http://7xsp7e.com1.z0.glb.clouddn.com/image/jpg/tech/redis/1463793-00d1bf433174d687.png">
+<meta property="og:image" content="http://7xsp7e.com1.z0.glb.clouddn.com/image/jpg/tech/redis/1463793-33a8460b4e76dcf3.png">
+<meta property="og:image" content="http://7xsp7e.com1.z0.glb.clouddn.com/image/jpg/tech/redis/1463793-8ab2fd0bb862b3fc.png">
+<meta property="og:image" content="http://7xsp7e.com1.z0.glb.clouddn.com/image/jpg/tech/redis/1463793-495b43cd591ecfcc.png">
+<meta property="og:image" content="http://7xsp7e.com1.z0.glb.clouddn.com/image/jpg/tech/redis/1463793-1d9100e1992146a0.png">
+<meta property="og:image" content="http://7xsp7e.com1.z0.glb.clouddn.com/image/jpg/tech/redis/1463793-8f1ca96a2fe051ff.png">
+<meta property="og:updated_time" content="2016-05-25T07:34:13.368Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Redis Cluster环境部署-Windows">
+<meta name="twitter:description" content="windows下使用RedisCluster集群简单实例">
+<meta name="twitter:image" content="http://7xsp7e.com1.z0.glb.clouddn.com/image/jpg/tech/redis/1463793-b7d446f160bab8cf.png">
+
+
+
+<script type="text/javascript" id="hexo.configuration">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    scheme: 'Muse',
+    sidebar: {"position":"left","display":"post"},
+    fancybox: true,
+    motion: true,
+    duoshuo: {
+      userId: 0,
+      author: 'Author'
+    }
+  };
+</script>
+
+  <title> Redis Cluster环境部署-Windows | 遗世而独立 </title>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-CN">
+
+  
+
+
+
+
+
+
+
+
+
+
+  
+  
+    
+  
+
+  <div class="container one-collumn sidebar-position-left page-post-detail ">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-meta ">
+  
+
+  <div class="custom-logo-site-title">
+    <a href="/"  class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <span class="site-title">遗世而独立</span>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+  </div>
+  <p class="site-subtitle">Coder</p>
+</div>
+
+<div class="site-nav-toggle">
+  <button>
+    <span class="btn-bar"></span>
+    <span class="btn-bar"></span>
+    <span class="btn-bar"></span>
+  </button>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-home fa-fw"></i> <br />
+            
+            Startseite
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives" rel="section">
+            
+              <i class="menu-item-icon fa fa-archive fa-fw"></i> <br />
+            
+            Archiv
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags" rel="section">
+            
+              <i class="menu-item-icon fa fa-tags fa-fw"></i> <br />
+            
+            Tags
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+            
+            
+              
+                Redis Cluster环境部署-Windows
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            <span class="post-meta-item-icon">
+              <i class="fa fa-calendar-o"></i>
+            </span>
+            <span class="post-meta-item-text">Veröffentlicht am</span>
+            <time itemprop="dateCreated" datetime="2016-05-25T14:14:44+08:00" content="2016-05-25">
+              2016-05-25
+            </time>
+          </span>
+
+          
+
+          
+            
+          
+
+          
+
+          
+          
+
+        </div>
+      </header>
+    
+
+
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <p>windows下使用RedisCluster集群简单实例<br><a id="more"></a></p>
+<p>一、开发环境</p>
+<p>1.win7</p>
+<p>2.redis 3.0 64位</p>
+<p>3.ruby 环境<br>  测试用到的所有安装包及我的测试配置 <a href="http://pan.baidu.com/s/1qXmO3fQ" target="_blank" rel="external">http://pan.baidu.com/s/1qXmO3fQ</a></p>
+<p>redis 安装<br>Redis对于Linux是官方支持的,安装和使用没有什么好说的,普通使用按照官方指导，5分钟以内就能搞定。详情请参考:<a href="http://redis.io/download" target="_blank" rel="external">http://redis.io/download</a></p>
+<p>Redis官方是不支持windows的，只是 Microsoft Open Tech group 在 GitHub上开发了一个Win64的版本,官方说明：</p>
+<pre><code>Win64 Unofficial The Redis project does not directly support
+Windows, however the Microsoft Open Tech group develops and maintains an Windows port targeting Win64. 
+</code></pre><p>项目地址：<a href="https://github.com/MSOpenTech/redis" target="_blank" rel="external">https://github.com/MSOpenTech/redis</a> 打开以后，可以直接使用浏览器下载，或者git克隆。在release页面可以下载需要的redis包</p>
+<p><img src="http://7xsp7e.com1.z0.glb.clouddn.com/image/jpg/tech/redis/1463793-b7d446f160bab8cf.png" alt="hyperlink syntax"></p>
+<p>下载解压，没什么好说的，在解压后的bin目录下有以下这些文件：</p>
+<pre><code>redis-benchmark.exe #基准测试
+redis-check-aof.exe # aof
+redis-check-dump.exe # dump
+redis-cli.exe # 客户端
+redis-server.exe # 服务器
+redis.windows.conf # 配置文件 
+</code></pre><p>ruby环境准备</p>
+<p>下载 64位的 RubyInstaller并安装 地址<a href="http://rubyinstaller.org/downloads/" target="_blank" rel="external">http://rubyinstaller.org/downloads/</a><br>勾选下面三个不用配置环境变量</p>
+<p><img src="http://7xsp7e.com1.z0.glb.clouddn.com/image/jpg/tech/redis/1463793-45de1a7750fa14c7.png" alt="hyperlink syntax"></p>
+<p>安装RubyGems</p>
+<p>下载下来是一个压缩包，解压运行里面的 setup.rb 安装 rubyGems<br>由于墙的原因ruby自带的源有时候很慢，我们换成淘宝的源，不然下面安装redis依赖会失败＼（－－）／</p>
+<p>在cmd下运行</p>
+<pre><code>gem sources --remove https://rubygems.org/ 删掉原来的源
+gem sources -a http://ruby.taobao.org 添加淘宝源
+gem sources -l 查看现有的源
+gem install redis 安装redis依赖
+</code></pre><p>二 、使用redis cluster</p>
+<p>按照文档的说明步骤来做就行了，详情在这 <a href="http://doc.redisfans.com/topic/cluster-tutorial.html#id5" target="_blank" rel="external">http://doc.redisfans.com/topic/cluster-tutorial.html#id5</a></p>
+<p>要让集群正常运作至少需要三个主节点，因此我们创建6个节点，三个主节点三个从节点，详细请查看文档，我简化一下文档的步骤即：</p>
+<p>1.创建 6个文件夹分别为 7000-7005<br>这里就是做集群时各个机器所安装的redis，在每个文件夹放一份下载下来的redis，例如</p>
+<p><img src="http://7xsp7e.com1.z0.glb.clouddn.com/image/jpg/tech/redis/1463793-dca8fd8cf42f8021.png" alt="hyperlink syntax"></p>
+<p>2.创建配置文件 redis.conf<br>其他几个7000-7004文件夹以此类推，注意修改对应的端口号</p>
+<pre><code>port 7005
+cluster-enabled yes
+cluster-config-file nodes.conf
+cluster-node-timeout 5000
+appendonly yes
+</code></pre><p>文件中的<br>cluster-enabled 选项用于开实例的集群模式，<br>cluster-conf-file 选项则设定了保存节点配置文件的路径， 默认值为nodes.conf 。<br>nodes.conf 节点配置文件无须人为修改， 它由 Redis 集群在启动时创建， 并在有需要时自动进行更新。</p>
+<p>3.创建启动脚本7005.bat<br>这样不用总是敲命令 ,名字随意改，其他几个文件夹同理</p>
+<pre><code>@echo off
+redis-server.exe redis.conf
+@pause
+</code></pre><p>4.创建集群</p>
+<pre><code>1.按照上面所说的配置好各个实例，主要是改端口号，运行 7000.bat- 7005.bat脚本启动六个redis实例
+2.cd到 redis-trib.rb 所在的目录下运行命令
+redis-trib.rb create --replicas 1 127.0.0.1:7000 127.0.0.1:7001 127.0.0.1:7002 127.0.0.1:7003 127.0.0.1:7004 127.0.0.1:7005
+</code></pre><p><img src="http://7xsp7e.com1.z0.glb.clouddn.com/image/jpg/tech/redis/1463793-00d1bf433174d687.png" alt="hyperlink syntax"></p>
+<p>打印出配置信息，现在的master是 7000 7001 7002这三台机，redis会对key 做 CRC16 校验和后分别存储这三台机上。没问题就输入 yes</p>
+<p>例如 7000 这台机 slots:0-5460 的意思是：</p>
+<p>对key 做 CRC16 校验和后 值在 0-5460范围内都会存到这台机器里<br>例如 key=288 对应的CRC16校验和 为 4258，应该存在7000这台机里</p>
+<p>PS：使用前应该对业务做梳理，根据系统中key的特点来调整各个机器的slots范围，<br>不然系统的key基本集中在一两台机器上集群的效果就不大了</p>
+<p>redis-trib.rb文件在下载下来的redis包里可能是没有的，可以到<br><a href="https://github.com/antirez/redis/tree/unstable/src" target="_blank" rel="external">https://github.com/antirez/redis/tree/unstable/src</a> 目录下下载<br>之前的ruby环境就是为运行这个文件做准备的</p>
+<p>命令的意义如下：</p>
+<pre><code>redis-trib.rb
+create， 这表示我们希望创建一个新的集群。
+选项 --replicas 1 表示我们希望为集群中的每个主节点创建一个从节点。
+之后跟着的其他参数则是实例的地址列表， 我们希望程序使用这些地址所指示的实例来创建新集群。
+</code></pre><p>简单来说， 以上命令的意思就是让 redis-trib 程序创建一个包含三个主节点和三个从节点的集群。</p>
+<p>看看node.conf文件里生成了什么</p>
+<p><img src="http://7xsp7e.com1.z0.glb.clouddn.com/image/jpg/tech/redis/1463793-33a8460b4e76dcf3.png" alt="hyperlink syntax"></p>
+<p>里面记录了master 和 slave的对应关系，例如图片里的 7000是master 而对应的 slave是7003这台机，绿色的一长串数字是对应机器的Id，redis以此来标记一台机器。<br>三、Jedis编程使用集群</p>
+<p>github地址 <a href="https://github.com/xetorthio/jedis" target="_blank" rel="external">https://github.com/xetorthio/jedis</a><br>按上面两步配置好，创建并启动集群。测试代码如下：</p>
+<p>添加Jedis依赖</p>
+<pre><code>&lt;dependency&gt;
+      &lt;groupId&gt;org.apache.commons&lt;/groupId&gt;
+      &lt;artifactId&gt;commons-pool2&lt;/artifactId&gt;
+      &lt;version&gt;2.4.2&lt;/version&gt;
+&lt;/dependency&gt;
+&lt;dependency&gt;
+     &lt;groupId&gt;redis.clients&lt;/groupId&gt;
+      &lt;artifactId&gt;jedis&lt;/artifactId&gt;
+      &lt;version&gt;2.7.3&lt;/version&gt;
+&lt;/dependency&gt;
+</code></pre><p>测试代码：</p>
+<pre><code>@Test
+   public  void cluster(){
+      String key = &quot;1417&quot;;
+      Set&lt;HostAndPort&gt; jedisClusterNodes = new HashSet&lt;HostAndPort&gt;();
+      jedisClusterNodes.add(new HostAndPort(&quot;127.0.0.1&quot;, 7000));   
+      JedisCluster jc = new JedisCluster(jedisClusterNodes);
+
+      jc.setnx(key, &quot;bar&quot;);
+      String value = jc.get(key);
+      System.out.println(&quot;key-&quot;+key+&quot; slot-&quot;+JedisClusterCRC16.getSlot(key)+&quot; value-&quot;+value);
+
+      String key2 = &quot;288&quot;;
+      jc.setnx(key2, &quot;bar2&quot;);
+      String value2 = jc.get(key);
+      System.out.println(&quot;key-&quot;+key2+&quot; slot-&quot;+JedisClusterCRC16.getSlot(key2)+&quot; value-&quot;+value2);
+   }
+</code></pre><p><img src="http://7xsp7e.com1.z0.glb.clouddn.com/image/jpg/tech/redis/1463793-8ab2fd0bb862b3fc.png" alt="hyperlink syntax"></p>
+<p>github上有这一句，Jedis Cluster 会自动去发现集群中的节点，所以JedisClusterNodes只需要 add一个实例</p>
+<p>运行得到结果<br><img src="http://7xsp7e.com1.z0.glb.clouddn.com/image/jpg/tech/redis/1463793-495b43cd591ecfcc.png" alt="hyperlink syntax"></p>
+<p>接下来用redis客户端看看这两个key=1417 、key=288的值存到哪个节点下<br>看回最初的配置</p>
+<p><img src="http://7xsp7e.com1.z0.glb.clouddn.com/image/jpg/tech/redis/1463793-1d9100e1992146a0.png" alt="hyperlink syntax"></p>
+<p>key=288算出来的 CRC16校验和是 4258，根据配置 应该存在 7000这台机上<br>key=1417 算出来的 CRC16校验和是 13096，根据配置 应该存在 7002 这台机上</p>
+<p>用redis 客户端查看数据存到哪台机器上</p>
+<p><img src="http://7xsp7e.com1.z0.glb.clouddn.com/image/jpg/tech/redis/1463793-8f1ca96a2fe051ff.png" alt="hyperlink syntax"></p>
+<p>进去7000这台机上<br>get 288拿到了value bar2<br>get 1417 得到提示让去 7002这台机查</p>
+<p>从redis客户端看到的结果与配置一致</p>
+<p>四、简单集成Spring</p>
+<p>JedisFactory类<br>传入host 、port 和JedisPoolConfig 类</p>
+<pre><code>package your path;
+import java.util.HashSet;
+import java.util.Set;
+import redis.clients.jedis.HostAndPort;
+import redis.clients.jedis.JedisCluster;
+import redis.clients.jedis.JedisPoolConfig;
+
+/**
+ * &lt;p&gt;Title: JedisClusterFactory.java&lt;／p&gt;
+ * &lt;p&gt;Description: &lt;／p&gt;
+ * @date 2016-1-14
+ * @version 1.0
+ */
+public class JedisClusterFactory {
+
+/** 
+ * @Description 
+ * @date 2016-1-14 上午11:00:18 
+ * @param args
+ */
+
+ private JedisCluster jedisCluster;
+
+ public JedisCluster getJedisCluster() {
+     return jedisCluster;
+ }
+
+ public JedisClusterFactory(JedisPoolConfig jedisPoolConfig,String host,int port){    
+     Set&lt;HostAndPort&gt; jedisClusterNodes= new HashSet&lt;HostAndPort&gt;();
+     //Jedis Cluster will attempt to discover cluster nodes automatically
+     jedisClusterNodes.add(new HostAndPort(host,port));
+     jedisCluster=new JedisCluster(jedisClusterNodes,jedisPoolConfig);
+ }
+}
+</code></pre><p>JedisProvide.java工具类，主要是封装些常用的操作</p>
+<pre><code>package your path;
+import your path.CacheSecondLevel;
+import redis.clients.jedis.JedisCluster;
+
+/**
+ * &lt;p&gt;Title: RedisProvide.java&lt;／p&gt;
+ * &lt;p&gt;Description: &lt;／p&gt;
+ * @author qiaowei liu
+ * @date 2016-1-8
+ * @version 1.0
+ */
+public class RedisProvide implements CacheSecondLevel {
+
+private JedisCluster jedisCluster;
+
+public RedisProvide(JedisClusterFactory jedisClusterFactory){
+       jedisCluster=jedisClusterFactory.getJedisCluster();
+}
+
+@Override
+public Object get(String key){
+    return jedisCluster.get(key);        
+}
+
+@Override
+public Object[] gets(String[] keys) {
+    // TODO Auto-generated method stub
+    return null;
+}
+
+@Override
+public void set(String key, Object obj) {
+    // TODO Auto-generated method stub
+    jedisCluster.set(key, obj.toString());
+}
+
+@Override
+public void delete(String key) {
+    // TODO Auto-generated method stub
+    jedisCluster.del(key);
+}
+}
+</code></pre><p>applicationContext.xml配置</p>
+<pre><code>    &lt;!--==================== redis配置 start ====================--&gt;         
+&lt;bean id=&quot;jedisPoolConfig&quot; class=&quot;redis.clients.jedis.JedisPoolConfig&quot;&gt;    
+     &lt;property name=&quot;maxTotal&quot;  value=&quot;${redis.maxTotal}&quot; /&gt; 
+   &lt;property name=&quot;maxIdle&quot; value=&quot;${redis.maxIdle}&quot; /&gt; 
+    &lt;property name=&quot;timeBetweenEvictionRunsMillis&quot; value=&quot;${redis.timeBetweenEvictionRunsMillis}&quot; /&gt;
+   &lt;property name=&quot;minEvictableIdleTimeMillis&quot; value=&quot;${redis.minEvictableIdleTimeMillis}&quot; /&gt;
+   &lt;property name=&quot;testOnBorrow&quot; value=&quot;${redis.testOnBorrow}&quot; /&gt;
+&lt;/bean&gt;
+
+&lt;bean id=&quot;jedisClusterFactory&quot; class=&quot;xxx.xxx.JedisClusterFactory&quot; &gt; 
+   &lt;constructor-arg  ref =&quot;jedisPoolConfig&quot;/&gt;
+   &lt;constructor-arg  name=&quot;host&quot; value=&quot;${redis.host}&quot;/&gt;
+   &lt;constructor-arg  name=&quot;port&quot; value=&quot;${redis.port}&quot;/&gt;           
+&lt;/bean&gt;
+
+&lt;bean id=&quot;redisProvide&quot; class=&quot;xxx.xxx.RedisProvide&quot;&gt;
+   &lt;constructor-arg  ref =&quot;jedisClusterFactory&quot; /&gt;
+&lt;/bean&gt;
+</code></pre><!--==================== redis配置 end ====================-->
+<p>conf/perproties</p>
+<pre><code>//redis config
+redis.host=127.0.0.1
+redis.port=7000
+redis.timeout=100000
+redis.maxIdle=300
+redis.maxTotal=600 
+redis.timeBetweenEvictionRunsMillis=30000  
+redis.minEvictableIdleTimeMillis=30000 
+redis.testOnBorrow=true
+</code></pre><p>参考资料</p>
+<p>redis安装<br>参考 <a href="http://blog.csdn.net/renfufei/article/details/38474435" target="_blank" rel="external">http://blog.csdn.net/renfufei/article/details/38474435</a></p>
+<p>redis集群<br><a href="http://doc.redisfans.com/topic/cluster-tutorial.html#id5" target="_blank" rel="external">http://doc.redisfans.com/topic/cluster-tutorial.html#id5</a></p>
+<p>redis命令参考<br><a href="http://doc.redisfans.com/" target="_blank" rel="external">http://doc.redisfans.com/</a></p>
+
+      
+    </div>
+
+    <div>
+      
+        
+      
+    </div>
+
+    <footer class="post-footer">
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2016/05/25/Redis-Cluster学习笔记/" rel="next" title="Redis Cluster学习笔记">
+                <i class="fa fa-chevron-left"></i> Redis Cluster学习笔记
+              </a>
+            
+          </div>
+
+          <div class="post-nav-prev post-nav-item">
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+  <div class="comments" id="comments">
+    
+  </div>
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap" >
+            Inhaltsverzeichnis
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview">
+            Übersicht
+          </li>
+        </ul>
+      
+
+      <section class="site-overview sidebar-panel ">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+          <img class="site-author-image" itemprop="image"
+               src="/images/default_avatar.jpg"
+               alt="Chenzhi" />
+          <p class="site-author-name" itemprop="name">Chenzhi</p>
+          <p class="site-description motion-element" itemprop="description">Java NodeJs NoSql</p>
+        </div>
+        <nav class="site-state motion-element">
+          <div class="site-state-item site-state-posts">
+            <a href="/archives">
+              <span class="site-state-item-count">7</span>
+              <span class="site-state-item-name">Artikel</span>
+            </a>
+          </div>
+
+          
+
+          
+            <div class="site-state-item site-state-tags">
+              <a href="/tags">
+                <span class="site-state-item-count">5</span>
+                <span class="site-state-item-name">Tags</span>
+              </a>
+            </div>
+          
+
+        </nav>
+
+        
+
+        <div class="links-of-author motion-element">
+          
+        </div>
+
+        
+        
+
+        
+        <div class="links-of-blogroll motion-element">
+          
+        </div>
+
+      </section>
+
+      
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc-indicator-top post-toc-indicator">
+            <i class="fa fa-angle-double-up"></i>
+          </div>
+          <div class="post-toc">
+            
+              
+            
+            
+              <p class="post-toc-empty">Dieser Artikel hat kein Inhaltsverzeichnis</p>
+            
+          </div>
+          <div class="post-toc-indicator-bottom post-toc-indicator">
+            <i class="fa fa-angle-double-down"></i>
+          </div>
+        </section>
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright" >
+  
+  &copy; 
+  <span itemprop="copyrightYear">2016</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Chenzhi</span>
+</div>
+
+<div class="powered-by">
+  Erstellt mit  <a class="theme-link" href="http://hexo.io">Hexo</a>
+</div>
+
+<div class="theme-info">
+  Theme -
+  <a class="theme-link" href="https://github.com/iissnan/hexo-theme-next">
+    NexT.Muse
+  </a>
+</div>
+
+
+
+      </div>
+    </footer>
+
+    <div class="back-to-top">
+      <i class="fa fa-arrow-up"></i>
+    </div>
+  </div>
+
+  
+
+
+  
+
+
+
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+  <script type="text/javascript" src="/vendors/jquery/index.js?v=2.1.3"></script>
+
+  <script type="text/javascript" src="/vendors/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+
+  <script type="text/javascript" src="/vendors/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+
+  <script type="text/javascript" src="/vendors/velocity/velocity.min.js"></script>
+
+  <script type="text/javascript" src="/vendors/velocity/velocity.ui.min.js"></script>
+
+  <script type="text/javascript" src="/vendors/fancybox/source/jquery.fancybox.pack.js"></script>
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=0.5.0"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=0.5.0"></script>
+
+
+
+  
+  
+
+  
+  
+<script type="text/javascript" src="/js/src/scrollspy.js?v=0.5.0"></script>
+
+<script type="text/javascript" id="sidebar.toc.highlight">
+  $(document).ready(function () {
+    var tocSelector = '.post-toc';
+    var $tocSelector = $(tocSelector);
+    var activeCurrentSelector = '.active-current';
+
+    $tocSelector
+      .on('activate.bs.scrollspy', function () {
+        var $currentActiveElement = $(tocSelector + ' .active').last();
+
+        removeCurrentActiveClass();
+        $currentActiveElement.addClass('active-current');
+
+        $tocSelector[0].scrollTop = $currentActiveElement.position().top;
+      })
+      .on('clear.bs.scrollspy', function () {
+        removeCurrentActiveClass();
+      });
+
+    function removeCurrentActiveClass () {
+      $(tocSelector + ' ' + activeCurrentSelector)
+        .removeClass(activeCurrentSelector.substring(1));
+    }
+
+    function processTOC () {
+      getTOCMaxHeight();
+      toggleTOCOverflowIndicators();
+    }
+
+    function getTOCMaxHeight () {
+      var height = $('.sidebar').height() -
+                   $tocSelector.position().top -
+                   $('.post-toc-indicator-bottom').height();
+
+      $tocSelector.css('height', height);
+
+      return height;
+    }
+
+    function toggleTOCOverflowIndicators () {
+      tocOverflowIndicator(
+        '.post-toc-indicator-top',
+        $tocSelector.scrollTop() > 0 ? 'show' : 'hide'
+      );
+
+      tocOverflowIndicator(
+        '.post-toc-indicator-bottom',
+        $tocSelector.scrollTop() >= $tocSelector.find('ol').height() - $tocSelector.height() ? 'hide' : 'show'
+      )
+    }
+
+    $(document).on('sidebar.motion.complete', function () {
+      processTOC();
+    });
+
+    $('body').scrollspy({ target: tocSelector });
+    $(window).on('resize', function () {
+      if ( $('.sidebar').hasClass('sidebar-active') ) {
+        processTOC();
+      }
+    });
+
+    onScroll($tocSelector);
+
+    function onScroll (element) {
+      element.on('mousewheel DOMMouseScroll', function (event) {
+          var oe = event.originalEvent;
+          var delta = oe.wheelDelta || -oe.detail;
+
+          this.scrollTop += ( delta < 0 ? 1 : -1 ) * 30;
+          event.preventDefault();
+
+          toggleTOCOverflowIndicators();
+      });
+    }
+
+    function tocOverflowIndicator (indicator, action) {
+      var $indicator = $(indicator);
+      var opacity = action === 'show' ? 1 : 0;
+      $indicator.velocity ?
+        $indicator.velocity('stop').velocity({
+          opacity: opacity
+        }, { duration: 100 }) :
+        $indicator.stop().animate({
+          opacity: opacity
+        }, 100);
+    }
+
+  });
+</script>
+
+<script type="text/javascript" id="sidebar.nav">
+  $(document).ready(function () {
+    var html = $('html');
+    var TAB_ANIMATE_DURATION = 200;
+    var hasVelocity = $.isFunction(html.velocity);
+
+    $('.sidebar-nav li').on('click', function () {
+      var item = $(this);
+      var activeTabClassName = 'sidebar-nav-active';
+      var activePanelClassName = 'sidebar-panel-active';
+      if (item.hasClass(activeTabClassName)) {
+        return;
+      }
+
+      var currentTarget = $('.' + activePanelClassName);
+      var target = $('.' + item.data('target'));
+
+      hasVelocity ?
+        currentTarget.velocity('transition.slideUpOut', TAB_ANIMATE_DURATION, function () {
+          target
+            .velocity('stop')
+            .velocity('transition.slideDownIn', TAB_ANIMATE_DURATION)
+            .addClass(activePanelClassName);
+        }) :
+        currentTarget.animate({ opacity: 0 }, TAB_ANIMATE_DURATION, function () {
+          currentTarget.hide();
+          target
+            .stop()
+            .css({'opacity': 0, 'display': 'block'})
+            .animate({ opacity: 1 }, TAB_ANIMATE_DURATION, function () {
+              currentTarget.removeClass(activePanelClassName);
+              target.addClass(activePanelClassName);
+            });
+        });
+
+      item.siblings().removeClass(activeTabClassName);
+      item.addClass(activeTabClassName);
+    });
+
+    $('.post-toc a').on('click', function (e) {
+      e.preventDefault();
+      var targetSelector = NexT.utils.escapeSelector(this.getAttribute('href'));
+      var offset = $(targetSelector).offset().top;
+      hasVelocity ?
+        html.velocity('stop').velocity('scroll', {
+          offset: offset  + 'px',
+          mobileHA: false
+        }) :
+        $('html, body').stop().animate({
+          scrollTop: offset
+        }, 500);
+    });
+
+    // Expand sidebar on post detail page by default, when post has a toc.
+    NexT.motion.middleWares.sidebar = function () {
+      var $tocContent = $('.post-toc-content');
+
+      if (CONFIG.sidebar.display === 'post' || CONFIG.sidebar.display === 'always') {
+        if ($tocContent.length > 0 && $tocContent.html().trim().length > 0) {
+          NexT.utils.displaySidebar();
+        }
+      }
+    };
+  });
+</script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=0.5.0"></script>
+
+
+
+  
+
+
+
+  
+
+
+
+  
+  
+  
+
+  
+
+  
+
+</body>
+</html>
