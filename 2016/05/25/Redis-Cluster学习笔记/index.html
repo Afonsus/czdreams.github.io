@@ -63,7 +63,7 @@
 <meta property="og:url" content="http://yoursite.com/2016/05/25/Redis-Cluster学习笔记/index.html">
 <meta property="og:site_name" content="遗世而独立">
 <meta property="og:description" content="Redis在3.0版正式引入了集群这个特性。Redis集群是一个分布式（distributed）、容错（fault-tolerant）的 Redis内存K/V服务， 集群可以使用的功能是普通单机 Redis 所能使用的功能的一个子集（subset），比如Redis集群并不支持处理多个keys的命令,因为这需要在不同的节点间移动数据,从而达不到像Redis那样的性能,在高负载的情况下可能会导致不可预">
-<meta property="og:updated_time" content="2016-05-25T05:12:08.774Z">
+<meta property="og:updated_time" content="2016-05-25T05:14:08.678Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="Redis Cluster学习笔记">
 <meta name="twitter:description" content="Redis在3.0版正式引入了集群这个特性。Redis集群是一个分布式（distributed）、容错（fault-tolerant）的 Redis内存K/V服务， 集群可以使用的功能是普通单机 Redis 所能使用的功能的一个子集（subset），比如Redis集群并不支持处理多个keys的命令,因为这需要在不同的节点间移动数据,从而达不到像Redis那样的性能,在高负载的情况下可能会导致不可预">
@@ -142,7 +142,7 @@
             
               <i class="menu-item-icon fa fa-home fa-fw"></i> <br />
             
-            Home
+            Startseite
           </a>
         </li>
       
@@ -152,7 +152,7 @@
             
               <i class="menu-item-icon fa fa-archive fa-fw"></i> <br />
             
-            Archives
+            Archiv
           </a>
         </li>
       
@@ -215,7 +215,7 @@
             <span class="post-meta-item-icon">
               <i class="fa fa-calendar-o"></i>
             </span>
-            <span class="post-meta-item-text">Posted on</span>
+            <span class="post-meta-item-text">Veröffentlicht am</span>
             <time itemprop="dateCreated" datetime="2016-05-25T11:56:19+08:00" content="2016-05-25">
               2016-05-25
             </time>
@@ -244,9 +244,9 @@
 
       
         <p>Redis在3.0版正式引入了集群这个特性。Redis集群是一个分布式（distributed）、容错（fault-tolerant）的 Redis内存K/V服务， 集群可以使用的功能是普通单机 Redis 所能使用的功能的一个子集（subset），比如Redis集群并不支持处理多个keys的命令,因为这需要在不同的节点间移动数据,从而达不到像Redis那样的性能,在高负载的情况下可能会导致不可预料的错误。<br><a id="more"></a><br>Redis集群的几个重要特征：</p>
-<p>(1).Redis 集群的分片特征在于将键空间分拆了16384个槽位，每一个节点负责其中一些槽位。</p>
-<p>(2).Redis提供一定程度的可用性,可以在某个节点宕机或者不可达的情况下继续处理命令.</p>
-<p>(3).Redis 集群中不存在中心（central）节点或者代理（proxy）节点， 集群的其中一个主要设计目标是达到线性可扩展性（linear scalability）。</p>
+<p>######(1).Redis 集群的分片特征在于将键空间分拆了16384个槽位，每一个节点负责其中一些槽位。</p>
+<p>######(2).Redis提供一定程度的可用性,可以在某个节点宕机或者不可达的情况下继续处理命令.</p>
+<p>######(3).Redis 集群中不存在中心（central）节点或者代理（proxy）节点， 集群的其中一个主要设计目标是达到线性可扩展性（linear scalability）。</p>
 <p>##1. Redis的数据分片（Sharding）</p>
 <p>Redis 集群的键空间被分割为 16384 （2^14)个槽（slot）， 集群的最大节点数量也是 16384 个（推荐的最大节点数量为 1000 个），同理每个主节点可以负责处理1到16384个槽位。</p>
 <p>当16384个槽位都有主节点负责处理时，集群进入”稳定“上线状态，可以开始处理数据命令。当集群没有处理稳定状态时，可以通过执行重配置（reconfiguration）操作，使得每个哈希槽都只由一个节点进行处理。</p>
@@ -256,21 +256,21 @@
 <p>##2. Redis集群节点<br>部分内容摘自附录2。Redis 集群中的节点不仅要记录键和值的映射，还需要记录集群的状态，包括键到正确节点的映射。它还具有自动发现其他节点，识别工作不正常的节点，并在有需要时，在从节点中选举出新的主节点的功能。</p>
 <p>为了执行以上列出的任务， 集群中的每个节点都与其他节点建立起了“集群连接（cluster bus）”， 该连接是一个 TCP 连接， 使用二进制协议进行通讯。</p>
 <p>节点之间使用 Gossip 协议 来进行以下工作：</p>
-<p>#######a).传播（propagate）关于集群的信息，以此来发现新的节点。</p>
-<p>#######b).向其他节点发送 PING 数据包，以此来检查目标节点是否正常运作。</p>
-<p>#######c).在特定事件发生时，发送集群信息。</p>
+<p>######a).传播（propagate）关于集群的信息，以此来发现新的节点。</p>
+<p>######b).向其他节点发送 PING 数据包，以此来检查目标节点是否正常运作。</p>
+<p>######c).在特定事件发生时，发送集群信息。</p>
 <p>除此之外， 集群连接还用于在集群中发布或订阅信息。</p>
 <p>集群节点不能前端代理命令请求， 所以客户端应该在节点返回 -MOVED或者 -ASK转向（redirection）错误时， 自行将命令请求转发至其他节点。</p>
 <p>客户端可以自由地向集群中的任何一个节点发送命令请求， 并可以在有需要时， 根据转向错误所提供的信息， 将命令转发至正确的节点， 所以在理论上来说， 客户端是无须保存集群状态信息的。但如果客户端可以将键和节点之间的映射信息保存起来， 可以有效地减少可能出现的转向次数， 籍此提升命令执行的效率。</p>
 <p>每个节点在集群中由一个独一无二的 ID标识， 该 ID 是一个十六进制表示的 160 位随机数，在节点第一次启动时由 /dev/urandom 生成。节点会将它的 ID 保存到配置文件， 只要这个配置文件不被删除， 节点就会一直沿用这个 ID 。一个节点可以改变它的 IP 和端口号， 而不改变节点 ID 。 集群可以自动识别出IP/端口号的变化， 并将这一信息通过 Gossip协议广播给其他节点知道。</p>
 <p>下面是每个节点都有的关联信息， 并且节点会将这些信息发送给其他节点：</p>
-<p>#######a).节点所使用的 IP 地址和 TCP 端口号。</p>
-<p>#######b).节点的标志（flags）。</p>
-<p>#######c).节点负责处理的哈希槽。</p>
-<p>#######b).节点最近一次使用集群连接发送 PING 数据包（packet）的时间。</p>
-<p>#######e).节点最近一次在回复中接收到 PONG 数据包的时间。</p>
-<p>#######f).集群将该节点标记为下线的时间。</p>
-<p>#######g).该节点的从节点数量。<br>如果该节点是从节点的话，那么它会记录主节点的节点 ID 。 如果这是一个主节点的话，那么主节点 ID 这一栏的值为 0000000。</p>
+<p>#####a).节点所使用的 IP 地址和 TCP 端口号。</p>
+<p>#####b).节点的标志（flags）。</p>
+<p>#####c).节点负责处理的哈希槽。</p>
+<p>#####b).节点最近一次使用集群连接发送 PING 数据包（packet）的时间。</p>
+<p>#####e).节点最近一次在回复中接收到 PONG 数据包的时间。</p>
+<p>#####f).集群将该节点标记为下线的时间。</p>
+<p>#####g).该节点的从节点数量。<br>如果该节点是从节点的话，那么它会记录主节点的节点 ID 。 如果这是一个主节点的话，那么主节点 ID 这一栏的值为 0000000。</p>
 <p>在了解Redis Cluster的集群基本特征后，我们首先搭建出这个Redis Cluster集群。</p>
 <p>##3. 安装Redis 3.0.x</p>
 <p>当前最新版为3.0.1</p>
@@ -489,10 +489,10 @@ public class JedisClusterTest {
       
         <ul class="sidebar-nav motion-element">
           <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap" >
-            Table of Contents
+            Inhaltsverzeichnis
           </li>
           <li class="sidebar-nav-overview" data-target="site-overview">
-            Overview
+            Übersicht
           </li>
         </ul>
       
@@ -509,7 +509,7 @@ public class JedisClusterTest {
           <div class="site-state-item site-state-posts">
             <a href="/archives">
               <span class="site-state-item-count">6</span>
-              <span class="site-state-item-name">posts</span>
+              <span class="site-state-item-name">Artikel</span>
             </a>
           </div>
 
@@ -519,7 +519,7 @@ public class JedisClusterTest {
             <div class="site-state-item site-state-tags">
               <a href="/tags">
                 <span class="site-state-item-count">5</span>
-                <span class="site-state-item-name">tags</span>
+                <span class="site-state-item-name">Tags</span>
               </a>
             </div>
           
@@ -552,7 +552,7 @@ public class JedisClusterTest {
               
             
             
-              <p class="post-toc-empty">This post does not have a Table of Contents</p>
+              <p class="post-toc-empty">Dieser Artikel hat kein Inhaltsverzeichnis</p>
             
           </div>
           <div class="post-toc-indicator-bottom post-toc-indicator">
@@ -582,7 +582,7 @@ public class JedisClusterTest {
 </div>
 
 <div class="powered-by">
-  Powered by <a class="theme-link" href="http://hexo.io">Hexo</a>
+  Erstellt mit  <a class="theme-link" href="http://hexo.io">Hexo</a>
 </div>
 
 <div class="theme-info">
