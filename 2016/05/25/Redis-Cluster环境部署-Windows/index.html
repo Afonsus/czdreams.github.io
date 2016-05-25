@@ -72,7 +72,7 @@
 <meta property="og:image" content="http://7xsp7e.com1.z0.glb.clouddn.com/image/jpg/tech/redis/1463793-495b43cd591ecfcc.png">
 <meta property="og:image" content="http://7xsp7e.com1.z0.glb.clouddn.com/image/jpg/tech/redis/1463793-1d9100e1992146a0.png">
 <meta property="og:image" content="http://7xsp7e.com1.z0.glb.clouddn.com/image/jpg/tech/redis/1463793-8f1ca96a2fe051ff.png">
-<meta property="og:updated_time" content="2016-05-25T07:34:13.368Z">
+<meta property="og:updated_time" content="2016-05-25T07:38:08.520Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="Redis Cluster环境部署-Windows">
 <meta name="twitter:description" content="windows下使用RedisCluster集群简单实例">
@@ -254,11 +254,8 @@
 
       
         <p>windows下使用RedisCluster集群简单实例<br><a id="more"></a></p>
-<p>一、开发环境</p>
-<p>1.win7</p>
-<p>2.redis 3.0 64位</p>
-<p>3.ruby 环境<br>  测试用到的所有安装包及我的测试配置 <a href="http://pan.baidu.com/s/1qXmO3fQ" target="_blank" rel="external">http://pan.baidu.com/s/1qXmO3fQ</a></p>
-<p>redis 安装<br>Redis对于Linux是官方支持的,安装和使用没有什么好说的,普通使用按照官方指导，5分钟以内就能搞定。详情请参考:<a href="http://redis.io/download" target="_blank" rel="external">http://redis.io/download</a></p>
+<h2 id="一、开发环境"><a href="#一、开发环境" class="headerlink" title="一、开发环境"></a>一、开发环境</h2><p>1.win7<br>2.redis 3.0 64位<br>3.ruby 环境<br>  测试用到的所有安装包及我的测试配置 <a href="http://pan.baidu.com/s/1qXmO3fQ" target="_blank" rel="external">http://pan.baidu.com/s/1qXmO3fQ</a></p>
+<h4 id="redis-安装"><a href="#redis-安装" class="headerlink" title="redis 安装"></a>redis 安装</h4><p>Redis对于Linux是官方支持的,安装和使用没有什么好说的,普通使用按照官方指导，5分钟以内就能搞定。详情请参考:<a href="http://redis.io/download" target="_blank" rel="external">http://redis.io/download</a></p>
 <p>Redis官方是不支持windows的，只是 Microsoft Open Tech group 在 GitHub上开发了一个Win64的版本,官方说明：</p>
 <pre><code>Win64 Unofficial The Redis project does not directly support
 Windows, however the Microsoft Open Tech group develops and maintains an Windows port targeting Win64. 
@@ -271,34 +268,30 @@ redis-check-dump.exe # dump
 redis-cli.exe # 客户端
 redis-server.exe # 服务器
 redis.windows.conf # 配置文件 
-</code></pre><p>ruby环境准备</p>
-<p>下载 64位的 RubyInstaller并安装 地址<a href="http://rubyinstaller.org/downloads/" target="_blank" rel="external">http://rubyinstaller.org/downloads/</a><br>勾选下面三个不用配置环境变量</p>
+</code></pre><h4 id="ruby环境准备"><a href="#ruby环境准备" class="headerlink" title="ruby环境准备"></a>ruby环境准备</h4><p>下载 64位的 RubyInstaller并安装 地址<a href="http://rubyinstaller.org/downloads/" target="_blank" rel="external">http://rubyinstaller.org/downloads/</a><br>勾选下面三个不用配置环境变量</p>
 <p><img src="http://7xsp7e.com1.z0.glb.clouddn.com/image/jpg/tech/redis/1463793-45de1a7750fa14c7.png" alt="hyperlink syntax"></p>
-<p>安装RubyGems</p>
-<p>下载下来是一个压缩包，解压运行里面的 setup.rb 安装 rubyGems<br>由于墙的原因ruby自带的源有时候很慢，我们换成淘宝的源，不然下面安装redis依赖会失败＼（－－）／</p>
+<h4 id="安装RubyGems"><a href="#安装RubyGems" class="headerlink" title="安装RubyGems"></a>安装RubyGems</h4><p>下载下来是一个压缩包，解压运行里面的 setup.rb 安装 rubyGems<br>由于墙的原因ruby自带的源有时候很慢，我们换成淘宝的源，不然下面安装redis依赖会失败＼（－－）／</p>
 <p>在cmd下运行</p>
 <pre><code>gem sources --remove https://rubygems.org/ 删掉原来的源
 gem sources -a http://ruby.taobao.org 添加淘宝源
 gem sources -l 查看现有的源
 gem install redis 安装redis依赖
-</code></pre><p>二 、使用redis cluster</p>
-<p>按照文档的说明步骤来做就行了，详情在这 <a href="http://doc.redisfans.com/topic/cluster-tutorial.html#id5" target="_blank" rel="external">http://doc.redisfans.com/topic/cluster-tutorial.html#id5</a></p>
+</code></pre><h2 id="二-、使用redis-cluster"><a href="#二-、使用redis-cluster" class="headerlink" title="二 、使用redis cluster"></a>二 、使用redis cluster</h2><p>按照文档的说明步骤来做就行了，详情在这 <a href="http://doc.redisfans.com/topic/cluster-tutorial.html#id5" target="_blank" rel="external">http://doc.redisfans.com/topic/cluster-tutorial.html#id5</a></p>
 <p>要让集群正常运作至少需要三个主节点，因此我们创建6个节点，三个主节点三个从节点，详细请查看文档，我简化一下文档的步骤即：</p>
-<p>1.创建 6个文件夹分别为 7000-7005<br>这里就是做集群时各个机器所安装的redis，在每个文件夹放一份下载下来的redis，例如</p>
+<h4 id="1-创建-6个文件夹分别为-7000-7005"><a href="#1-创建-6个文件夹分别为-7000-7005" class="headerlink" title="1.创建 6个文件夹分别为 7000-7005"></a>1.创建 6个文件夹分别为 7000-7005</h4><p>这里就是做集群时各个机器所安装的redis，在每个文件夹放一份下载下来的redis，例如</p>
 <p><img src="http://7xsp7e.com1.z0.glb.clouddn.com/image/jpg/tech/redis/1463793-dca8fd8cf42f8021.png" alt="hyperlink syntax"></p>
-<p>2.创建配置文件 redis.conf<br>其他几个7000-7004文件夹以此类推，注意修改对应的端口号</p>
+<h4 id="2-创建配置文件-redis-conf"><a href="#2-创建配置文件-redis-conf" class="headerlink" title="2.创建配置文件 redis.conf"></a>2.创建配置文件 redis.conf</h4><p>其他几个7000-7004文件夹以此类推，注意修改对应的端口号</p>
 <pre><code>port 7005
 cluster-enabled yes
 cluster-config-file nodes.conf
 cluster-node-timeout 5000
 appendonly yes
 </code></pre><p>文件中的<br>cluster-enabled 选项用于开实例的集群模式，<br>cluster-conf-file 选项则设定了保存节点配置文件的路径， 默认值为nodes.conf 。<br>nodes.conf 节点配置文件无须人为修改， 它由 Redis 集群在启动时创建， 并在有需要时自动进行更新。</p>
-<p>3.创建启动脚本7005.bat<br>这样不用总是敲命令 ,名字随意改，其他几个文件夹同理</p>
+<h4 id="3-创建启动脚本7005-bat"><a href="#3-创建启动脚本7005-bat" class="headerlink" title="3.创建启动脚本7005.bat"></a>3.创建启动脚本7005.bat</h4><p>这样不用总是敲命令 ,名字随意改，其他几个文件夹同理</p>
 <pre><code>@echo off
 redis-server.exe redis.conf
 @pause
-</code></pre><p>4.创建集群</p>
-<pre><code>1.按照上面所说的配置好各个实例，主要是改端口号，运行 7000.bat- 7005.bat脚本启动六个redis实例
+</code></pre><h4 id="4-创建集群"><a href="#4-创建集群" class="headerlink" title="4.创建集群"></a>4.创建集群</h4><pre><code>1.按照上面所说的配置好各个实例，主要是改端口号，运行 7000.bat- 7005.bat脚本启动六个redis实例
 2.cd到 redis-trib.rb 所在的目录下运行命令
 redis-trib.rb create --replicas 1 127.0.0.1:7000 127.0.0.1:7001 127.0.0.1:7002 127.0.0.1:7003 127.0.0.1:7004 127.0.0.1:7005
 </code></pre><p><img src="http://7xsp7e.com1.z0.glb.clouddn.com/image/jpg/tech/redis/1463793-00d1bf433174d687.png" alt="hyperlink syntax"></p>
@@ -315,8 +308,8 @@ create， 这表示我们希望创建一个新的集群。
 </code></pre><p>简单来说， 以上命令的意思就是让 redis-trib 程序创建一个包含三个主节点和三个从节点的集群。</p>
 <p>看看node.conf文件里生成了什么</p>
 <p><img src="http://7xsp7e.com1.z0.glb.clouddn.com/image/jpg/tech/redis/1463793-33a8460b4e76dcf3.png" alt="hyperlink syntax"></p>
-<p>里面记录了master 和 slave的对应关系，例如图片里的 7000是master 而对应的 slave是7003这台机，绿色的一长串数字是对应机器的Id，redis以此来标记一台机器。<br>三、Jedis编程使用集群</p>
-<p>github地址 <a href="https://github.com/xetorthio/jedis" target="_blank" rel="external">https://github.com/xetorthio/jedis</a><br>按上面两步配置好，创建并启动集群。测试代码如下：</p>
+<p>里面记录了master 和 slave的对应关系，例如图片里的 7000是master 而对应的 slave是7003这台机，绿色的一长串数字是对应机器的Id，redis以此来标记一台机器。</p>
+<h2 id="三、Jedis编程使用集群"><a href="#三、Jedis编程使用集群" class="headerlink" title="三、Jedis编程使用集群"></a>三、Jedis编程使用集群</h2><p>github地址 <a href="https://github.com/xetorthio/jedis" target="_blank" rel="external">https://github.com/xetorthio/jedis</a><br>按上面两步配置好，创建并启动集群。测试代码如下：</p>
 <p>添加Jedis依赖</p>
 <pre><code>&lt;dependency&gt;
       &lt;groupId&gt;org.apache.commons&lt;/groupId&gt;
@@ -355,8 +348,7 @@ create， 这表示我们希望创建一个新的集群。
 <p><img src="http://7xsp7e.com1.z0.glb.clouddn.com/image/jpg/tech/redis/1463793-8f1ca96a2fe051ff.png" alt="hyperlink syntax"></p>
 <p>进去7000这台机上<br>get 288拿到了value bar2<br>get 1417 得到提示让去 7002这台机查</p>
 <p>从redis客户端看到的结果与配置一致</p>
-<p>四、简单集成Spring</p>
-<p>JedisFactory类<br>传入host 、port 和JedisPoolConfig 类</p>
+<h2 id="四、简单集成Spring"><a href="#四、简单集成Spring" class="headerlink" title="四、简单集成Spring"></a>四、简单集成Spring</h2><p>JedisFactory类<br>传入host 、port 和JedisPoolConfig 类</p>
 <pre><code>package your path;
 import java.util.HashSet;
 import java.util.Set;
@@ -464,8 +456,7 @@ redis.maxTotal=600
 redis.timeBetweenEvictionRunsMillis=30000  
 redis.minEvictableIdleTimeMillis=30000 
 redis.testOnBorrow=true
-</code></pre><p>参考资料</p>
-<p>redis安装<br>参考 <a href="http://blog.csdn.net/renfufei/article/details/38474435" target="_blank" rel="external">http://blog.csdn.net/renfufei/article/details/38474435</a></p>
+</code></pre><h2 id="参考资料"><a href="#参考资料" class="headerlink" title="参考资料"></a>参考资料</h2><p>redis安装<br>参考 <a href="http://blog.csdn.net/renfufei/article/details/38474435" target="_blank" rel="external">http://blog.csdn.net/renfufei/article/details/38474435</a></p>
 <p>redis集群<br><a href="http://doc.redisfans.com/topic/cluster-tutorial.html#id5" target="_blank" rel="external">http://doc.redisfans.com/topic/cluster-tutorial.html#id5</a></p>
 <p>redis命令参考<br><a href="http://doc.redisfans.com/" target="_blank" rel="external">http://doc.redisfans.com/</a></p>
 
@@ -603,7 +594,7 @@ redis.testOnBorrow=true
               
             
             
-              <p class="post-toc-empty">Dieser Artikel hat kein Inhaltsverzeichnis</p>
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#一、开发环境"><span class="nav-number">1.</span> <span class="nav-text">一、开发环境</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#redis-安装"><span class="nav-number">1.0.1.</span> <span class="nav-text">redis 安装</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#ruby环境准备"><span class="nav-number">1.0.2.</span> <span class="nav-text">ruby环境准备</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#安装RubyGems"><span class="nav-number">1.0.3.</span> <span class="nav-text">安装RubyGems</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#二-、使用redis-cluster"><span class="nav-number">2.</span> <span class="nav-text">二 、使用redis cluster</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#1-创建-6个文件夹分别为-7000-7005"><span class="nav-number">2.0.1.</span> <span class="nav-text">1.创建 6个文件夹分别为 7000-7005</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#2-创建配置文件-redis-conf"><span class="nav-number">2.0.2.</span> <span class="nav-text">2.创建配置文件 redis.conf</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#3-创建启动脚本7005-bat"><span class="nav-number">2.0.3.</span> <span class="nav-text">3.创建启动脚本7005.bat</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#4-创建集群"><span class="nav-number">2.0.4.</span> <span class="nav-text">4.创建集群</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#三、Jedis编程使用集群"><span class="nav-number">3.</span> <span class="nav-text">三、Jedis编程使用集群</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#四、简单集成Spring"><span class="nav-number">4.</span> <span class="nav-text">四、简单集成Spring</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#参考资料"><span class="nav-number">5.</span> <span class="nav-text">参考资料</span></a></li></ol></div>
             
           </div>
           <div class="post-toc-indicator-bottom post-toc-indicator">
