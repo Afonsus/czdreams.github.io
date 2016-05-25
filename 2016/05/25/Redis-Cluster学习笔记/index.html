@@ -63,7 +63,7 @@
 <meta property="og:url" content="http://yoursite.com/2016/05/25/Redis-Cluster学习笔记/index.html">
 <meta property="og:site_name" content="遗世而独立">
 <meta property="og:description" content="Redis在3.0版正式引入了集群这个特性。Redis集群是一个分布式（distributed）、容错（fault-tolerant）的 Redis内存K/V服务， 集群可以使用的功能是普通单机 Redis 所能使用的功能的一个子集（subset），比如Redis集群并不支持处理多个keys的命令,因为这需要在不同的节点间移动数据,从而达不到像Redis那样的性能,在高负载的情况下可能会导致不可预">
-<meta property="og:updated_time" content="2016-05-25T05:21:36.072Z">
+<meta property="og:updated_time" content="2016-05-25T05:25:31.114Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="Redis Cluster学习笔记">
 <meta name="twitter:description" content="Redis在3.0版正式引入了集群这个特性。Redis集群是一个分布式（distributed）、容错（fault-tolerant）的 Redis内存K/V服务， 集群可以使用的功能是普通单机 Redis 所能使用的功能的一个子集（subset），比如Redis集群并不支持处理多个keys的命令,因为这需要在不同的节点间移动数据,从而达不到像Redis那样的性能,在高负载的情况下可能会导致不可预">
@@ -245,36 +245,22 @@
       
         <p>Redis在3.0版正式引入了集群这个特性。Redis集群是一个分布式（distributed）、容错（fault-tolerant）的 Redis内存K/V服务， 集群可以使用的功能是普通单机 Redis 所能使用的功能的一个子集（subset），比如Redis集群并不支持处理多个keys的命令,因为这需要在不同的节点间移动数据,从而达不到像Redis那样的性能,在高负载的情况下可能会导致不可预料的错误。<br><a id="more"></a></p>
 <p>Redis集群的几个重要特征：</p>
-<p>(1).Redis 集群的分片特征在于将键空间分拆了16384个槽位，每一个节点负责其中一些槽位。</p>
-<p>(2).Redis提供一定程度的可用性,可以在某个节点宕机或者不可达的情况下继续处理命令.</p>
-<p>(3).Redis 集群中不存在中心（central）节点或者代理（proxy）节点， 集群的其中一个主要设计目标是达到线性可扩展性（linear scalability）。</p>
-<p>##1. Redis的数据分片（Sharding）</p>
-<p>Redis 集群的键空间被分割为 16384 （2^14)个槽（slot）， 集群的最大节点数量也是 16384 个（推荐的最大节点数量为 1000 个），同理每个主节点可以负责处理1到16384个槽位。</p>
+<h6 id="1-Redis-集群的分片特征在于将键空间分拆了16384个槽位，每一个节点负责其中一些槽位。"><a href="#1-Redis-集群的分片特征在于将键空间分拆了16384个槽位，每一个节点负责其中一些槽位。" class="headerlink" title="(1).Redis 集群的分片特征在于将键空间分拆了16384个槽位，每一个节点负责其中一些槽位。"></a>(1).Redis 集群的分片特征在于将键空间分拆了16384个槽位，每一个节点负责其中一些槽位。</h6><h6 id="2-Redis提供一定程度的可用性-可以在某个节点宕机或者不可达的情况下继续处理命令"><a href="#2-Redis提供一定程度的可用性-可以在某个节点宕机或者不可达的情况下继续处理命令" class="headerlink" title="(2).Redis提供一定程度的可用性,可以在某个节点宕机或者不可达的情况下继续处理命令."></a>(2).Redis提供一定程度的可用性,可以在某个节点宕机或者不可达的情况下继续处理命令.</h6><h6 id="3-Redis-集群中不存在中心（central）节点或者代理（proxy）节点，-集群的其中一个主要设计目标是达到线性可扩展性（linear-scalability）。"><a href="#3-Redis-集群中不存在中心（central）节点或者代理（proxy）节点，-集群的其中一个主要设计目标是达到线性可扩展性（linear-scalability）。" class="headerlink" title="(3).Redis 集群中不存在中心（central）节点或者代理（proxy）节点， 集群的其中一个主要设计目标是达到线性可扩展性（linear scalability）。"></a>(3).Redis 集群中不存在中心（central）节点或者代理（proxy）节点， 集群的其中一个主要设计目标是达到线性可扩展性（linear scalability）。</h6><h2 id="1-Redis的数据分片（Sharding）"><a href="#1-Redis的数据分片（Sharding）" class="headerlink" title="1. Redis的数据分片（Sharding）"></a>1. Redis的数据分片（Sharding）</h2><p>Redis 集群的键空间被分割为 16384 （2^14)个槽（slot）， 集群的最大节点数量也是 16384 个（推荐的最大节点数量为 1000 个），同理每个主节点可以负责处理1到16384个槽位。</p>
 <p>当16384个槽位都有主节点负责处理时，集群进入”稳定“上线状态，可以开始处理数据命令。当集群没有处理稳定状态时，可以通过执行重配置（reconfiguration）操作，使得每个哈希槽都只由一个节点进行处理。</p>
 <p>重配置指的是将某个/某些槽从一个节点移动到另一个节点。一个主节点可以有任意多个从节点， 这些从节点用于在主节点发生网络断线或者节点失效时， 对主节点进行替换。</p>
 <p>集群的使用公式CRC16（Key）&amp;16383计算key属于哪个槽：<br>HASH_SLOT = CRC16(key) mod 16384</p>
 <p>CRC16其结果长度为16位。</p>
-<p>##2. Redis集群节点<br>部分内容摘自附录2。Redis 集群中的节点不仅要记录键和值的映射，还需要记录集群的状态，包括键到正确节点的映射。它还具有自动发现其他节点，识别工作不正常的节点，并在有需要时，在从节点中选举出新的主节点的功能。</p>
+<h2 id="2-Redis集群节点"><a href="#2-Redis集群节点" class="headerlink" title="2. Redis集群节点"></a>2. Redis集群节点</h2><p>部分内容摘自附录2。Redis 集群中的节点不仅要记录键和值的映射，还需要记录集群的状态，包括键到正确节点的映射。它还具有自动发现其他节点，识别工作不正常的节点，并在有需要时，在从节点中选举出新的主节点的功能。</p>
 <p>为了执行以上列出的任务， 集群中的每个节点都与其他节点建立起了“集群连接（cluster bus）”， 该连接是一个 TCP 连接， 使用二进制协议进行通讯。</p>
 <p>节点之间使用 Gossip 协议 来进行以下工作：</p>
-<p>a).传播（propagate）关于集群的信息，以此来发现新的节点。</p>
-<p>b).向其他节点发送 PING 数据包，以此来检查目标节点是否正常运作。</p>
-<p>c).在特定事件发生时，发送集群信息。</p>
-<p>除此之外， 集群连接还用于在集群中发布或订阅信息。</p>
+<h6 id="a-传播（propagate）关于集群的信息，以此来发现新的节点。"><a href="#a-传播（propagate）关于集群的信息，以此来发现新的节点。" class="headerlink" title="a).传播（propagate）关于集群的信息，以此来发现新的节点。"></a>a).传播（propagate）关于集群的信息，以此来发现新的节点。</h6><h6 id="b-向其他节点发送-PING-数据包，以此来检查目标节点是否正常运作。"><a href="#b-向其他节点发送-PING-数据包，以此来检查目标节点是否正常运作。" class="headerlink" title="b).向其他节点发送 PING 数据包，以此来检查目标节点是否正常运作。"></a>b).向其他节点发送 PING 数据包，以此来检查目标节点是否正常运作。</h6><h6 id="c-在特定事件发生时，发送集群信息。"><a href="#c-在特定事件发生时，发送集群信息。" class="headerlink" title="c).在特定事件发生时，发送集群信息。"></a>c).在特定事件发生时，发送集群信息。</h6><p>除此之外， 集群连接还用于在集群中发布或订阅信息。</p>
 <p>集群节点不能前端代理命令请求， 所以客户端应该在节点返回 -MOVED或者 -ASK转向（redirection）错误时， 自行将命令请求转发至其他节点。</p>
 <p>客户端可以自由地向集群中的任何一个节点发送命令请求， 并可以在有需要时， 根据转向错误所提供的信息， 将命令转发至正确的节点， 所以在理论上来说， 客户端是无须保存集群状态信息的。但如果客户端可以将键和节点之间的映射信息保存起来， 可以有效地减少可能出现的转向次数， 籍此提升命令执行的效率。</p>
 <p>每个节点在集群中由一个独一无二的 ID标识， 该 ID 是一个十六进制表示的 160 位随机数，在节点第一次启动时由 /dev/urandom 生成。节点会将它的 ID 保存到配置文件， 只要这个配置文件不被删除， 节点就会一直沿用这个 ID 。一个节点可以改变它的 IP 和端口号， 而不改变节点 ID 。 集群可以自动识别出IP/端口号的变化， 并将这一信息通过 Gossip协议广播给其他节点知道。</p>
 <p>下面是每个节点都有的关联信息， 并且节点会将这些信息发送给其他节点：</p>
-<p>a).节点所使用的 IP 地址和 TCP 端口号。</p>
-<p>b).节点的标志（flags）。</p>
-<p>c).节点负责处理的哈希槽。</p>
-<p>b).节点最近一次使用集群连接发送 PING 数据包（packet）的时间。</p>
-<p>e).节点最近一次在回复中接收到 PONG 数据包的时间。</p>
-<p>f).集群将该节点标记为下线的时间。</p>
-<p>g).该节点的从节点数量。<br>如果该节点是从节点的话，那么它会记录主节点的节点 ID 。 如果这是一个主节点的话，那么主节点 ID 这一栏的值为 0000000。</p>
+<h6 id="a-节点所使用的-IP-地址和-TCP-端口号。"><a href="#a-节点所使用的-IP-地址和-TCP-端口号。" class="headerlink" title="a).节点所使用的 IP 地址和 TCP 端口号。"></a>a).节点所使用的 IP 地址和 TCP 端口号。</h6><h6 id="b-节点的标志（flags）。"><a href="#b-节点的标志（flags）。" class="headerlink" title="b).节点的标志（flags）。"></a>b).节点的标志（flags）。</h6><h6 id="c-节点负责处理的哈希槽。"><a href="#c-节点负责处理的哈希槽。" class="headerlink" title="c).节点负责处理的哈希槽。"></a>c).节点负责处理的哈希槽。</h6><h6 id="b-节点最近一次使用集群连接发送-PING-数据包（packet）的时间。"><a href="#b-节点最近一次使用集群连接发送-PING-数据包（packet）的时间。" class="headerlink" title="b).节点最近一次使用集群连接发送 PING 数据包（packet）的时间。"></a>b).节点最近一次使用集群连接发送 PING 数据包（packet）的时间。</h6><h6 id="e-节点最近一次在回复中接收到-PONG-数据包的时间。"><a href="#e-节点最近一次在回复中接收到-PONG-数据包的时间。" class="headerlink" title="e).节点最近一次在回复中接收到 PONG 数据包的时间。"></a>e).节点最近一次在回复中接收到 PONG 数据包的时间。</h6><h6 id="f-集群将该节点标记为下线的时间。"><a href="#f-集群将该节点标记为下线的时间。" class="headerlink" title="f).集群将该节点标记为下线的时间。"></a>f).集群将该节点标记为下线的时间。</h6><h6 id="g-该节点的从节点数量。"><a href="#g-该节点的从节点数量。" class="headerlink" title="g).该节点的从节点数量。"></a>g).该节点的从节点数量。</h6><p>如果该节点是从节点的话，那么它会记录主节点的节点 ID 。 如果这是一个主节点的话，那么主节点 ID 这一栏的值为 0000000。</p>
 <p>在了解Redis Cluster的集群基本特征后，我们首先搭建出这个Redis Cluster集群。</p>
-<p>##3. 安装Redis 3.0.x</p>
-<p>当前最新版为3.0.1</p>
+<h2 id="3-安装Redis-3-0-x"><a href="#3-安装Redis-3-0-x" class="headerlink" title="3. 安装Redis 3.0.x"></a>3. 安装Redis 3.0.x</h2><p>当前最新版为3.0.1</p>
 <pre><code>wget http://download.redis.io/releases/redis-3.0.1.tar.gz
 tar xvzf redis-3.0.1.tar.gz
 cd redis-3.0.1/
@@ -291,8 +277,7 @@ ln -sf /usr/local/redis3/conf /etc/redis3
 //检查版本信息
 redis-cli -v
 redis-cli 3.0.1
-</code></pre><p>##4. Redis Cluster配置</p>
-<p>运行在集群模式的Redis实例与普通的Redis实例有所不同，集群模式需要通过配置启用cluster特性，开启集群模式后的Redis实例便可以使用集群特有的命令和特性了.下面是一个最少选项的集群的配置文件 : 注意如果使用的是单机测试，最好把cluster-config-file nodes.conf设置为对应的 端口 nodes-xxx.conf，还有就是 pid 设置为当前 目录下 pidfile ./redis.pid</p>
+</code></pre><h2 id="4-Redis-Cluster配置"><a href="#4-Redis-Cluster配置" class="headerlink" title="4. Redis Cluster配置"></a>4. Redis Cluster配置</h2><p>运行在集群模式的Redis实例与普通的Redis实例有所不同，集群模式需要通过配置启用cluster特性，开启集群模式后的Redis实例便可以使用集群特有的命令和特性了.下面是一个最少选项的集群的配置文件 : 注意如果使用的是单机测试，最好把cluster-config-file nodes.conf设置为对应的 端口 nodes-xxx.conf，还有就是 pid 设置为当前 目录下 pidfile ./redis.pid</p>
 <pre><code>port 7001
 cluster-enabled yes
 cluster-config-file nodes.conf
@@ -348,8 +333,7 @@ d2b437ca8b9007dcdb63ac16210f6540860361e3 127.0.0.1:7006 slave b5b652fa02d9999861
 b5b652fa02d9999861e66c843b01fd2700c02adf 127.0.0.1:7003 master - 0 1431186118673 3 connected 10923-16383
 821ec823dc0c2d4f65319e84fe74157fb1014155 127.0.0.1:7004 slave 1984c27297c6ef50bbfcbd35c11b93cc40ba17e4 0 1431186120176 4 connected
 1984c27297c6ef50bbfcbd35c11b93cc40ba17e4 127.0.0.1:7001 myself,master - 0 0 1 connected 0-5460
-</code></pre><p>##5. 连接Redis集群</p>
-<p>通过上面的输出，我们可以看出Redis三个主节点的slot范围。一个 Redis 客户端可以向集群中的任意节点（包括从节点）发送命令请求。我们首先连接第一个节点：</p>
+</code></pre><h2 id="5-连接Redis集群"><a href="#5-连接Redis集群" class="headerlink" title="5. 连接Redis集群"></a>5. 连接Redis集群</h2><p>通过上面的输出，我们可以看出Redis三个主节点的slot范围。一个 Redis 客户端可以向集群中的任意节点（包括从节点）发送命令请求。我们首先连接第一个节点：</p>
 <pre><code>redis-cli -p 7001
 127.0.0.1:7001&gt; set a 1 
 (error) MOVED 15495 127.0.0.1:7003
@@ -360,7 +344,7 @@ OK
 </code></pre><p>节点会对命令请求进行分析和key的slot计算，并且会查找这个命令所要处理的键所在的槽。如果要查找的哈希槽正好就由接收到命令的节点负责处理， 那么节点就直接执行这个命令。</p>
 <p>另一方面， 如果所查找的槽不是由该节点处理的话， 节点将查看自身内部所保存的哈希槽到节点 ID 的映射记录， 并向客户端回复一个 MOVED 错误。上面的错误信息包含键 x 所属的哈希槽15495， 以及负责处理这个槽的节点的 IP 和端口号 127.0.0.1:7003 。</p>
 <p>虽然我们用Node ID来标识集群中的节点， 但是为了让客户端的转向操作尽可能地简单， 节点在 MOVED 错误中直接返回目标节点的 IP 和端口号， 而不是目标节点的 ID 。客户端应该记录槽15495由节点127.0.0.1:7003负责处理“这一信息， 这样当再次有命令需要对槽15495执行时， 客户端就可以加快寻找正确节点的速度。这样，当集群处于稳定状态时，所有客户端最终都会保存有一个哈希槽至节点的映射记录，使得集群非常高效： 客户端可以直接向正确的节点发送命令请求， 无须转向、代理或者其他任何可能发生单点故障（single point failure）的实体（entiy）。</p>
-<p>##6.java 连接Redis集群<br>使用 jedis-2.7.2.jar jar 包</p>
+<h2 id="6-java-连接Redis集群"><a href="#6-java-连接Redis集群" class="headerlink" title="6.java 连接Redis集群"></a>6.java 连接Redis集群</h2><p>使用 jedis-2.7.2.jar jar 包</p>
 <pre><code>import java.util.HashSet;
 import java.util.Set;
 
@@ -406,8 +390,7 @@ public class JedisClusterTest {
     jedisCluster.close();
  }
 }
-</code></pre><p>##7.java 连接Redis集群常见错误</p>
-<p>####7.1.Too many Cluster redirections<br>这种情况一般情况下都是 redis 绑定ip问题，默认情况下 redis 绑定的 ip 是本机的 127.0.0.1 如果redis 部署在其他机器上，而本地测试程序想要通过网络链接到 redis 集群，那么就需要注意，在 redis.conf 文件中配置 bind xxx.xxx.xxx.xxx 注意这个地方要配置成客户端链接的 ip</p>
+</code></pre><h2 id="7-java-连接Redis集群常见错误"><a href="#7-java-连接Redis集群常见错误" class="headerlink" title="7.java 连接Redis集群常见错误"></a>7.java 连接Redis集群常见错误</h2><h4 id="7-1-Too-many-Cluster-redirections"><a href="#7-1-Too-many-Cluster-redirections" class="headerlink" title="7.1.Too many Cluster redirections"></a>7.1.Too many Cluster redirections</h4><p>这种情况一般情况下都是 redis 绑定ip问题，默认情况下 redis 绑定的 ip 是本机的 127.0.0.1 如果redis 部署在其他机器上，而本地测试程序想要通过网络链接到 redis 集群，那么就需要注意，在 redis.conf 文件中配置 bind xxx.xxx.xxx.xxx 注意这个地方要配置成客户端链接的 ip</p>
 <p>注意：如果 redis 绑定了指定的 ip 地址了，这时候在启动集群的时候也需要注意，需要指定ip地址了，本来启动集群的方式是这样的：</p>
 <pre><code>./redis-trib.rb create --replicas 1 127.0.0.1:7000  127.0.0.1:7001 127.0.0.1:7002 127.0.0.1:7003 127.0.0.1:7004 127.0.0.1:7005
 </code></pre><p>现在就是这样的</p>
@@ -553,7 +536,7 @@ public class JedisClusterTest {
               
             
             
-              <p class="post-toc-empty">Dieser Artikel hat kein Inhaltsverzeichnis</p>
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-6"><a class="nav-link" href="#1-Redis-集群的分片特征在于将键空间分拆了16384个槽位，每一个节点负责其中一些槽位。"><span class="nav-number">1.</span> <span class="nav-text">(1).Redis 集群的分片特征在于将键空间分拆了16384个槽位，每一个节点负责其中一些槽位。</span></a></li><li class="nav-item nav-level-6"><a class="nav-link" href="#2-Redis提供一定程度的可用性-可以在某个节点宕机或者不可达的情况下继续处理命令"><span class="nav-number">2.</span> <span class="nav-text">(2).Redis提供一定程度的可用性,可以在某个节点宕机或者不可达的情况下继续处理命令.</span></a></li><li class="nav-item nav-level-6"><a class="nav-link" href="#3-Redis-集群中不存在中心（central）节点或者代理（proxy）节点，-集群的其中一个主要设计目标是达到线性可扩展性（linear-scalability）。"><span class="nav-number">3.</span> <span class="nav-text">(3).Redis 集群中不存在中心（central）节点或者代理（proxy）节点， 集群的其中一个主要设计目标是达到线性可扩展性（linear scalability）。</span></a></li></ol></li></ol></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#1-Redis的数据分片（Sharding）"><span class="nav-number"></span> <span class="nav-text">1. Redis的数据分片（Sharding）</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#2-Redis集群节点"><span class="nav-number"></span> <span class="nav-text">2. Redis集群节点</span></a><ol class="nav-child"><li class="nav-item nav-level-6"><a class="nav-link" href="#a-传播（propagate）关于集群的信息，以此来发现新的节点。"><span class="nav-number">1.</span> <span class="nav-text">a).传播（propagate）关于集群的信息，以此来发现新的节点。</span></a></li><li class="nav-item nav-level-6"><a class="nav-link" href="#b-向其他节点发送-PING-数据包，以此来检查目标节点是否正常运作。"><span class="nav-number">2.</span> <span class="nav-text">b).向其他节点发送 PING 数据包，以此来检查目标节点是否正常运作。</span></a></li><li class="nav-item nav-level-6"><a class="nav-link" href="#c-在特定事件发生时，发送集群信息。"><span class="nav-number">3.</span> <span class="nav-text">c).在特定事件发生时，发送集群信息。</span></a></li><li class="nav-item nav-level-6"><a class="nav-link" href="#a-节点所使用的-IP-地址和-TCP-端口号。"><span class="nav-number">4.</span> <span class="nav-text">a).节点所使用的 IP 地址和 TCP 端口号。</span></a></li><li class="nav-item nav-level-6"><a class="nav-link" href="#b-节点的标志（flags）。"><span class="nav-number">5.</span> <span class="nav-text">b).节点的标志（flags）。</span></a></li><li class="nav-item nav-level-6"><a class="nav-link" href="#c-节点负责处理的哈希槽。"><span class="nav-number">6.</span> <span class="nav-text">c).节点负责处理的哈希槽。</span></a></li><li class="nav-item nav-level-6"><a class="nav-link" href="#b-节点最近一次使用集群连接发送-PING-数据包（packet）的时间。"><span class="nav-number">7.</span> <span class="nav-text">b).节点最近一次使用集群连接发送 PING 数据包（packet）的时间。</span></a></li><li class="nav-item nav-level-6"><a class="nav-link" href="#e-节点最近一次在回复中接收到-PONG-数据包的时间。"><span class="nav-number">8.</span> <span class="nav-text">e).节点最近一次在回复中接收到 PONG 数据包的时间。</span></a></li><li class="nav-item nav-level-6"><a class="nav-link" href="#f-集群将该节点标记为下线的时间。"><span class="nav-number">9.</span> <span class="nav-text">f).集群将该节点标记为下线的时间。</span></a></li><li class="nav-item nav-level-6"><a class="nav-link" href="#g-该节点的从节点数量。"><span class="nav-number">10.</span> <span class="nav-text">g).该节点的从节点数量。</span></a></li></ol></li></ol></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#3-安装Redis-3-0-x"><span class="nav-number"></span> <span class="nav-text">3. 安装Redis 3.0.x</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#4-Redis-Cluster配置"><span class="nav-number"></span> <span class="nav-text">4. Redis Cluster配置</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#5-连接Redis集群"><span class="nav-number"></span> <span class="nav-text">5. 连接Redis集群</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#6-java-连接Redis集群"><span class="nav-number"></span> <span class="nav-text">6.java 连接Redis集群</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#7-java-连接Redis集群常见错误"><span class="nav-number"></span> <span class="nav-text">7.java 连接Redis集群常见错误</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#7-1-Too-many-Cluster-redirections"><span class="nav-number"></span> <span class="nav-text">7.1.Too many Cluster redirections</span></a></div>
             
           </div>
           <div class="post-toc-indicator-bottom post-toc-indicator">
