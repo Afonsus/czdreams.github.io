@@ -1,0 +1,832 @@
+<!doctype html>
+
+
+
+  
+
+
+<html class="theme-next muse use-motion">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+  <link href="/vendors/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css"/>
+
+
+
+
+  <link href="//fonts.googleapis.com/css?family=Lato:300,400,700,400italic&subset=latin,latin-ext" rel="stylesheet" type="text/css">
+
+
+
+<link href="/vendors/font-awesome/css/font-awesome.min.css?v=4.4.0" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=0.5.0" rel="stylesheet" type="text/css" />
+
+
+  <meta name="keywords" content="Redis Cluster," />
+
+
+
+
+
+
+
+
+  <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico?v=0.5.0" />
+
+
+
+
+
+
+<meta name="description" content="Redis在3.0版正式引入了集群这个特性。Redis集群是一个分布式（distributed）、容错（fault-tolerant）的 Redis内存K/V服务， 集群可以使用的功能是普通单机 Redis 所能使用的功能的一个子集（subset），比如Redis集群并不支持处理多个keys的命令,因为这需要在不同的节点间移动数据,从而达不到像Redis那样的性能,在高负载的情况下可能会导致不可预">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Redis Cluster学习笔记">
+<meta property="og:url" content="http://yoursite.com/2016/05/25/Redis-Cluster学习笔记/index.html">
+<meta property="og:site_name" content="遗世而独立">
+<meta property="og:description" content="Redis在3.0版正式引入了集群这个特性。Redis集群是一个分布式（distributed）、容错（fault-tolerant）的 Redis内存K/V服务， 集群可以使用的功能是普通单机 Redis 所能使用的功能的一个子集（subset），比如Redis集群并不支持处理多个keys的命令,因为这需要在不同的节点间移动数据,从而达不到像Redis那样的性能,在高负载的情况下可能会导致不可预">
+<meta property="og:updated_time" content="2016-05-25T05:12:08.774Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Redis Cluster学习笔记">
+<meta name="twitter:description" content="Redis在3.0版正式引入了集群这个特性。Redis集群是一个分布式（distributed）、容错（fault-tolerant）的 Redis内存K/V服务， 集群可以使用的功能是普通单机 Redis 所能使用的功能的一个子集（subset），比如Redis集群并不支持处理多个keys的命令,因为这需要在不同的节点间移动数据,从而达不到像Redis那样的性能,在高负载的情况下可能会导致不可预">
+
+
+
+<script type="text/javascript" id="hexo.configuration">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    scheme: 'Muse',
+    sidebar: {"position":"left","display":"post"},
+    fancybox: true,
+    motion: true,
+    duoshuo: {
+      userId: 0,
+      author: 'Author'
+    }
+  };
+</script>
+
+  <title> Redis Cluster学习笔记 | 遗世而独立 </title>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-CN">
+
+  
+
+
+
+
+
+
+
+
+
+
+  
+  
+    
+  
+
+  <div class="container one-collumn sidebar-position-left page-post-detail ">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-meta ">
+  
+
+  <div class="custom-logo-site-title">
+    <a href="/"  class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <span class="site-title">遗世而独立</span>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+  </div>
+  <p class="site-subtitle">Coder</p>
+</div>
+
+<div class="site-nav-toggle">
+  <button>
+    <span class="btn-bar"></span>
+    <span class="btn-bar"></span>
+    <span class="btn-bar"></span>
+  </button>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-home fa-fw"></i> <br />
+            
+            Home
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives" rel="section">
+            
+              <i class="menu-item-icon fa fa-archive fa-fw"></i> <br />
+            
+            Archives
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags" rel="section">
+            
+              <i class="menu-item-icon fa fa-tags fa-fw"></i> <br />
+            
+            Tags
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+            
+            
+              
+                Redis Cluster学习笔记
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            <span class="post-meta-item-icon">
+              <i class="fa fa-calendar-o"></i>
+            </span>
+            <span class="post-meta-item-text">Posted on</span>
+            <time itemprop="dateCreated" datetime="2016-05-25T11:56:19+08:00" content="2016-05-25">
+              2016-05-25
+            </time>
+          </span>
+
+          
+
+          
+            
+          
+
+          
+
+          
+          
+
+        </div>
+      </header>
+    
+
+
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <p>Redis在3.0版正式引入了集群这个特性。Redis集群是一个分布式（distributed）、容错（fault-tolerant）的 Redis内存K/V服务， 集群可以使用的功能是普通单机 Redis 所能使用的功能的一个子集（subset），比如Redis集群并不支持处理多个keys的命令,因为这需要在不同的节点间移动数据,从而达不到像Redis那样的性能,在高负载的情况下可能会导致不可预料的错误。<br><a id="more"></a><br>Redis集群的几个重要特征：</p>
+<p>(1).Redis 集群的分片特征在于将键空间分拆了16384个槽位，每一个节点负责其中一些槽位。</p>
+<p>(2).Redis提供一定程度的可用性,可以在某个节点宕机或者不可达的情况下继续处理命令.</p>
+<p>(3).Redis 集群中不存在中心（central）节点或者代理（proxy）节点， 集群的其中一个主要设计目标是达到线性可扩展性（linear scalability）。</p>
+<p>##1. Redis的数据分片（Sharding）</p>
+<p>Redis 集群的键空间被分割为 16384 （2^14)个槽（slot）， 集群的最大节点数量也是 16384 个（推荐的最大节点数量为 1000 个），同理每个主节点可以负责处理1到16384个槽位。</p>
+<p>当16384个槽位都有主节点负责处理时，集群进入”稳定“上线状态，可以开始处理数据命令。当集群没有处理稳定状态时，可以通过执行重配置（reconfiguration）操作，使得每个哈希槽都只由一个节点进行处理。</p>
+<p>重配置指的是将某个/某些槽从一个节点移动到另一个节点。一个主节点可以有任意多个从节点， 这些从节点用于在主节点发生网络断线或者节点失效时， 对主节点进行替换。</p>
+<p>集群的使用公式CRC16（Key）&amp;16383计算key属于哪个槽：<br>HASH_SLOT = CRC16(key) mod 16384</p>
+<p>CRC16其结果长度为16位。</p>
+<p>##2. Redis集群节点<br>部分内容摘自附录2。Redis 集群中的节点不仅要记录键和值的映射，还需要记录集群的状态，包括键到正确节点的映射。它还具有自动发现其他节点，识别工作不正常的节点，并在有需要时，在从节点中选举出新的主节点的功能。</p>
+<p>为了执行以上列出的任务， 集群中的每个节点都与其他节点建立起了“集群连接（cluster bus）”， 该连接是一个 TCP 连接， 使用二进制协议进行通讯。</p>
+<p>节点之间使用 Gossip 协议 来进行以下工作：</p>
+<p>#######a).传播（propagate）关于集群的信息，以此来发现新的节点。</p>
+<p>#######b).向其他节点发送 PING 数据包，以此来检查目标节点是否正常运作。</p>
+<p>#######c).在特定事件发生时，发送集群信息。</p>
+<p>除此之外， 集群连接还用于在集群中发布或订阅信息。</p>
+<p>集群节点不能前端代理命令请求， 所以客户端应该在节点返回 -MOVED或者 -ASK转向（redirection）错误时， 自行将命令请求转发至其他节点。</p>
+<p>客户端可以自由地向集群中的任何一个节点发送命令请求， 并可以在有需要时， 根据转向错误所提供的信息， 将命令转发至正确的节点， 所以在理论上来说， 客户端是无须保存集群状态信息的。但如果客户端可以将键和节点之间的映射信息保存起来， 可以有效地减少可能出现的转向次数， 籍此提升命令执行的效率。</p>
+<p>每个节点在集群中由一个独一无二的 ID标识， 该 ID 是一个十六进制表示的 160 位随机数，在节点第一次启动时由 /dev/urandom 生成。节点会将它的 ID 保存到配置文件， 只要这个配置文件不被删除， 节点就会一直沿用这个 ID 。一个节点可以改变它的 IP 和端口号， 而不改变节点 ID 。 集群可以自动识别出IP/端口号的变化， 并将这一信息通过 Gossip协议广播给其他节点知道。</p>
+<p>下面是每个节点都有的关联信息， 并且节点会将这些信息发送给其他节点：</p>
+<p>#######a).节点所使用的 IP 地址和 TCP 端口号。</p>
+<p>#######b).节点的标志（flags）。</p>
+<p>#######c).节点负责处理的哈希槽。</p>
+<p>#######b).节点最近一次使用集群连接发送 PING 数据包（packet）的时间。</p>
+<p>#######e).节点最近一次在回复中接收到 PONG 数据包的时间。</p>
+<p>#######f).集群将该节点标记为下线的时间。</p>
+<p>#######g).该节点的从节点数量。<br>如果该节点是从节点的话，那么它会记录主节点的节点 ID 。 如果这是一个主节点的话，那么主节点 ID 这一栏的值为 0000000。</p>
+<p>在了解Redis Cluster的集群基本特征后，我们首先搭建出这个Redis Cluster集群。</p>
+<p>##3. 安装Redis 3.0.x</p>
+<p>当前最新版为3.0.1</p>
+<pre><code>wget http://download.redis.io/releases/redis-3.0.1.tar.gz
+tar xvzf redis-3.0.1.tar.gz
+cd redis-3.0.1/
+make -j
+apt-get install tcl
+make test
+//将redis安装到/usr/local/redis3上
+cd src &amp;&amp; make PREFIX=/usr/local/redis3 install
+//创建符号链接
+ls /usr/local/redis3/bin/redis-* /usr/local/redis3/bin/redis-benchmark /usr/local/redis3/bin/redis-check-dump /usr/local/redis3/bin/redis-sentinel /usr/local/redis3/bin/redis-check-aof /usr/local/redis3/bin/redis-cli /usr/local/redis3/bin/redis-server
+for i in `cd /usr/local/redis3/bin; ls redis-*` do ln -s /usr/local/redis3/bin/$i /usr/local/bin/$i done;
+mkdir -p /usr/local/redis3/conf
+ln -sf /usr/local/redis3/conf /etc/redis3
+//检查版本信息
+redis-cli -v
+redis-cli 3.0.1
+</code></pre><p>##4. Redis Cluster配置</p>
+<p>运行在集群模式的Redis实例与普通的Redis实例有所不同，集群模式需要通过配置启用cluster特性，开启集群模式后的Redis实例便可以使用集群特有的命令和特性了.下面是一个最少选项的集群的配置文件 : 注意如果使用的是单机测试，最好把cluster-config-file nodes.conf设置为对应的 端口 nodes-xxx.conf，还有就是 pid 设置为当前 目录下 pidfile ./redis.pid</p>
+<pre><code>port 7001
+cluster-enabled yes
+cluster-config-file nodes.conf
+cluster-node-timeout 5000
+appendonly yes
+</code></pre><p>文件中的 cluster-enabled 选项用于开实例的集群模式， 而 cluster-conf-file 选项则设定了保存节点配置文件的路径， 默认值为 nodes.conf。该节点配置文件无须人为修改，它由Redis集群在启动时自动创建， 并在有需要时自动进行更新。</p>
+<p>若要让集群正常运作至少需要三个主节点，我们的环境中，每个主节点附带一个从节点，所以一共六个节点。端口为7001-7006。</p>
+<p>在/app/redis3， 并创建六个以端口号为名字的子目录， 稍后我们在将每个目录中运行一个 Redis 实例：</p>
+<pre><code>cd /app/redis3
+mkdir 7001 7002 7003 7004 7005 7006
+cp /etc/redis3/conf/redis.conf  /app/redis3/7001/
+......
+cp /etc/redis3/conf/redis.conf  /app/redis3/7006/
+</code></pre><p>将redis.conf里的端口号修改为对应的端口。下面我们打开对应的目录，启动redis实例即可，启动的时候要进入到对应的目录然后启动。</p>
+<pre><code>cd /app/redis3/7001;nohup redis-server redis.conf &amp;
+cd /app/redis3/7002;nohup redis-server redis.conf &amp;
+......
+</code></pre><p>实例打印的日志显示， 因为 nodes.conf 文件不存在， 所以每个节点都为它自身指定了一个新的 ID ,</p>
+<pre><code>/app/redis3/7006# tail -f nohup.out
+27040:M 09 May 22:53:50.197 * No cluster configuration found, I&apos;m 1984c27297c6ef50bbfcbd35c11b93cc40ba17e4
+/app/redis3/7006# cat nodes.conf 
+d2b437ca8b9007dcdb63ac16210f6540860361e3 :0 myself,master - 0 0 0 connected
+vars currentEpoch 0 lastVoteEpoch 0
+</code></pre><p>现在我们已经有了六个正在运行中的 Redis 实例， 接下来我们需要使用这些实例来创建集群。通过使用 Redis 集群命令行工具 redis-trib ， 编写节点配置文件的工作可以非常容易地完成： redis-trib 位于 Redis 源码的 src 文件夹中， 它是一个 Ruby 程序， 这个程序通过向实例发送特殊命令来完成创建新集群， 检查集群， 或者对集群进行重新分片（reshared）等工作。这里通过create命令来创建集群，指定replicas=1，即每一个主实例有一个从实例。redis-trib 会打印出一份预想中的配置给你看， 如果你觉得没问题的话， 就可以输入 yes ， redis-trib 就会将这份配置应用到集群当中,让各个节点开始互相通讯,最后可以得到如下信息</p>
+<pre><code>~/redis-3.0.1/src# apt-get install ruby gem
+~/redis-3.0.1/src# gem sources -a http://ruby.taobao.org/
+~/redis-3.0.1/src# gem install redis
+~/redis-3.0.1/src# cp redis-trib.rb /usr/local/redis3/bin/
+~/redis-3.0.1/src# ln -sf /usr/local/redis3/bin/redis-trib.rb /usr/bin/redis-trib.rb
+~/redis-3.0.1/src# redis-trib.rb create --replicas 1  127.0.0.1:7001 127.0.0.1:7002 127.0.0.1:7003 127.0.0.1:7004 127.0.0.1:7005 127.0.0.1:7006
+M: 1984c27297c6ef50bbfcbd35c11b93cc40ba17e4 127.0.0.1:7001
+   slots:0-5460 (5461 slots) master
+M: 481e256be4c724f5a2c64a761e52b4be61ca45b4 127.0.0.1:7002
+   slots:5461-10922 (5462 slots) master
+M: b5b652fa02d9999861e66c843b01fd2700c02adf 127.0.0.1:7003
+   slots:10923-16383 (5461 slots) master
+S: 821ec823dc0c2d4f65319e84fe74157fb1014155 127.0.0.1:7004
+   replicates 1984c27297c6ef50bbfcbd35c11b93cc40ba17e4
+S: b3b8541b9520d707180d56a2fb3cf3ee6895ed10 127.0.0.1:7005
+   replicates 481e256be4c724f5a2c64a761e52b4be61ca45b4
+S: d2b437ca8b9007dcdb63ac16210f6540860361e3 127.0.0.1:7006
+   replicates b5b652fa02d9999861e66c843b01fd2700c02adf
+Can I set the above configuration? (type &apos;yes&apos; to accept):
+[OK] All nodes agree about slots configuration.
+&gt;&gt;&gt; Check for open slots...
+&gt;&gt;&gt; Check slots coverage...
+[OK] All 16384 slots covered.
+</code></pre><p>以上信息的其中一部分可以通过向集群中的任意节点（主节点或者从节点都可以）发送 CLUSTER NODES 命令来获得。该命令还可以获得节点 ID ， IP 地址和端口号， 标志（flag）， 最后发送 PING 的时间， 最后接收 PONG 的时间， 连接状态， 节点负责处理的槽。</p>
+<pre><code>redis-cli -p 7001 cluster nodes
+481e256be4c724f5a2c64a761e52b4be61ca45b4 127.0.0.1:7002 master - 0 1431186119174 2 connected 5461-10922
+b3b8541b9520d707180d56a2fb3cf3ee6895ed10 127.0.0.1:7005 slave 481e256be4c724f5a2c64a761e52b4be61ca45b4 0 1431186120677 5 connected
+d2b437ca8b9007dcdb63ac16210f6540860361e3 127.0.0.1:7006 slave b5b652fa02d9999861e66c843b01fd2700c02adf 0 1431186119174 6 connected
+b5b652fa02d9999861e66c843b01fd2700c02adf 127.0.0.1:7003 master - 0 1431186118673 3 connected 10923-16383
+821ec823dc0c2d4f65319e84fe74157fb1014155 127.0.0.1:7004 slave 1984c27297c6ef50bbfcbd35c11b93cc40ba17e4 0 1431186120176 4 connected
+1984c27297c6ef50bbfcbd35c11b93cc40ba17e4 127.0.0.1:7001 myself,master - 0 0 1 connected 0-5460
+</code></pre><p>##5. 连接Redis集群</p>
+<p>通过上面的输出，我们可以看出Redis三个主节点的slot范围。一个 Redis 客户端可以向集群中的任意节点（包括从节点）发送命令请求。我们首先连接第一个节点：</p>
+<pre><code>redis-cli -p 7001
+127.0.0.1:7001&gt; set a 1 
+(error) MOVED 15495 127.0.0.1:7003
+127.0.0.1:7001&gt; get a
+(error) MOVED 15495 127.0.0.1:7003
+127.0.0.1:7001&gt; set b 1
+OK
+</code></pre><p>节点会对命令请求进行分析和key的slot计算，并且会查找这个命令所要处理的键所在的槽。如果要查找的哈希槽正好就由接收到命令的节点负责处理， 那么节点就直接执行这个命令。</p>
+<p>另一方面， 如果所查找的槽不是由该节点处理的话， 节点将查看自身内部所保存的哈希槽到节点 ID 的映射记录， 并向客户端回复一个 MOVED 错误。上面的错误信息包含键 x 所属的哈希槽15495， 以及负责处理这个槽的节点的 IP 和端口号 127.0.0.1:7003 。</p>
+<p>虽然我们用Node ID来标识集群中的节点， 但是为了让客户端的转向操作尽可能地简单， 节点在 MOVED 错误中直接返回目标节点的 IP 和端口号， 而不是目标节点的 ID 。客户端应该记录槽15495由节点127.0.0.1:7003负责处理“这一信息， 这样当再次有命令需要对槽15495执行时， 客户端就可以加快寻找正确节点的速度。这样，当集群处于稳定状态时，所有客户端最终都会保存有一个哈希槽至节点的映射记录，使得集群非常高效： 客户端可以直接向正确的节点发送命令请求， 无须转向、代理或者其他任何可能发生单点故障（single point failure）的实体（entiy）。</p>
+<p>##6.java 连接Redis集群<br>使用 jedis-2.7.2.jar jar 包</p>
+<pre><code>import java.util.HashSet;
+import java.util.Set;
+
+import redis.clients.jedis.HostAndPort;
+import redis.clients.jedis.JedisCluster;
+import redis.clients.jedis.JedisPoolConfig;
+
+public class JedisClusterTest {
+ public static void main(String[] args) {
+    JedisPoolConfig config = new JedisPoolConfig();
+    config.setMaxTotal(20);
+    config.setMaxIdle(2);
+
+    HostAndPort hp0 = new HostAndPort(&quot;localhost&quot;, 7000);
+    HostAndPort hp1 = new HostAndPort(&quot;localhost&quot;, 7001);
+    HostAndPort hp2 = new HostAndPort(&quot;localhost&quot;, 7002);
+    HostAndPort hp3 = new HostAndPort(&quot;localhost&quot;, 7003);
+    HostAndPort hp4 = new HostAndPort(&quot;localhost&quot;, 7004);
+    HostAndPort hp5 = new HostAndPort(&quot;localhost&quot;, 7005);
+
+    Set&lt;HostAndPort&gt; hps = new HashSet&lt;HostAndPort&gt;();
+    hps.add(hp0);
+    hps.add(hp1);
+    hps.add(hp2);
+    hps.add(hp3);
+    hps.add(hp4);
+    hps.add(hp5);
+
+    // 超时，最大的转发数，最大链接数，最小链接数都会影响到集群
+    JedisCluster jedisCluster = new JedisCluster(hps, 5000, 10, config);
+
+    long start = System.currentTimeMillis();
+    for (int i = 0; i &lt; 100; i++) {
+        jedisCluster.set(&quot;sn&quot; + i, &quot;n&quot; + i);
+    }
+    long end = System.currentTimeMillis();
+
+    System.out.println(&quot;Simple  @ Sharding Set : &quot; + (end - start) / 10000);
+
+    for (int i = 0; i &lt; 1000; i++) {
+        System.out.println(jedisCluster.get(&quot;sn&quot; + i));
+    }
+    jedisCluster.close();
+ }
+}
+</code></pre><p>##7.java 连接Redis集群常见错误</p>
+<p>####7.1.Too many Cluster redirections<br>这种情况一般情况下都是 redis 绑定ip问题，默认情况下 redis 绑定的 ip 是本机的 127.0.0.1 如果redis 部署在其他机器上，而本地测试程序想要通过网络链接到 redis 集群，那么就需要注意，在 redis.conf 文件中配置 bind xxx.xxx.xxx.xxx 注意这个地方要配置成客户端链接的 ip</p>
+<p>注意：如果 redis 绑定了指定的 ip 地址了，这时候在启动集群的时候也需要注意，需要指定ip地址了，本来启动集群的方式是这样的：</p>
+<pre><code>./redis-trib.rb create --replicas 1 127.0.0.1:7000  127.0.0.1:7001 127.0.0.1:7002 127.0.0.1:7003 127.0.0.1:7004 127.0.0.1:7005
+</code></pre><p>现在就是这样的</p>
+<pre><code>./redis-trib.rb create --replicas 1 xxx.xxx.xxx.xxx:7000  xxx.xxx.xxx.xxx:7001 xxx.xxx.xxx.xxx:7002 xxx.xxx.xxx.xxx:7003 xxx.xxx.xxx.xxx:7004 xxx.xxx.xxx.xxx:7005./redis-trib.rb create --replicas 1 127.0.0.1:7000  127.0.0.1:7001 127.0.0.1:7002 127.0.0.1:7003 127.0.0.1:7004 127.0.0.1:7005
+</code></pre>
+      
+    </div>
+
+    <div>
+      
+        
+      
+    </div>
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/Redis-Cluster/" rel="tag">#Redis Cluster</a>
+          
+        </div>
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2016/04/13/红黑树-Java之TreeMap实探/" rel="next" title="红黑树-Java之TreeMap实探">
+                <i class="fa fa-chevron-left"></i> 红黑树-Java之TreeMap实探
+              </a>
+            
+          </div>
+
+          <div class="post-nav-prev post-nav-item">
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+  <div class="comments" id="comments">
+    
+  </div>
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap" >
+            Table of Contents
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview">
+            Overview
+          </li>
+        </ul>
+      
+
+      <section class="site-overview sidebar-panel ">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+          <img class="site-author-image" itemprop="image"
+               src="/images/default_avatar.jpg"
+               alt="Chenzhi" />
+          <p class="site-author-name" itemprop="name">Chenzhi</p>
+          <p class="site-description motion-element" itemprop="description">Java NodeJs NoSql</p>
+        </div>
+        <nav class="site-state motion-element">
+          <div class="site-state-item site-state-posts">
+            <a href="/archives">
+              <span class="site-state-item-count">6</span>
+              <span class="site-state-item-name">posts</span>
+            </a>
+          </div>
+
+          
+
+          
+            <div class="site-state-item site-state-tags">
+              <a href="/tags">
+                <span class="site-state-item-count">5</span>
+                <span class="site-state-item-name">tags</span>
+              </a>
+            </div>
+          
+
+        </nav>
+
+        
+
+        <div class="links-of-author motion-element">
+          
+        </div>
+
+        
+        
+
+        
+        <div class="links-of-blogroll motion-element">
+          
+        </div>
+
+      </section>
+
+      
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc-indicator-top post-toc-indicator">
+            <i class="fa fa-angle-double-up"></i>
+          </div>
+          <div class="post-toc">
+            
+              
+            
+            
+              <p class="post-toc-empty">This post does not have a Table of Contents</p>
+            
+          </div>
+          <div class="post-toc-indicator-bottom post-toc-indicator">
+            <i class="fa fa-angle-double-down"></i>
+          </div>
+        </section>
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright" >
+  
+  &copy; 
+  <span itemprop="copyrightYear">2016</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Chenzhi</span>
+</div>
+
+<div class="powered-by">
+  Powered by <a class="theme-link" href="http://hexo.io">Hexo</a>
+</div>
+
+<div class="theme-info">
+  Theme -
+  <a class="theme-link" href="https://github.com/iissnan/hexo-theme-next">
+    NexT.Muse
+  </a>
+</div>
+
+
+
+      </div>
+    </footer>
+
+    <div class="back-to-top">
+      <i class="fa fa-arrow-up"></i>
+    </div>
+  </div>
+
+  
+
+
+  
+
+
+
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+  <script type="text/javascript" src="/vendors/jquery/index.js?v=2.1.3"></script>
+
+  <script type="text/javascript" src="/vendors/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+
+  <script type="text/javascript" src="/vendors/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+
+  <script type="text/javascript" src="/vendors/velocity/velocity.min.js"></script>
+
+  <script type="text/javascript" src="/vendors/velocity/velocity.ui.min.js"></script>
+
+  <script type="text/javascript" src="/vendors/fancybox/source/jquery.fancybox.pack.js"></script>
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=0.5.0"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=0.5.0"></script>
+
+
+
+  
+  
+
+  
+  
+<script type="text/javascript" src="/js/src/scrollspy.js?v=0.5.0"></script>
+
+<script type="text/javascript" id="sidebar.toc.highlight">
+  $(document).ready(function () {
+    var tocSelector = '.post-toc';
+    var $tocSelector = $(tocSelector);
+    var activeCurrentSelector = '.active-current';
+
+    $tocSelector
+      .on('activate.bs.scrollspy', function () {
+        var $currentActiveElement = $(tocSelector + ' .active').last();
+
+        removeCurrentActiveClass();
+        $currentActiveElement.addClass('active-current');
+
+        $tocSelector[0].scrollTop = $currentActiveElement.position().top;
+      })
+      .on('clear.bs.scrollspy', function () {
+        removeCurrentActiveClass();
+      });
+
+    function removeCurrentActiveClass () {
+      $(tocSelector + ' ' + activeCurrentSelector)
+        .removeClass(activeCurrentSelector.substring(1));
+    }
+
+    function processTOC () {
+      getTOCMaxHeight();
+      toggleTOCOverflowIndicators();
+    }
+
+    function getTOCMaxHeight () {
+      var height = $('.sidebar').height() -
+                   $tocSelector.position().top -
+                   $('.post-toc-indicator-bottom').height();
+
+      $tocSelector.css('height', height);
+
+      return height;
+    }
+
+    function toggleTOCOverflowIndicators () {
+      tocOverflowIndicator(
+        '.post-toc-indicator-top',
+        $tocSelector.scrollTop() > 0 ? 'show' : 'hide'
+      );
+
+      tocOverflowIndicator(
+        '.post-toc-indicator-bottom',
+        $tocSelector.scrollTop() >= $tocSelector.find('ol').height() - $tocSelector.height() ? 'hide' : 'show'
+      )
+    }
+
+    $(document).on('sidebar.motion.complete', function () {
+      processTOC();
+    });
+
+    $('body').scrollspy({ target: tocSelector });
+    $(window).on('resize', function () {
+      if ( $('.sidebar').hasClass('sidebar-active') ) {
+        processTOC();
+      }
+    });
+
+    onScroll($tocSelector);
+
+    function onScroll (element) {
+      element.on('mousewheel DOMMouseScroll', function (event) {
+          var oe = event.originalEvent;
+          var delta = oe.wheelDelta || -oe.detail;
+
+          this.scrollTop += ( delta < 0 ? 1 : -1 ) * 30;
+          event.preventDefault();
+
+          toggleTOCOverflowIndicators();
+      });
+    }
+
+    function tocOverflowIndicator (indicator, action) {
+      var $indicator = $(indicator);
+      var opacity = action === 'show' ? 1 : 0;
+      $indicator.velocity ?
+        $indicator.velocity('stop').velocity({
+          opacity: opacity
+        }, { duration: 100 }) :
+        $indicator.stop().animate({
+          opacity: opacity
+        }, 100);
+    }
+
+  });
+</script>
+
+<script type="text/javascript" id="sidebar.nav">
+  $(document).ready(function () {
+    var html = $('html');
+    var TAB_ANIMATE_DURATION = 200;
+    var hasVelocity = $.isFunction(html.velocity);
+
+    $('.sidebar-nav li').on('click', function () {
+      var item = $(this);
+      var activeTabClassName = 'sidebar-nav-active';
+      var activePanelClassName = 'sidebar-panel-active';
+      if (item.hasClass(activeTabClassName)) {
+        return;
+      }
+
+      var currentTarget = $('.' + activePanelClassName);
+      var target = $('.' + item.data('target'));
+
+      hasVelocity ?
+        currentTarget.velocity('transition.slideUpOut', TAB_ANIMATE_DURATION, function () {
+          target
+            .velocity('stop')
+            .velocity('transition.slideDownIn', TAB_ANIMATE_DURATION)
+            .addClass(activePanelClassName);
+        }) :
+        currentTarget.animate({ opacity: 0 }, TAB_ANIMATE_DURATION, function () {
+          currentTarget.hide();
+          target
+            .stop()
+            .css({'opacity': 0, 'display': 'block'})
+            .animate({ opacity: 1 }, TAB_ANIMATE_DURATION, function () {
+              currentTarget.removeClass(activePanelClassName);
+              target.addClass(activePanelClassName);
+            });
+        });
+
+      item.siblings().removeClass(activeTabClassName);
+      item.addClass(activeTabClassName);
+    });
+
+    $('.post-toc a').on('click', function (e) {
+      e.preventDefault();
+      var targetSelector = NexT.utils.escapeSelector(this.getAttribute('href'));
+      var offset = $(targetSelector).offset().top;
+      hasVelocity ?
+        html.velocity('stop').velocity('scroll', {
+          offset: offset  + 'px',
+          mobileHA: false
+        }) :
+        $('html, body').stop().animate({
+          scrollTop: offset
+        }, 500);
+    });
+
+    // Expand sidebar on post detail page by default, when post has a toc.
+    NexT.motion.middleWares.sidebar = function () {
+      var $tocContent = $('.post-toc-content');
+
+      if (CONFIG.sidebar.display === 'post' || CONFIG.sidebar.display === 'always') {
+        if ($tocContent.length > 0 && $tocContent.html().trim().length > 0) {
+          NexT.utils.displaySidebar();
+        }
+      }
+    };
+  });
+</script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=0.5.0"></script>
+
+
+
+  
+
+
+
+  
+
+
+
+  
+  
+  
+
+  
+
+  
+
+</body>
+</html>
