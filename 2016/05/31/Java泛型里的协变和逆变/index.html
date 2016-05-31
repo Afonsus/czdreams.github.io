@@ -41,7 +41,7 @@
 <link href="/css/main.css?v=0.5.0" rel="stylesheet" type="text/css" />
 
 
-  <meta name="keywords" content="web wrk 测试," />
+  <meta name="keywords" content="Hexo, NexT" />
 
 
 
@@ -57,16 +57,16 @@
 
 
 
-<meta name="description" content="wrk 是一个比较先进的 HTTP 压力测试工具。">
+<meta name="description" content="实例讲解Java泛型里的协变和逆变。">
 <meta property="og:type" content="article">
-<meta property="og:title" content="WEB压力测试工具wrk">
-<meta property="og:url" content="http://yoursite.com/2016/04/08/WEB压力测试工具wrk/index.html">
+<meta property="og:title" content="Java泛型里的协变和逆变">
+<meta property="og:url" content="http://yoursite.com/2016/05/31/Java泛型里的协变和逆变/index.html">
 <meta property="og:site_name" content="遗世而独立">
-<meta property="og:description" content="wrk 是一个比较先进的 HTTP 压力测试工具。">
-<meta property="og:updated_time" content="2016-04-13T09:53:46.137Z">
+<meta property="og:description" content="实例讲解Java泛型里的协变和逆变。">
+<meta property="og:updated_time" content="2016-05-31T06:40:25.485Z">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="WEB压力测试工具wrk">
-<meta name="twitter:description" content="wrk 是一个比较先进的 HTTP 压力测试工具。">
+<meta name="twitter:title" content="Java泛型里的协变和逆变">
+<meta name="twitter:description" content="实例讲解Java泛型里的协变和逆变。">
 
 
 
@@ -84,7 +84,7 @@
   };
 </script>
 
-  <title> WEB压力测试工具wrk | 遗世而独立 </title>
+  <title> Java泛型里的协变和逆变 | 遗世而独立 </title>
 </head>
 
 <body itemscope itemtype="http://schema.org/WebPage" lang="zh-CN">
@@ -204,7 +204,7 @@
             
             
               
-                WEB压力测试工具wrk
+                Java泛型里的协变和逆变
               
             
           </h1>
@@ -216,8 +216,8 @@
               <i class="fa fa-calendar-o"></i>
             </span>
             <span class="post-meta-item-text">Posted on</span>
-            <time itemprop="dateCreated" datetime="2016-04-08T11:19:10+08:00" content="2016-04-08">
-              2016-04-08
+            <time itemprop="dateCreated" datetime="2016-05-31T14:35:02+08:00" content="2016-05-31">
+              2016-05-31
             </time>
           </span>
 
@@ -243,33 +243,77 @@
       
 
       
-        <p>wrk 是一个比较先进的 HTTP 压力测试工具。<br><a id="more"></a></p>
-<h2 id="一、什么是WRK"><a href="#一、什么是WRK" class="headerlink" title="一、什么是WRK"></a>一、什么是WRK</h2><p>WRK的全称是“Windows Research Kernel”，它是微软为高校操作系统课程提供的可修改和跟踪的操作系统教学平台。它给出了Windows这个成功的商业操作系统的内核大部分代码，可以对其进行修改、编译，并且可以用这个内核启动Windows操作系统。可让学生将操作系统基本原理和商业操作系统内核联系起来，进一步加深对操作系统整体的理解。</p>
-<h2 id="二、安装WRK"><a href="#二、安装WRK" class="headerlink" title="二、安装WRK"></a>二、安装WRK</h2><p>Linux版本</p>
-<p>下载 ：git clone <a href="https://github.com/wg/wrk.git" target="_blank" rel="external">https://github.com/wg/wrk.git</a></p>
-<p>安装：进入wrk 目录，执行make</p>
-<h2 id="三、执行WRK"><a href="#三、执行WRK" class="headerlink" title="三、执行WRK"></a>三、执行WRK</h2><p>wrk命令参数：</p>
-<pre><code>Usage: wrk &lt;options&gt; &lt;url&gt;                            
-Options:                                            
--c, --connections &lt;N&gt;  Connections to keep open   
--d, --duration    &lt;T&gt;  Duration of test           
--t, --threads     &lt;N&gt;  Number of threads to use   
--s, --script      &lt;S&gt;  Load Lua script file       
--H, --header      &lt;H&gt;  Add header to request      
-    --latency          Print latency statistics   
-    --timeout     &lt;T&gt;  Socket/request timeout     
--v, --version          Print version details
-</code></pre><p>执行 ./wrk -t8 -c400 <a href="http://localhost:8080/index.html" target="_blank" rel="external">http://localhost:8080/index.html</a></p>
-<pre><code> Running 10s test @ http://localhost:8080/index.html
-   8 threads and 400 connections
-   Thread Stats   Avg      Stdev     Max   +/- Stdev
-      Latency   119.63ms  258.48ms   1.97s    85.39%
-      Req/Sec     3.57k     4.21k   15.40k    83.58%
-   140788 requests in 10.03s, 525.64MB read
-   Socket errors: connect 0, read 0, write 0, timeout 13
-Requests/sec:  14031.81
-Transfer/sec:  52.39MB
-</code></pre>
+        <p>实例讲解Java泛型里的协变和逆变。<br><a id="more"></a></p>
+<h2 id="Java泛型里的协变和逆变"><a href="#Java泛型里的协变和逆变" class="headerlink" title="Java泛型里的协变和逆变"></a>Java泛型里的协变和逆变</h2><p>通过实例来看问题，</p>
+<pre><code>// 定义三个类: Benz -&gt; Car -&gt; Vehicle，它们之间是顺次继承关系
+class Vehicle {}
+class Car extends Vehicle {}
+class Benz extends Car {}
+
+// 定义一个util类，其中用到泛型里的协变和逆变
+class Utils&lt;T&gt; {
+    T get(List&lt;? extends T&gt; list, int i) {
+        return list.get(i);
+    }
+
+    void put(List&lt;? super T&gt; list, T item) {
+        list.add(item);
+    }
+
+    void copy(List&lt;? super T&gt; to, List&lt;? extends T&gt; from) {
+        for(T item : from) {
+            to.add(item);
+        }
+    }
+}
+
+// 测试函数
+void test() {
+    List&lt;Vehicle&gt; vehicles = new ArrayList&lt;&gt;();
+    List&lt;Benz&gt; benzs = new ArrayList&lt;&gt;();
+    Utils&lt;Car&gt; carUtils = new Utils&lt;&gt;();
+
+    carUtils.put(vehicles, new Car());
+    Car car = carUtils.get(benzs, 0);
+    carUtils.copy(vehicles, benzs);
+}
+</code></pre><p>我们只需关注Utils<car>.copy()函数即可，两个参数from, to均为list，</car></p>
+<ul>
+<li>对from的要求：其中的对象必须是Car或者Car的子类，即可以用Car来引用这些对象</li>
+<li>对to的要求：它必须可以保存Car类型的对象，即其元素的类型必须是Car或者Car的父类</li>
+</ul>
+<p>接下来看看该函数的使用情况，carUtils.copy(vehicles, benzs);，参数的含义是：</p>
+<ul>
+<li>List&lt;? extents Car&gt;：这个类型集合(List<car>, List<benz>)里的元素可以使用替换原则</benz></car></li>
+<li>List&lt;? super Car&gt;：这个类型集合(List<car>,List<vehicle>)里的元素也可以使用替换原则</vehicle></car></li>
+</ul>
+<p>都可以使用替换原则了，但是他们有何区别呢？</p>
+<ul>
+<li>List&lt;? extents Car&gt;：List&lt;? extents Car&gt;与? extends Car的序关系是一致的</li>
+<li>List&lt;? super Car&gt;：List&lt;? super Car&gt;与? super Car的序关系是相反的</li>
+</ul>
+<p>其中，? extends Car, ? super Car, List&lt;? extents Car&gt;, List&lt;? super Car&gt;<br>均为类型集合，序关系小的可以替换序关系大的。其实在类型系统里面，Liskov替换原则可以<br>进一步推广为： 任何序关系大的类型可以出现的地方，序关系小的类型一定可以出现。<br>而继承关系是一种特殊的序关系，当然这需要语言的类型系统支持才可以。</p>
+<h2 id="协变和逆变"><a href="#协变和逆变" class="headerlink" title="协变和逆变"></a>协变和逆变</h2><h3 id="定义-wikipedia"><a href="#定义-wikipedia" class="headerlink" title="定义(wikipedia)"></a>定义(wikipedia)</h3><pre><code>covariant if it preserves the ordering of types (≤), which orders types from more specific to more generic;
+contravariant if it reverses this ordering;
+bivariant if both of these apply (i.e., both I&lt;A&gt; ≤ I&lt;B&gt; and I&lt;B&gt; ≤ I&lt;A&gt; at the same time);
+invariant or nonvariant if neither of these applies.
+</code></pre><h3 id="理解"><a href="#理解" class="headerlink" title="理解"></a>理解</h3><p>设T是一个类型集合(type set)，其中的元素是一个个类型，如Vehicle, Car, Benz，<br>S<t>是一个根据T生成的类型集合(如List<t>)，其中的元素也是一个个类型，如S<vehicle>,<br>S<car>, S<benz>，那么我们有如下定义，</benz></car></vehicle></t></t></p>
+<pre><code>如果集合S&lt;T&gt;里的序关系跟集合T里的序关系一致，那么就说S&lt;T&gt;跟T是协变关系
+如果集合S&lt;T&gt;里的序关系跟集合T里的序关系相反，那么就说S&lt;T&gt;跟T是逆变关系
+</code></pre><p>然后，根据序关系的大小就可以使用替换原则了。那函数Utils<car>.copy()的参数<br>为啥要用? extends T，? super T而不直接使用T呢，void copy(List<t> to, List<t> from)，<br>把T替换成Car之后，要使用这个函数就只能使用List<car>了，但是很明显，我们完全可以<br>将一个List<benz> copy 到一个List<car>或者List<vehicle>里面，要怎么解决呢？<br>当然是使用协变和逆变：</vehicle></car></benz></car></t></t></car></p>
+<pre><code>对于from参数，? extends T表示跟T满足协变关系的List&lt;T&gt;就可以使用替换原则
+对于to参数，? super T表示跟T满足逆变关系的List&lt;T&gt;就可以使用替换原则
+</code></pre><p>这样就不用仅仅局限到List<car>了。</car></p>
+<h3 id="协变、逆变使用的时机"><a href="#协变、逆变使用的时机" class="headerlink" title="协变、逆变使用的时机"></a>协变、逆变使用的时机</h3><p>然后问题又来了，什么时候使用协变，什么时候使用逆变呢？<br>仔细观察（C#里面已经观察好久了）就会发现，</p>
+<pre><code>如果只是读取的话，那么满足协变关系的类型可以使用替换原则
+如果只是写入的话，那么满足逆变关系的类型可以使用替换原则
+</code></pre><p>比如上面的函数，void copy(List&lt;? super Car&gt; to, List&lt;? extends Car&gt; from);，<br>从from里面读取数据，则完全可以从List<car>，List<benz>里面读取，<br>而往to里面写入数据，则完全可以往List<car>，List<vehicle>里面写入，<br>所以from使用满足协变关系的类型而to使用满足逆变关系的类型。事实上，在C#，Kotlin里，<br>直接使用out, in来表示协变关系和逆变关系，比如Kotlin里面这样定义copy函数，<br>fun copy(to: List<in car="">, from: List<out car="">)，然后就可以这样使用了，</out></in></vehicle></car></benz></car></p>
+<pre><code>copy(cars, benzs)
+copy(cars, cars)
+copy(vehicles, benzs)
+copy(vehicles, cars)
+</code></pre><p>(over)</p>
+
       
     </div>
 
@@ -281,28 +325,18 @@ Transfer/sec:  52.39MB
 
     <footer class="post-footer">
       
-        <div class="post-tags">
-          
-            <a href="/tags/web-wrk-测试/" rel="tag">#web wrk 测试</a>
-          
-        </div>
-      
 
       
         <div class="post-nav">
           <div class="post-nav-next post-nav-item">
             
-              <a href="/2016/03/24/使用SSH密钥连接Github/" rel="next" title="使用SSH密钥连接Github">
-                <i class="fa fa-chevron-left"></i> 使用SSH密钥连接Github
+              <a href="/2016/05/25/Redis-Cluster环境部署-Windows/" rel="next" title="Redis Cluster环境部署-Windows">
+                <i class="fa fa-chevron-left"></i> Redis Cluster环境部署-Windows
               </a>
             
           </div>
 
           <div class="post-nav-prev post-nav-item">
-            
-              <a href="/2016/04/13/红黑树-Java之TreeMap实探/" rel="prev" title="红黑树-Java之TreeMap实探">
-                红黑树-Java之TreeMap实探 <i class="fa fa-chevron-right"></i>
-              </a>
             
           </div>
         </div>
@@ -414,7 +448,7 @@ Transfer/sec:  52.39MB
               
             
             
-              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#一、什么是WRK"><span class="nav-number">1.</span> <span class="nav-text">一、什么是WRK</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#二、安装WRK"><span class="nav-number">2.</span> <span class="nav-text">二、安装WRK</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#三、执行WRK"><span class="nav-number">3.</span> <span class="nav-text">三、执行WRK</span></a></li></ol></div>
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#Java泛型里的协变和逆变"><span class="nav-number">1.</span> <span class="nav-text">Java泛型里的协变和逆变</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#协变和逆变"><span class="nav-number">2.</span> <span class="nav-text">协变和逆变</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#定义-wikipedia"><span class="nav-number">2.1.</span> <span class="nav-text">定义(wikipedia)</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#理解"><span class="nav-number">2.2.</span> <span class="nav-text">理解</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#协变、逆变使用的时机"><span class="nav-number">2.3.</span> <span class="nav-text">协变、逆变使用的时机</span></a></li></ol></li></ol></div>
             
           </div>
           <div class="post-toc-indicator-bottom post-toc-indicator">
