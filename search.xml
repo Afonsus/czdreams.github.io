@@ -5,7 +5,7 @@
     
     <entry>
       <title><![CDATA[理解Java中的弱引用 ]]></title>
-      <url>http://yoursite.com/2016/06/07/%E7%90%86%E8%A7%A3Java%E4%B8%AD%E7%9A%84%E5%BC%B1%E5%BC%95%E7%94%A8/</url>
+      <url>http://czdreams.github.io/2016/06/07/%E7%90%86%E8%A7%A3Java%E4%B8%AD%E7%9A%84%E5%BC%B1%E5%BC%95%E7%94%A8/</url>
       <content type="html"><![CDATA[<p>Java中的弱引用具体指的是java.lang.ref.WeakReference<t>类<br><a id="more"></a></t></p>
 <h2 id="1-What——什么是弱引用？"><a href="#1-What——什么是弱引用？" class="headerlink" title="1. What——什么是弱引用？"></a>1. What——什么是弱引用？</h2><p>Java中的弱引用具体指的是java.lang.ref.WeakReference<t>类，我们首先来看一下官方文档对它做的说明：</t></p>
 <pre><code>弱引用对象的存在不会阻止它所指向的对象变被垃圾回收器回收。弱引用最常见的用途是实现规范映射(canonicalizing mappings，比如哈希表）。
@@ -33,7 +33,7 @@ WeakReference(T referent, ReferenceQueue&lt;? super T&gt; q) //创建一个指�
     
     <entry>
       <title><![CDATA[TimSort算法]]></title>
-      <url>http://yoursite.com/2016/06/07/TimSort%E7%AE%97%E6%B3%95/</url>
+      <url>http://czdreams.github.io/2016/06/07/TimSort%E7%AE%97%E6%B3%95/</url>
       <content type="html"><![CDATA[<p>首先强调一下，这是个稳定的排序算法。<br><a id="more"></a></p>
 <p>看过代码之后觉得这个算法没有想象的那么难。逻辑很清晰，整个算法最大的特点就是充分利用数组中已经存在顺序。在归并的过程中有一个 Galloping Mode(翻译过来可以叫 飞奔模式)，这是整个排序算法中最不寻常的地方。简单的理解就是，归并过程中有两个数列，比较的时候，有个数列连续有{MIN_GALLOP}个元素都比另一个数列的第一个元素小，那就应该数一下后面到底还有多少个元素比另一个数列的第一个元素小。数完之后一次copy过去，减少copy的次数。MIN_GALLOP还是一个可以动态调整的值，这应该是统计优化的结果。</p>
 <p>除了算法本身的魅力，作者的代码写的很简洁。读起来很享受。大家有兴趣可以自己读一遍，我在下面贴出我看代码过程中的注释。对逻辑所有的解释都在注释中。阅读的方法是从static <t> void sort(T[] a, Comparator&lt;? super T&gt; c)与 static <t> void sort(T[] a, int lo, int hi, Comparator&lt;? super T&gt; c)两个方法开始, 顺着逻辑一路往下读就可以。</t></t></p>
@@ -959,7 +959,7 @@ class TimSort&lt;T&gt; {
     
     <entry>
       <title><![CDATA[DualPivotQuickSort 双轴快速排序]]></title>
-      <url>http://yoursite.com/2016/06/07/DualPivotQuickSort-%E5%8F%8C%E8%BD%B4%E5%BF%AB%E9%80%9F%E6%8E%92%E5%BA%8F/</url>
+      <url>http://czdreams.github.io/2016/06/07/DualPivotQuickSort-%E5%8F%8C%E8%BD%B4%E5%BF%AB%E9%80%9F%E6%8E%92%E5%BA%8F/</url>
       <content type="html"><![CDATA[<p>这个算法是Arrays.java中给基本类型的数据排序使用的具体实现<br><a id="more"></a></p>
 <p>这个算法是Arrays.java中给基本类型的数据排序使用的具体实现。它针对每种基本类型都做了实现，实现的方式有稍微的差异，但是思路都是相同的，所以这里只挑了int类型的排序来看。</p>
 <p>整个实现中的思路是 首先检查数组的长度，比一个阈值小的时候直接使用双轴快排。其它情况下，先检查数组中数据的顺序连续性。把数组中连续升序或者连续降序的信息记录下来，顺便把连续降序的部分倒置。这样数据就被切割成一段段连续升序的数列。</p>
@@ -1445,7 +1445,7 @@ class TimSort&lt;T&gt; {
     
     <entry>
       <title><![CDATA[Java泛型里的协变和逆变]]></title>
-      <url>http://yoursite.com/2016/05/31/Java%E6%B3%9B%E5%9E%8B%E9%87%8C%E7%9A%84%E5%8D%8F%E5%8F%98%E5%92%8C%E9%80%86%E5%8F%98/</url>
+      <url>http://czdreams.github.io/2016/05/31/Java%E6%B3%9B%E5%9E%8B%E9%87%8C%E7%9A%84%E5%8D%8F%E5%8F%98%E5%92%8C%E9%80%86%E5%8F%98/</url>
       <content type="html"><![CDATA[<p>实例讲解Java泛型里的协变和逆变。<br><a id="more"></a></p>
 <h2 id="Java泛型里的协变和逆变"><a href="#Java泛型里的协变和逆变" class="headerlink" title="Java泛型里的协变和逆变"></a>Java泛型里的协变和逆变</h2><p>通过实例来看问题，</p>
 <pre><code>// 定义三个类: Benz -&gt; Car -&gt; Vehicle，它们之间是顺次继承关系
@@ -1521,7 +1521,7 @@ copy(vehicles, cars)
     
     <entry>
       <title><![CDATA[Redis Cluster环境部署-Windows]]></title>
-      <url>http://yoursite.com/2016/05/25/Redis-Cluster%E7%8E%AF%E5%A2%83%E9%83%A8%E7%BD%B2-Windows/</url>
+      <url>http://czdreams.github.io/2016/05/25/Redis-Cluster%E7%8E%AF%E5%A2%83%E9%83%A8%E7%BD%B2-Windows/</url>
       <content type="html"><![CDATA[<p>windows下使用RedisCluster集群简单实例<br><a id="more"></a></p>
 <h2 id="一、开发环境"><a href="#一、开发环境" class="headerlink" title="一、开发环境"></a>一、开发环境</h2><p>1.win7<br>2.redis 3.0 64位<br>3.ruby 环境<br>  测试用到的所有安装包及我的测试配置 <a href="http://pan.baidu.com/s/1qXmO3fQ" target="_blank" rel="external">http://pan.baidu.com/s/1qXmO3fQ</a></p>
 <h4 id="redis-安装"><a href="#redis-安装" class="headerlink" title="redis 安装"></a>redis 安装</h4><p>Redis对于Linux是官方支持的,安装和使用没有什么好说的,普通使用按照官方指导，5分钟以内就能搞定。详情请参考:<a href="http://redis.io/download" target="_blank" rel="external">http://redis.io/download</a></p>
@@ -1733,7 +1733,7 @@ redis.testOnBorrow=true
     
     <entry>
       <title><![CDATA[Redis Cluster学习笔记]]></title>
-      <url>http://yoursite.com/2016/05/25/Redis-Cluster%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0/</url>
+      <url>http://czdreams.github.io/2016/05/25/Redis-Cluster%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0/</url>
       <content type="html"><![CDATA[<p>Redis在3.0版正式引入了集群这个特性。Redis集群是一个分布式（distributed）、容错（fault-tolerant）的 Redis内存K/V服务， 集群可以使用的功能是普通单机 Redis 所能使用的功能的一个子集（subset），比如Redis集群并不支持处理多个keys的命令,因为这需要在不同的节点间移动数据,从而达不到像Redis那样的性能,在高负载的情况下可能会导致不可预料的错误。<br><a id="more"></a></p>
 <p>Redis集群的几个重要特征：</p>
 <p>(1).Redis 集群的分片特征在于将键空间分拆了16384个槽位，每一个节点负责其中一些槽位。</p>
@@ -1903,7 +1903,7 @@ public class JedisClusterTest {
     
     <entry>
       <title><![CDATA[红黑树-Java之TreeMap实探]]></title>
-      <url>http://yoursite.com/2016/04/13/%E7%BA%A2%E9%BB%91%E6%A0%91-Java%E4%B9%8BTreeMap%E5%AE%9E%E6%8E%A2/</url>
+      <url>http://czdreams.github.io/2016/04/13/%E7%BA%A2%E9%BB%91%E6%A0%91-Java%E4%B9%8BTreeMap%E5%AE%9E%E6%8E%A2/</url>
       <content type="html"><![CDATA[<p>TreeMap的实现是红黑树算法的实现，通过本篇博文我们能对TreeMap有更深的认识。<br><a id="more"></a></p>
 <p>TreeMap的实现是红黑树算法的实现，所以要了解TreeMap就必须对红黑树有一定的了解,通过这篇博文你可以获得如下知识点：</p>
 <p>1、红黑树的基本概念。</p>
@@ -2451,7 +2451,7 @@ private void fixAfterInsertion(Entry&lt;K,V&gt; x) {
     
     <entry>
       <title><![CDATA[WEB压力测试工具wrk]]></title>
-      <url>http://yoursite.com/2016/04/08/WEB%E5%8E%8B%E5%8A%9B%E6%B5%8B%E8%AF%95%E5%B7%A5%E5%85%B7wrk/</url>
+      <url>http://czdreams.github.io/2016/04/08/WEB%E5%8E%8B%E5%8A%9B%E6%B5%8B%E8%AF%95%E5%B7%A5%E5%85%B7wrk/</url>
       <content type="html"><![CDATA[<p>wrk 是一个比较先进的 HTTP 压力测试工具。<br><a id="more"></a></p>
 <h2 id="一、什么是WRK"><a href="#一、什么是WRK" class="headerlink" title="一、什么是WRK"></a>一、什么是WRK</h2><p>WRK的全称是“Windows Research Kernel”，它是微软为高校操作系统课程提供的可修改和跟踪的操作系统教学平台。它给出了Windows这个成功的商业操作系统的内核大部分代码，可以对其进行修改、编译，并且可以用这个内核启动Windows操作系统。可让学生将操作系统基本原理和商业操作系统内核联系起来，进一步加深对操作系统整体的理解。</p>
 <h2 id="二、安装WRK"><a href="#二、安装WRK" class="headerlink" title="二、安装WRK"></a>二、安装WRK</h2><p>Linux版本</p>
@@ -2483,7 +2483,7 @@ Transfer/sec:  52.39MB
     
     <entry>
       <title><![CDATA[使用SSH密钥连接Github]]></title>
-      <url>http://yoursite.com/2016/03/24/%E4%BD%BF%E7%94%A8SSH%E5%AF%86%E9%92%A5%E8%BF%9E%E6%8E%A5Github/</url>
+      <url>http://czdreams.github.io/2016/03/24/%E4%BD%BF%E7%94%A8SSH%E5%AF%86%E9%92%A5%E8%BF%9E%E6%8E%A5Github/</url>
       <content type="html"><![CDATA[<p>使用Github，也许大家觉得比较麻烦的就是在每次push的时候，都需要输入用户名和密码。如果使用SSH，就可以记住用户名，并创建属于自己的密码来保证安全操作，还有神奇的一招可以“不用输入密码”哦。下面将介绍如何创建SSH Keys并将公钥加到GitHub账户中，使用SSH Keys在本机和GitHub之间建立一个安全的连接。<br><a id="more"></a></p>
 <h2 id="一、Windows环境下生成SSH-key且连接GitHub"><a href="#一、Windows环境下生成SSH-key且连接GitHub" class="headerlink" title="一、Windows环境下生成SSH key且连接GitHub"></a>一、Windows环境下生成SSH key且连接GitHub</h2><h3 id="第一步、看看是否存在SSH密钥-keys"><a href="#第一步、看看是否存在SSH密钥-keys" class="headerlink" title="第一步、看看是否存在SSH密钥(keys)"></a>第一步、看看是否存在SSH密钥(keys)</h3><p>首先，我们需要看看是否看看本机是否存在SSH keys,打开Git Bash,并运行:</p>
 <pre><code>$cd ~/.ssh#
@@ -2586,7 +2586,7 @@ IdentityFile ~/.ssh/work_rsa
     
     <entry>
       <title><![CDATA[Hexo+GitHub搭建博客]]></title>
-      <url>http://yoursite.com/2016/03/24/Hexo-GitHub%E6%90%AD%E5%BB%BA%E5%8D%9A%E5%AE%A2/</url>
+      <url>http://czdreams.github.io/2016/03/24/Hexo-GitHub%E6%90%AD%E5%BB%BA%E5%8D%9A%E5%AE%A2/</url>
       <content type="html"><![CDATA[<p>经过各种找资料，踩过何种坑，终于搭建好了hexo，域名目前用得时github的，我的hexo是3.1.1版本，hexo不同的版本，很多配置都不一样。好吧，废话不多说了，开始吧。<br><a id="more"></a></p>
 <h1 id="正文："><a href="#正文：" class="headerlink" title="正文："></a>正文：</h1><p>  这边教程是针对与Mac的，参考链接，由于原文讲到的hexo是以前的老版本，所以现在的版本配置的时候会有些改动。<br>  之前是想着写博客，一方面是给自己做笔记，可以提升自己的写作、总结能力，一个技术点我们会使用，并不难，但是要做到让让别人也能听懂我们讲得，还是需要一定的技巧和经验的。很多类似于CSDN、博客园也都可以写文章，但是页面的样式我，不是太喜欢，简书还算好点得。最近看到一些大神们的博客（在我的友情链接里有），貌似都是用hexo写得，我也依葫芦画瓢的搭建了一个。不罗嗦了，直接上搭建步骤。</p>
 <p>配置环境<br>安装Node（必须）<br>作用：用来生成静态页面的<br>到Node.js官网下载相应平台的最新版本，一路安装即可。</p>
@@ -2662,7 +2662,7 @@ hexo version #查看Hexo的版本
     
     <entry>
       <title><![CDATA[Hello World]]></title>
-      <url>http://yoursite.com/2016/03/24/hello-world/</url>
+      <url>http://czdreams.github.io/2016/03/24/hello-world/</url>
       <content type="html"><![CDATA[<p>Welcome to <a href="https://hexo.io/" target="_blank" rel="external">Hexo</a>! This is your very first post. Check <a href="https://hexo.io/docs/" target="_blank" rel="external">documentation</a> for more info. If you get any problems when using Hexo, you can find the answer in <a href="https://hexo.io/docs/troubleshooting.html" target="_blank" rel="external">troubleshooting</a> or you can ask me on <a href="https://github.com/hexojs/hexo/issues" target="_blank" rel="external">GitHub</a>.<br><a id="more"></a></p>
 <h2 id="Quick-Start"><a href="#Quick-Start" class="headerlink" title="Quick Start"></a>Quick Start</h2><h3 id="Create-a-new-post"><a href="#Create-a-new-post" class="headerlink" title="Create a new post"></a>Create a new post</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ hexo new <span class="string">"My New Post"</span></span><br></pre></td></tr></table></figure>
 <p>More info: <a href="https://hexo.io/docs/writing.html" target="_blank" rel="external">Writing</a></p>

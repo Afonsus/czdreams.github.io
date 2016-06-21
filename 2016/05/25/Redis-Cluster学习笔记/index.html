@@ -105,7 +105,7 @@
 <meta name="description" content="Redis在3.0版正式引入了集群这个特性。Redis集群是一个分布式（distributed）、容错（fault-tolerant）的 Redis内存K/V服务， 集群可以使用的功能是普通单机 Redis 所能使用的功能的一个子集（subset），比如Redis集群并不支持处理多个keys的命令,因为这需要在不同的节点间移动数据,从而达不到像Redis那样的性能,在高负载的情况下可能会导致不可预">
 <meta property="og:type" content="article">
 <meta property="og:title" content="Redis Cluster学习笔记">
-<meta property="og:url" content="http://yoursite.com/2016/05/25/Redis-Cluster学习笔记/index.html">
+<meta property="og:url" content="http://czdreams.github.io/2016/05/25/Redis-Cluster学习笔记/index.html">
 <meta property="og:site_name" content="ThronBirds Blog">
 <meta property="og:description" content="Redis在3.0版正式引入了集群这个特性。Redis集群是一个分布式（distributed）、容错（fault-tolerant）的 Redis内存K/V服务， 集群可以使用的功能是普通单机 Redis 所能使用的功能的一个子集（subset），比如Redis集群并不支持处理多个keys的命令,因为这需要在不同的节点间移动数据,从而达不到像Redis那样的性能,在高负载的情况下可能会导致不可预">
 <meta property="og:updated_time" content="2016-06-20T08:22:35.020Z">
@@ -132,7 +132,7 @@
 
 
 
-  <link rel="canonical" href="http://yoursite.com/2016/05/25/Redis-Cluster学习笔记/"/>
+  <link rel="canonical" href="http://czdreams.github.io/2016/05/25/Redis-Cluster学习笔记/"/>
 
   <title> Redis Cluster学习笔记 | ThronBirds Blog </title>
 </head>
@@ -220,7 +220,7 @@
       
         <li class="menu-item menu-item-search">
           
-            <a href="#" class="st-search-show-outputs">
+            <a href="#" class="popup-trigger">
           
             
               <i class="menu-item-icon fa fa-search fa-fw"></i> <br />
@@ -235,19 +235,12 @@
   
     <div class="site-search">
       
-  <form class="site-search-form">
-  <input type="text" id="st-search-input" class="st-search-input st-default-search-input" />
-</form>
-
-<script type="text/javascript">
-  (function(w,d,t,u,n,s,e){w['SwiftypeObject']=n;w[n]=w[n]||function(){
-    (w[n].q=w[n].q||[]).push(arguments);};s=d.createElement(t);
-    e=d.getElementsByTagName(t)[0];s.async=1;s.src=u;e.parentNode.insertBefore(s,e);
-  })(window,document,'script','//s.swiftypecdn.com/install/v2/st.js','_st');
-
-  _st('install', 'epqxLhyXWSzet35iK9nt','2.0.0');
-</script>
-
+  <div class="popup">
+ <span class="search-icon fa fa-search"></span>
+ <input type="text" id="local-search-input">
+ <div id="local-search-result"></div>
+ <span class="popup-btn-close">close</span>
+</div>
 
 
     </div>
@@ -581,7 +574,7 @@ public class JedisClusterTest {
   <div class="comments" id="comments">
     
       <div class="ds-thread" data-thread-key="2016/05/25/Redis-Cluster学习笔记/"
-           data-title="Redis Cluster学习笔记" data-url="http://yoursite.com/2016/05/25/Redis-Cluster学习笔记/">
+           data-title="Redis Cluster学习笔记" data-url="http://czdreams.github.io/2016/05/25/Redis-Cluster学习笔记/">
       </div>
     
   </div>
