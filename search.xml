@@ -1,0 +1,2680 @@
+<?xml version="1.0" encoding="utf-8"?>
+<search>
+  
+  
+    
+    <entry>
+      <title><![CDATA[理解Java中的弱引用 ]]></title>
+      <url>http://yoursite.com/2016/06/07/%E7%90%86%E8%A7%A3Java%E4%B8%AD%E7%9A%84%E5%BC%B1%E5%BC%95%E7%94%A8/</url>
+      <content type="html"><![CDATA[<p>Java中的弱引用具体指的是java.lang.ref.WeakReference<t>类<br><a id="more"></a></t></p>
+<h2 id="1-What——什么是弱引用？"><a href="#1-What——什么是弱引用？" class="headerlink" title="1. What——什么是弱引用？"></a>1. What——什么是弱引用？</h2><p>Java中的弱引用具体指的是java.lang.ref.WeakReference<t>类，我们首先来看一下官方文档对它做的说明：</t></p>
+<pre><code>弱引用对象的存在不会阻止它所指向的对象变被垃圾回收器回收。弱引用最常见的用途是实现规范映射(canonicalizing mappings，比如哈希表）。
+
+假设垃圾收集器在某个时间点决定一个对象是弱可达的(weakly reachable)（也就是说当前指向它的全都是弱引用），这时垃圾收集器会清除所有指向该对象的弱引用，然后垃圾收集器会把这个弱可达对象标记为可终结(finalizable)的，这样它们随后就会被回收。与此同时或稍后，垃圾收集器会把那些刚清除的弱引用放入创建弱引用对象时所登记到的引用队列(Reference Queue)中。
+</code></pre><p>实际上，Java中存在四种引用，它们由强到弱依次是：强引用、软引用、弱引用、虚引用。下面我们简单介绍下除弱引用外的其他三种引用：</p>
+<pre><code>强引用（Strong Reference）：通常我们通过new来创建一个新对象时返回的引用就是一个强引用，若一个对象通过一系列强引用可到达，它就是强可达的(strongly reachable)，那么它就不被回收
+
+软引用（Soft Reference）：软引用和弱引用的区别在于，若一个对象是弱引用可达，无论当前内存是否充足它都会被回收，而软引用可达的对象在内存不充足时才会被回收，因此软引用要比弱引用“强”一些
+
+虚引用（Phantom Reference）：虚引用是Java中最弱的引用，那么它弱到什么程度呢？它是如此脆弱以至于我们通过虚引用甚至无法获取到被引用的对象，虚引用存在的唯一作用就是当它指向的对象被回收后，虚引用本身会被加入到引用队列中，用作记录它指向的对象已被销毁。
+</code></pre><h2 id="2-Why——为什么使用弱引用？"><a href="#2-Why——为什么使用弱引用？" class="headerlink" title="2. Why——为什么使用弱引用？"></a>2. Why——为什么使用弱引用？</h2><p>考虑下面的场景：现在有一个Product类代表一种产品，这个类被设计为不可扩展的，而此时我们想要为每个产品增加一个编号。一种解决方案是使用HashMap<product, integer="">。于是问题来了，如果我们已经不再需要一个Product对象存在于内存中（比如已经卖出了这件产品），假设指向它的引用为productA，我们这时会给productA赋值为null，然而这时productA过去指向的Product对象并不会被回收，因为它显然还被HashMap引用着。所以这种情况下，我们想要真正的回收一个Product对象，仅仅把它的强引用赋值为null是不够的，还要把相应的条目从HashMap中移除。显然“从HashMap中移除不再需要的条目”这个工作我们不想自己完成，我们希望告诉垃圾收集器：“在只有HashMap中的key在引用着Product对象的情况下，就可以回收相应Product对象了。” 显然，根据前面弱引用的定义，使用弱引用能帮助我们达成这个目的。我们只需要用指向Product对象的弱引用对象来作为HashMap中的键就可以了。</product,></p>
+<h2 id="3-How——如何使用弱引用？"><a href="#3-How——如何使用弱引用？" class="headerlink" title="3. How——如何使用弱引用？"></a>3. How——如何使用弱引用？</h2><p>拿上面介绍的场景举例，我们使用一个指向Product对象的弱引用对象来作为HashMap的键，只需这样定义这个弱引用对象：</p>
+<pre><code>productA = new Product(...);
+WeakReference&lt;Product&gt; weakProductA = new WeakReference&lt;&gt;(productA);
+</code></pre><p>现在，若引用对象weakProductA就指向了Product对象productA。那么我们怎么通过weakProduct获取它所指向的Product对象productA呢？很简单，只需要下面这句代码：</p>
+<pre><code>Product product = weakProductA.get();
+</code></pre><p>实际上，对于这种情况，Java类库为我们提供了WeakHashMap类，使用和这个类，它的键自然就是弱引用对象，无需我们再手动包装原始对象。这样一来，当productA变为null时（表明它所引用的Product已经无需存在于内存中），这时指向这个Product对象的就是由弱引用对象weakProductA了，那么显然这时候相应的Product对象时弱可达的，所以指向它的弱引用会被清除，这个Product对象随即会被回收，指向它的弱引用对象会进入引用队列中。 </p>
+<p>下面我们来简单地介绍下引用队列的概念。实际上，WeakReference类有两个构造函数：</p>
+<pre><code>WeakReference(T referent) //创建一个指向给定对象的弱引用
+WeakReference(T referent, ReferenceQueue&lt;? super T&gt; q) //创建一个指向给定对象并且登记到给定引用队列的弱引用
+</code></pre><p>我们可以看到第二个构造方法中提供了一个ReferenceQueue类型的参数，通过提供这个参数，我们便把创建的弱引用对象注册到了一个引用队列上，这样当它被垃圾回收器清除时，就会把它送入这个引用队列中，我们便可以对这些被清除的弱引用对象进行统一管理。</p>
+]]></content>
+    </entry>
+    
+    <entry>
+      <title><![CDATA[TimSort算法]]></title>
+      <url>http://yoursite.com/2016/06/07/TimSort%E7%AE%97%E6%B3%95/</url>
+      <content type="html"><![CDATA[<p>首先强调一下，这是个稳定的排序算法。<br><a id="more"></a></p>
+<p>看过代码之后觉得这个算法没有想象的那么难。逻辑很清晰，整个算法最大的特点就是充分利用数组中已经存在顺序。在归并的过程中有一个 Galloping Mode(翻译过来可以叫 飞奔模式)，这是整个排序算法中最不寻常的地方。简单的理解就是，归并过程中有两个数列，比较的时候，有个数列连续有{MIN_GALLOP}个元素都比另一个数列的第一个元素小，那就应该数一下后面到底还有多少个元素比另一个数列的第一个元素小。数完之后一次copy过去，减少copy的次数。MIN_GALLOP还是一个可以动态调整的值，这应该是统计优化的结果。</p>
+<p>除了算法本身的魅力，作者的代码写的很简洁。读起来很享受。大家有兴趣可以自己读一遍，我在下面贴出我看代码过程中的注释。对逻辑所有的解释都在注释中。阅读的方法是从static <t> void sort(T[] a, Comparator&lt;? super T&gt; c)与 static <t> void sort(T[] a, int lo, int hi, Comparator&lt;? super T&gt; c)两个方法开始, 顺着逻辑一路往下读就可以。</t></t></p>
+<p>除了上面提到的Galloping Mode，还有源码中还有一个概念叫作 run, 可以把它理解为一段已经排好序的数列。</p>
+<pre><code>import java.util.Arrays;
+import java.util.Comparator;
+
+/**
+ * Created by yxf on 16-5-30.
+ * 这里对TimSort算法在java中的实现做了注释，部分实现逻辑相似的注释没有处理，直接是原来的注释。
+ *
+ */
+class TimSort&lt;T&gt; {
+    /**
+     * 参与序列合并的最短长度。比这个更短的序列将会通过二叉插入排序加长。如果整个数组都比这个短，那就不会经过归并排序。
+     * &lt;p/&gt;
+     * 这个常量的值必须2的幂。Tim Perter 在C语言中的实现版本使用了64，但是根据经验这里的版本使用32更合适。在最坏的情况下，使用了非2的幂赋值，就必须要重写 {@link # minRunLength}这个方法。
+     * 如果减小了这个值，就需要在构造方法中减小stackLen的值，不然将面临数组越界的风险。
+     */
+    private static final int MIN_MERGE = 32;
+
+    /**
+     * 将要被排序的数组
+     */
+    private final T[] a;
+
+    /**
+     * 这次排序的比较器
+     */
+    private final Comparator&lt;? super T&gt; c;
+
+    /**
+     * 判断数据顺序连续性的阈值
+     * 后面结合代码看，会容易理解一点
+     */
+    private static final int MIN_GALLOP = 7;
+
+    private int minGallop = MIN_GALLOP;
+
+    /**
+     * 归并排序中临时数组的最大长度，数组的长度也可以根据需求增长。
+     * 与C语言中的实现方式不同，对于相对较小的数组，我们不用这么大的临时数组。这点改变对性能有显著的影响
+     */
+    private static final int INITIAL_TMP_STORAGE_LENGTH = 256;
+
+
+    /**
+     * 临时数组，根据泛型的内容可知，实际的存储要用Object[],不能用T[]
+     */
+    private T[] tmp;
+
+    /**
+     * 栈中待归并的run的数量。一个run i的范围从runBase[i]开始，一直延续到runLen[i]。
+     * 下面这个根据前一个run的结尾总是下一个run的开头。
+     * 所以下面的等式总是成立:
+     * runBase[i] + runLen[i] == runBase[i+1];
+     **/
+
+    private int stackSize = 0; //栈中run的数量
+    private final int[] runBase;
+    private final int[] runLen;
+
+    /**
+     * 这个构造方法是私有的所以只能在类内部创建。
+     * 创建这个实例是为了保存一次排序过程中的状态变量。
+     */
+    private TimSort(T[] a, Comparator&lt;? super T&gt; c) {
+        this.a = a;
+        this.c = c;
+
+        // 这里是分配临时数组的空间。SuppressWainings是为了消除泛型数组转型的警告
+        // 临时数组的长度写的很精炼，不明白的自己熟悉一下java位操作。
+        // 结果就是 数组长度的一半或者是INITIAL_TMP_STORAGE_LENGTH
+        int len = a.length;
+        @SuppressWarnings({&quot;unchecked&quot;, &quot;UnnecessaryLocalVariable&quot;})
+        T[] newArray = (T[]) new Object[len &lt; 2 * INITIAL_TMP_STORAGE_LENGTH ?
+                len &gt;&gt;&gt; 1 : INITIAL_TMP_STORAGE_LENGTH];
+        tmp = newArray;
+
+        /**
+         * 这里是分配储存run的栈的空间，它不能在运行时扩展。
+         * C语言版本中的栈一直使用固定值85，但这样对一些中小数组来说有些浪费资源。所以，
+         * 这个版本我们使用了相对较小容量的栈。
+         * 在MIN_MERGE减小的时候，这些‘魔法数’可能面临数组越界的风险。
+         * */
+        int stackLen = (len &lt; 120 ? 5 :
+                                 len &lt; 1542 ? 10 :
+                                 len &lt; 119151 ? 24 : 40);
+        runBase = new int[stackLen];
+        runLen = new int[stackLen];
+    }
+
+    static &lt;T&gt; void sort(T[] a, Comparator&lt;? super T&gt; c) {
+        sort(a, 0, a.length, c);
+    }
+
+    static &lt;T&gt; void sort(T[] a, int lo, int hi, Comparator&lt;? super T&gt; c) {
+        if (c == null) {
+            Arrays.sort(a, lo, hi);
+            return;
+        }
+
+        rangeCheck(a.length, lo, hi);
+        int nRemaining = hi - lo;
+        if (nRemaining &lt; 2)
+            return;  // 长度是0或者1 就不需要排序了。
+
+        // 小于MIN_MERGE长度的数组就不用归并排序了，杀鸡焉用宰牛刀
+        if (nRemaining &lt; MIN_MERGE) {
+            int initRunLen = countRunAndMakeAscending(a, lo, hi, c);
+            binarySort(a, lo, hi, lo + initRunLen, c);
+            return;
+        }
+
+        /**
+         * March over the array once, left to right, finding natural runs,
+         * extending short natural runs to minRun elements, and merging runs
+         * to maintain stack invariant.
+         *
+         * 下面将进入算法流程的主体,首先理解源码注释中run的含义，可以理解为升序序列的意思。
+         *
+         * 从左到右，遍历一边数组。找出自然排好序的序列(natural run)，把短的自然升序序列通过二叉查找排序
+         * 扩展到minRun长度的升序序列。最后合并栈中的所有升序序列，保证规则不变。
+         */
+        TimSort&lt;T&gt; ts = new TimSort&lt;&gt;(a, c); //新建TimSort对象，保存栈的状态
+        int minRun = minRunLength(nRemaining);
+        do {
+            //跟二叉查找插入排序一样，先找自然升序序列
+            int runLen = countRunAndMakeAscending(a, lo, hi, c);
+
+            // If run is short, extend to min(minRun, nRemaining)
+            // 如果 自然升序的长度不够minRun，就把 min(minRun,nRemaining)长度的范围内的数列排好序
+            if (runLen &lt; minRun) {
+                int force = nRemaining &lt;= minRun ? nRemaining : minRun;
+                binarySort(a, lo, lo + force, lo + runLen, c);
+                runLen = force;
+            }
+
+            // Push run onto pending-run stack, and maybe merge
+            //把已经排好序的数列压入栈中，检查是不是需要合并
+            ts.pushRun(lo, runLen);
+            ts.mergeCollapse();
+
+            //把指针后移runLen距离，准备开始下一轮片段的排序
+            lo += runLen;
+            //剩下待排序的数量相应的减少 runLen
+            nRemaining -= runLen;
+        } while (nRemaining != 0);
+
+        // Merge all remaining runs to complete sort
+        assert lo == hi;
+        ts.mergeForceCollapse();
+        assert ts.stackSize == 1;
+    }
+
+    /**
+     * 被优化的二分插入排序
+     *
+     * 使用二分插入排序算法给指定一部分数组排序。这是给小数组排序的最佳方案。最差情况下
+     * 它需要 O(n log n) 次比较和 O(n^2)次数据移动。
+     *
+     * 如果开始的部分数据是有序的那么我们可以利用它们。这个方法默认数组中的位置lo(包括在内)到
+     * start(不包括在内)的范围内是已经排好序的。
+     *
+     * @param a     被排序的数组
+     * @param lo    待排序范围内的首个元素的位置
+     * @param hi    待排序范围内最后一个元素的后一个位置
+     * @param start 待排序范围内的第一个没有排好序的位置，确保 (lo &lt;= start &lt;= hi)
+     * @param c     本次排序的比较器
+     */
+    @SuppressWarnings(&quot;fallthrough&quot;)
+    private static &lt;T&gt; void binarySort(T[] a, int lo, int hi, int start,
+                                       Comparator&lt;? super T&gt; c) {
+        assert lo &lt;= start &amp;&amp; start &lt;= hi;
+        //如果start 从起点开始，做下预处理；也就是原本就是无序的。
+        if (start == lo)
+            start++;
+        //从start位置开始，对后面的所有元素排序
+        for (; start &lt; hi; start++) {
+            //pivot 代表正在参与排序的值，
+            T pivot = a[start];
+
+            // Set left (and right) to the index where a[start] (pivot) belongs
+            // 把pivot应当插入的设置的边界设置为left和right
+            int left = lo;
+            int right = start;
+            assert left &lt;= right;
+
+            /*
+             * 保证的逻辑:
+             *   pivot &gt;= all in [lo, left).
+             *   pivot &lt;  all in [right, start).
+             */
+            while (left &lt; right) {
+                int mid = (left + right) &gt;&gt;&gt; 1;
+                if (c.compare(pivot, a[mid]) &lt; 0)
+                    right = mid;
+                else
+                    left = mid + 1;
+            }
+            assert left == right;
+
+            /**
+             * 此时，仍然能保证:
+             * pivot &gt;= [lo, left) &amp;&amp; pivot &lt; [left,start)
+             * 所以，pivot的值应当在left所在的位置，然后需要把[left,start)范围内的内容整体右移一位
+             * 腾出空间。如果pivot与区间中的某个值相等，left指正会指向重复的值的后一位，
+             * 所以这里的排序是稳定的。
+             */
+            int n = start - left;  //需要移动的范围的长度
+
+            // switch语句是一条小优化，1-2个元素的移动就不需要System.arraycopy了。
+            // （这代码写的真是简洁，switch原来可以这样用）
+            switch (n) {
+                case 2:
+                    a[left + 2] = a[left + 1];
+                case 1:
+                    a[left + 1] = a[left];
+                    break;
+                default:
+                    System.arraycopy(a, left, a, left + 1, n);
+            }
+            //移动过之后，把pivot的值放到应该插入的位置，就是left的位置了
+            a[left] = pivot;
+        }
+    }
+
+    /**
+     * 这一段代码是TimSort算法中的一个小优化，它利用了数组中前面一段已有的顺序。
+     * 如果是升序，直接返回统计结果；如果是降序，在返回之前，将这段数列倒置，
+     * 以确保这断序列从首个位置到此位置的序列都是升序的。
+     * 返回的结果是这种两种形式的，lo是这段序列的开始位置。
+     *
+     * A run is the longest ascending sequence with:
+     *
+     * a[lo] &lt;= a[lo + 1] &lt;= a[lo + 2] &lt;= ...
+     *
+     * or the longest descending sequence with:
+     *
+     * a[lo] &gt;  a[lo + 1] &gt;  a[lo + 2] &gt;  ...
+     *
+     * 为了保证排序的稳定性，这里要使用严格的降序，这样才能保证相等的元素不参与倒置子序列的过程，
+     * 保证它们原本的顺序不被打乱。
+     *
+     * @param a  参与排序的数组
+     * @param lo run中首个元素的位置
+     * @param hi run中最后一个元素的后面一个位置，需要确保lo&lt;hi
+     * @param c  本次排序的比较器
+     * @return 从首个元素开始的最长升序子序列的结尾位置+1 or 严格的降序子序列的结尾位置+1。
+     */
+    private static &lt;T&gt; int countRunAndMakeAscending(T[] a, int lo, int hi,
+                                                    Comparator&lt;? super T&gt; c) {
+        assert lo &lt; hi;
+        int runHi = lo + 1;
+        if (runHi == hi)
+            return 1;
+
+        // 找出最长升序序的子序列，如果降序，倒置之
+        if (c.compare(a[runHi++], a[lo]) &lt; 0) { // 前两个元素是降序，就按照降序统计
+            while (runHi &lt; hi &amp;&amp; c.compare(a[runHi], a[runHi - 1]) &lt; 0)
+                runHi++;
+            reverseRange(a, lo, runHi);
+        } else {                              // 前两个元素是升序，按照升序统计
+            while (runHi &lt; hi &amp;&amp; c.compare(a[runHi], a[runHi - 1]) &gt;= 0)
+                runHi++;
+        }
+
+        return runHi - lo;
+    }
+
+    /**
+     * 倒置数组中一段范围的元素
+     *
+     * @param a  指定数组
+     * @param lo 这段范围的起始位置
+     * @param hi 这段范围的终点位置的后一个位置
+     */
+    private static void reverseRange(Object[] a, int lo, int hi) {
+        hi--;
+        while (lo &lt; hi) {
+            Object t = a[lo];
+            a[lo++] = a[hi];
+            a[hi--] = t;
+        }
+    }
+
+    /**
+     * 返回参与合并的最小长度，如果自然排序的长度，小于此长度，那么就通过二分查找排序扩展到
+     * 此长度。{@link #binarySort}.
+     *
+     * 粗略的讲，计算结果是这样的：
+     *
+     * 如果 n &lt; MIN_MERGE, 直接返回 n。（太小了，不值得做复杂的操作）；
+     * 如果 n 正好是2的幂，返回 n / 2；
+     * 其它情况下 返回一个数 k，满足 MIN_MERGE/2 &lt;= k &lt;= MIN_MERGE,
+     * 这样结果就能保证 n/k 非常接近但小于一个2的幂。
+     * 这个数字实际上是一种空间与时间的优化。
+     *
+     * @param n 参与排序的数组的长度
+     * @return 参与归并的最短长度
+     * 这段代码写得也很赞
+     */
+    private static int minRunLength(int n) {
+        assert n &gt;= 0;
+        int r = 0;      // 只要不是 2的幂就会置 1
+        while (n &gt;= MIN_MERGE) {
+            r |= (n &amp; 1);
+            n &gt;&gt;= 1;
+        }
+        return n + r;
+    }
+
+    /**
+     * Pushes the specified run onto the pending-run stack.
+     * 将指定的升序序列压入等待合并的栈中
+     *
+     * @param runBase 升序序列的首个元素的位置
+     * @param runLen  升序序列的长度
+     */
+    private void pushRun(int runBase, int runLen) {
+        this.runBase[stackSize] = runBase;
+        this.runLen[stackSize] = runLen;
+        stackSize++;
+    }
+
+    /**
+     * 检查栈中待归并的升序序列，如果他们不满足下列条件就把相邻的两个序列合并，
+     * 直到他们满足下面的条件
+     *
+     * 1. runLen[i - 3] &gt; runLen[i - 2] + runLen[i - 1]
+     * 2. runLen[i - 2] &gt; runLen[i - 1]
+     *
+     * 每次添加新序列到栈中的时候都会执行一次这个操作。所以栈中的需要满足的条件
+     * 需要靠调用这个方法来维护。
+     *
+     * 最差情况下，有点像玩2048。
+     */
+    private void mergeCollapse() {
+        while (stackSize &gt; 1) {
+            int n = stackSize - 2;
+            if (n &gt; 0 &amp;&amp; runLen[n - 1] &lt;= runLen[n] + runLen[n + 1]) {
+                if (runLen[n - 1] &lt; runLen[n + 1])
+                    n--;
+                mergeAt(n);
+            } else if (runLen[n] &lt;= runLen[n + 1]) {
+                mergeAt(n);
+            } else {
+                break; // Invariant is established
+            }
+        }
+    }
+
+    /**
+     * 合并栈中所有待合并的序列，最后剩下一个序列。这个方法在整次排序中只执行一次
+     */
+    private void mergeForceCollapse() {
+        while (stackSize &gt; 1) {
+            int n = stackSize - 2;
+            if (n &gt; 0 &amp;&amp; runLen[n - 1] &lt; runLen[n + 1])
+                n--;
+            mergeAt(n);
+        }
+    }
+
+    /**
+     * 在一个序列中，将一个指定的key，从左往右查找它应当插入的位置；如果序列中存在
+     * 与key相同的值(一个或者多个)，那返回这些值中最左边的位置。
+     *
+     * 推断： 统计概率的原因，随机数字来说，两个待合并的序列的尾假设是差不多大的，从尾开始
+     * 做查找找到的概率高一些。仔细算一下，最差情况下，这种查找也是 log(n)，所以这里没有
+     * 用简单的二分查找。
+     *
+     * @param key  准备插入的key
+     * @param a    参与排序的数组
+     * @param base 序列范围的第一个元素的位置
+     * @param len  整个范围的长度，一定有len &gt; 0
+     * @param hint 开始查找的位置，有0 &lt;= hint &lt;= len;越接近结果查找越快
+     * @param c    排序，查找使用的比较器
+     * @return 返回一个整数 k, 有 0 &lt;= k &lt;=n, 它满足 a[b + k - 1] &lt; a[b + k]
+     * 就是说key应当被放在 a[base + k],
+     * 有 a[base,base+k) &lt; key &amp;&amp; key &lt;=a [base + k, base + len)
+     */
+    private static &lt;T&gt; int gallopLeft(T key, T[] a, int base, int len, int hint,
+                                      Comparator&lt;? super T&gt; c) {
+        assert len &gt; 0 &amp;&amp; hint &gt;= 0 &amp;&amp; hint &lt; len;
+        int lastOfs = 0;
+        int ofs = 1;
+        if (c.compare(key, a[base + hint]) &gt; 0) { // key &gt; a[base+hint]
+            // 遍历右边，直到 a[base+hint+lastOfs] &lt; key &lt;= a[base+hint+ofs]
+            int maxOfs = len - hint;
+            while (ofs &lt; maxOfs &amp;&amp; c.compare(key, a[base + hint + ofs]) &gt; 0) {
+                lastOfs = ofs;
+                ofs = (ofs &lt;&lt; 1) + 1;
+                if (ofs &lt;= 0)   // int overflow
+                    ofs = maxOfs;
+            }
+            if (ofs &gt; maxOfs)
+                ofs = maxOfs;
+
+            // 最终的ofs是这样确定的，满足条件 a[base+hint+lastOfs] &lt; key &lt;= a[base+hint+ofs]
+            // 的一组
+            // ofs:     1   3   7  15  31  63 2^n-1 ... maxOfs
+            // lastOfs: 0   1   3   7  15  31 2^(n-1)-1  &lt; ofs
+
+
+            // 因为目前的offset是相对hint的，所以做相对变换
+            lastOfs += hint;
+            ofs += hint;
+        } else { // key &lt;= a[base + hint]
+            // 遍历左边，直到[base+hint-ofs] &lt; key &lt;= a[base+hint-lastOfs]
+            final int maxOfs = hint + 1;
+            while (ofs &lt; maxOfs &amp;&amp; c.compare(key, a[base + hint - ofs]) &lt;= 0) {
+                lastOfs = ofs;
+                ofs = (ofs &lt;&lt; 1) + 1;
+                if (ofs &lt;= 0)   // int overflow
+                    ofs = maxOfs;
+            }
+            if (ofs &gt; maxOfs)
+                ofs = maxOfs;
+            // 确定ofs的过程与上面相同
+            // ofs:     1   3   7  15  31  63 2^n-1 ... maxOfs
+            // lastOfs: 0   1   3   7  15  31 2^(n-1)-1  &lt; ofs
+
+            // Make offsets relative to base
+            int tmp = lastOfs;
+            lastOfs = hint - ofs;
+            ofs = hint - tmp;
+        }
+        assert -1 &lt;= lastOfs &amp;&amp; lastOfs &lt; ofs &amp;&amp; ofs &lt;= len;
+
+        /*
+         * 现在的情况是 a[base+lastOfs] &lt; key &lt;= a[base+ofs], 所以，key应当在lastOfs的
+         * 右边，又不超过ofs。在base+lastOfs-1到 base+ofs范围内做一次二叉查找。
+         */
+        lastOfs++;
+        while (lastOfs &lt; ofs) {
+            int m = lastOfs + ((ofs - lastOfs) &gt;&gt;&gt; 1);
+
+            if (c.compare(key, a[base + m]) &gt; 0)
+                lastOfs = m + 1;  // a[base + m] &lt; key
+            else
+                ofs = m;          // key &lt;= a[base + m]
+        }
+        assert lastOfs == ofs;    // so a[base + ofs - 1] &lt; key &lt;= a[base + ofs]
+        return ofs;
+    }
+
+    /**
+     * 与gallopLeft相似，不同的是如果发现key的值与某些元素相等，那返回这些值最后一个元素的位置的
+     * 后一个位置
+     *
+     * @param key  需要查找待插入位置的那个值
+     * @param a    待排序的数组
+     * @param base 被查找的序列中第一个元素的位置
+     * @param len  被查找的序列的长度
+     * @param hint 开始查找的位置，0 &lt;= hint &lt; len.它越接近结果所在位置，查找越快。
+     * @param c    本次排序的比较器
+     * @return 一个整数 k,  满足0 &lt;= k &lt;= n 并且 a[b + k - 1] &lt;= key &lt; a[b + k]
+     */
+    private static &lt;T&gt; int gallopRight(T key, T[] a, int base, int len,
+                                       int hint, Comparator&lt;? super T&gt; c) {
+        assert len &gt; 0 &amp;&amp; hint &gt;= 0 &amp;&amp; hint &lt; len;
+
+        int ofs = 1;
+        int lastOfs = 0;
+        if (c.compare(key, a[base + hint]) &lt; 0) {
+            // Gallop left until a[b+hint - ofs] &lt;= key &lt; a[b+hint - lastOfs]
+            int maxOfs = hint + 1;
+            while (ofs &lt; maxOfs &amp;&amp; c.compare(key, a[base + hint - ofs]) &lt; 0) {
+                lastOfs = ofs;
+                ofs = (ofs &lt;&lt; 1) + 1;
+                if (ofs &lt;= 0)   // int overflow
+                    ofs = maxOfs;
+            }
+            if (ofs &gt; maxOfs)
+                ofs = maxOfs;
+
+            // Make offsets relative to b
+            int tmp = lastOfs;
+            lastOfs = hint - ofs;
+            ofs = hint - tmp;
+        } else { // a[b + hint] &lt;= key
+            // Gallop right until a[b+hint + lastOfs] &lt;= key &lt; a[b+hint + ofs]
+            int maxOfs = len - hint;
+            while (ofs &lt; maxOfs &amp;&amp; c.compare(key, a[base + hint + ofs]) &gt;= 0) {
+                lastOfs = ofs;
+                ofs = (ofs &lt;&lt; 1) + 1;
+                if (ofs &lt;= 0)   // int overflow
+                    ofs = maxOfs;
+            }
+            if (ofs &gt; maxOfs)
+                ofs = maxOfs;
+
+            // Make offsets relative to b
+            lastOfs += hint;
+            ofs += hint;
+        }
+        assert -1 &lt;= lastOfs &amp;&amp; lastOfs &lt; ofs &amp;&amp; ofs &lt;= len;
+
+        /*
+         * Now a[b + lastOfs] &lt;= key &lt; a[b + ofs], so key belongs somewhere to
+         * the right of lastOfs but no farther right than ofs.  Do a binary
+         * search, with invariant a[b + lastOfs - 1] &lt;= key &lt; a[b + ofs].
+         */
+        lastOfs++;
+        while (lastOfs &lt; ofs) {
+            int m = lastOfs + ((ofs - lastOfs) &gt;&gt;&gt; 1);
+
+            if (c.compare(key, a[base + m]) &lt; 0)
+                ofs = m;          // key &lt; a[b + m]
+            else
+                lastOfs = m + 1;  // a[b + m] &lt;= key
+        }
+        assert lastOfs == ofs;    // so a[b + ofs - 1] &lt;= key &lt; a[b + ofs]
+        return ofs;
+    }
+
+    /**
+     * 合并在栈中位于i和i+1的两个相邻的升序序列。 i必须为从栈顶数，第二和第三个元素。
+     * 换句话说i == stackSize - 2 || i == stackSize - 3
+     *
+     * @param i 待合并的第一个序列所在的位置
+     */
+    private void mergeAt(int i) {
+        //校验
+        assert stackSize &gt;= 2;
+        assert i &gt;= 0;
+        assert i == stackSize - 2 || i == stackSize - 3;
+        //内部初始化
+        int base1 = runBase[i];
+        int len1 = runLen[i];
+        int base2 = runBase[i + 1];
+        int len2 = runLen[i + 1];
+        assert len1 &gt; 0 &amp;&amp; len2 &gt; 0;
+        assert base1 + len1 == base2;
+
+        /*
+         * 记录合并后的序列的长度；如果i == stackSize - 3 就把最后一个序列的信息
+         * 往前移一位，因为本次合并不关它的事。i+1对应的序列被合并到i序列中了，所以
+         * i+1 数列可以消失了
+         */
+        runLen[i] = len1 + len2;
+        if (i == stackSize - 3) {
+            runBase[i + 1] = runBase[i + 2];
+            runLen[i + 1] = runLen[i + 2];
+        }
+        //i+1消失了，所以长度也减下来了
+        stackSize--;
+
+        /*
+         * 找出第二个序列的首个元素可以插入到第一个序列的什么位置，因为在此位置之前的序列已经就位了。
+         * 它们可以被忽略，不参加归并。
+         */
+        int k = gallopRight(a[base2], a, base1, len1, 0, c);
+        assert k &gt;= 0;
+        // 因为要忽略前半部分元素，所以起点和长度相应的变化
+        base1 += k;
+        len1 -= k;
+        // 如果序列2 的首个元素要插入到序列1的后面，那就直接结束了,
+        // ！！！ 因为序列2在数组中的位置本来就在序列1后面,也就是整个范围本来就是有序的！！！
+        if (len1 == 0)
+            return;
+
+        /*
+         * 跟上面相似，看序列1的最后一个元素(a[base1+len1-1])可以插入到序列2的什么位置（相对第二个序列起点的位置，非在数组中的位置），
+         * 这个位置后面的元素也是不需要参与归并的。所以len2直接设置到这里，后面的元素直接忽略。
+         */
+        len2 = gallopLeft(a[base1 + len1 - 1], a, base2, len2, len2 - 1, c);
+        assert len2 &gt;= 0;
+        if (len2 == 0)
+            return;
+
+        // 合并剩下的两个有序序列，并且这里为了节省空间，临时数组选用 min(len1,len2)的长度
+        // 优化的很细呢
+        if (len1 &lt;= len2)
+            mergeLo(base1, len1, base2, len2);
+        else
+            mergeHi(base1, len1, base2, len2);
+    }
+
+    /**
+     * 使用固定空间合并两个相邻的有序序列，保持数组的稳定性。
+     * 使用本方法之前保证第一个序列的首个元素大于第二个序列的首个元素；第一个序列的末尾元素
+     * 大于第二个序列的所有元素
+     *
+     * 为了性能，这个方法在len1 &lt;= len2的时候调用；它的姐妹方法mergeHi应该在len1 &gt;= len2
+     * 的时候调用。len1==len2的时候随便调用哪个都可以
+     *
+     * @param base1 index of first element in first run to be merged
+     * @param len1  length of first run to be merged (must be &gt; 0)
+     * @param base2 index of first element in second run to be merged
+     *              (must be aBase + aLen)
+     * @param len2  length of second run to be merged (must be &gt; 0)
+     */
+    private void mergeLo(int base1, int len1, int base2, int len2) {
+        assert len1 &gt; 0 &amp;&amp; len2 &gt; 0 &amp;&amp; base1 + len1 == base2;
+
+        //将第一个序列放到临时数组中
+        T[] a = this.a; // For performance
+        T[] tmp = ensureCapacity(len1);
+        System.arraycopy(a, base1, tmp, 0, len1);
+
+        int cursor1 = 0;       // 临时数组指针
+        int cursor2 = base2;   // 序列2的指针，参与归并的另一个序列
+        int dest = base1;      // 保存结果的指针
+
+        // 这里先把第二个序列的首个元素，移动到结果序列中的位置，然后处理那些不需要归并的情况
+        a[dest++] = a[cursor2++];
+
+        // 序列2只有一个元素的情况，把它移动到指定位置之后，剩下的临时数组
+        // 中的所有序列1的元素全部copy到后面
+        if (--len2 == 0) {
+            System.arraycopy(tmp, cursor1, a, dest, len1);
+            return;
+        }
+        // 序列1只有一个元素的情况，把它移动到最后一个位置，为了不覆盖，先把序列2中的元素
+        // 全部移走。这个是因为序列1中的最后一个元素比序列2中的所有元素都大，这是该方法执行的条件
+        if (len1 == 1) {
+            System.arraycopy(a, cursor2, a, dest, len2);
+            a[dest + len2] = tmp[cursor1]; // Last elt of run 1 to end of merge
+            return;
+        }
+
+        Comparator&lt;? super T&gt; c = this.c;  // 本次排序的比较器
+
+        int minGallop = this.minGallop;    //  &quot;    &quot;       &quot;     &quot;      &quot;
+
+        // 不了解break标签的同学要补补Java基本功了
+        outer:
+        while (true) {
+            /*
+            * 这里加了两个值来记录一个序列连续比另外一个大的次数，根据此信息，可以做出一些
+            * 优化
+            * */
+            int count1 = 0; // 序列1 连续 比序列2大多少次
+            int count2 = 0; // 序列2 连续 比序列1大多少次
+
+            /*
+            * 这里是直接的归并算法的合并的部分，这里会统计count1合count2,
+            * 如果其中一个大于一个阈值，就会跳出循环
+            * */
+            do {
+                assert len1 &gt; 1 &amp;&amp; len2 &gt; 0;
+                if (c.compare(a[cursor2], tmp[cursor1]) &lt; 0) {
+                    a[dest++] = a[cursor2++];
+                    count2++;
+                    count1 = 0;
+
+                    // 序列2没有元素了就跳出整次合并
+                    if (--len2 == 0)
+                        break outer;
+                } else {
+                    a[dest++] = tmp[cursor1++];
+                    count1++;
+                    count2 = 0;
+                    // 如果序列1只剩下最后一个元素了就可以跳出循环
+                    if (--len1 == 1)
+                        break outer;
+                }
+
+            /*
+            * 这个判断相当于 count1 &lt; minGallop &amp;&amp; count2 &lt;minGallop
+            * 因为count1和count2总有一个为0
+            * */
+            } while ((count1 | count2) &lt; minGallop);
+
+
+
+            /*
+             * 执行到这里的话，一个序列会连续的的比另一个序列大，那么这种连续性可能持续的
+             * 更长。那么我们就按照这个逻辑试一试。直到这种连续性被打破。根据找到的长度，
+             * 直接连续的copy就可以了，这样可以提高copy的效率。
+             */
+            do {
+                assert len1 &gt; 1 &amp;&amp; len2 &gt; 0;
+                // gallopRight就是之前用过的那个方法
+                count1 = gallopRight(a[cursor2], tmp, cursor1, len1, 0, c);
+                if (count1 != 0) {
+                    System.arraycopy(tmp, cursor1, a, dest, count1);
+                    dest += count1;
+                    cursor1 += count1;
+                    len1 -= count1;
+                    if (len1 &lt;= 1) // 结尾处理退化的序列
+                        break outer;
+                }
+                a[dest++] = a[cursor2++];
+                if (--len2 == 0) //结尾处理退化的序列
+                    break outer;
+
+                count2 = gallopLeft(tmp[cursor1], a, cursor2, len2, 0, c);
+                if (count2 != 0) {
+                    System.arraycopy(a, cursor2, a, dest, count2);
+                    dest += count2;
+                    cursor2 += count2;
+                    len2 -= count2;
+                    if (len2 == 0)
+                        break outer;
+                }
+                a[dest++] = tmp[cursor1++];
+                if (--len1 == 1)
+                    break outer;
+                // 这里对连续性比另外一个大的阈值减少，这样更容易触发这段操作，
+                // 应该是因为前面的数据表现好，后面的数据类似的可能性更高？
+                minGallop--;
+            } while (count1 &gt;= MIN_GALLOP | count2 &gt;= MIN_GALLOP); //如果连续性还是很大的话，继续这样处理s
+
+
+            if (minGallop &lt; 0)
+                minGallop = 0;
+
+            //同样，这里如果跳出了那段循环，就证明数据的顺序程度不好，应当增加阈值，避免浪费资源
+            minGallop += 2;
+        }  //outer 结束
+
+
+        this.minGallop = minGallop &lt; 1 ? 1 : minGallop;  // Write back to field
+
+        //这里处理收尾工作
+        if (len1 == 1) {
+            assert len2 &gt; 0;
+            System.arraycopy(a, cursor2, a, dest, len2);
+            a[dest + len2] = tmp[cursor1]; //  Last elt of run 1 to end of merge
+        } else if (len1 == 0) {
+            //因为序列1中的最后一个值，比序列2中的所有值都大，所以，不可能序列1空了，序列2还有元素
+            throw new IllegalArgumentException(
+                    &quot;Comparison method violates its general contract!&quot;);
+        } else {
+            assert len2 == 0;
+            assert len1 &gt; 1;
+            System.arraycopy(tmp, cursor1, a, dest, len1);
+        }
+    }
+
+    /**
+     * Like mergeLo, except that this method should be called only if
+     * len1 &gt;= len2; mergeLo should be called if len1 &lt;= len2.  (Either method
+     * may be called if len1 == len2.)
+     *
+     * @param base1 index of first element in first run to be merged
+     * @param len1  length of first run to be merged (must be &gt; 0)
+     * @param base2 index of first element in second run to be merged
+     *              (must be aBase + aLen)
+     * @param len2  length of second run to be merged (must be &gt; 0)
+     */
+    private void mergeHi(int base1, int len1, int base2, int len2) {
+        assert len1 &gt; 0 &amp;&amp; len2 &gt; 0 &amp;&amp; base1 + len1 == base2;
+
+        // Copy second run into temp array
+        T[] a = this.a; // For performance
+        T[] tmp = ensureCapacity(len2);
+        System.arraycopy(a, base2, tmp, 0, len2);
+
+        int cursor1 = base1 + len1 - 1;  // Indexes into a
+        int cursor2 = len2 - 1;          // Indexes into tmp array
+        int dest = base2 + len2 - 1;     // Indexes into a
+
+        // Move last element of first run and deal with degenerate cases
+        a[dest--] = a[cursor1--];
+        if (--len1 == 0) {
+            System.arraycopy(tmp, 0, a, dest - (len2 - 1), len2);
+            return;
+        }
+        if (len2 == 1) {
+            dest -= len1;
+            cursor1 -= len1;
+            System.arraycopy(a, cursor1 + 1, a, dest + 1, len1);
+            a[dest] = tmp[cursor2];
+            return;
+        }
+
+        Comparator&lt;? super T&gt; c = this.c;  // Use local variable for performance
+        int minGallop = this.minGallop;    //  &quot;    &quot;       &quot;     &quot;      &quot;
+        outer:
+        while (true) {
+            int count1 = 0; // Number of times in a row that first run won
+            int count2 = 0; // Number of times in a row that second run won
+
+            /*
+             * Do the straightforward thing until (if ever) one run
+             * appears to win consistently.
+             */
+            do {
+                assert len1 &gt; 0 &amp;&amp; len2 &gt; 1;
+                if (c.compare(tmp[cursor2], a[cursor1]) &lt; 0) {
+                    a[dest--] = a[cursor1--];
+                    count1++;
+                    count2 = 0;
+                    if (--len1 == 0)
+                        break outer;
+                } else {
+                    a[dest--] = tmp[cursor2--];
+                    count2++;
+                    count1 = 0;
+                    if (--len2 == 1)
+                        break outer;
+                }
+            } while ((count1 | count2) &lt; minGallop);
+
+            /*
+             * One run is winning so consistently that galloping may be a
+             * huge win. So try that, and continue galloping until (if ever)
+             * neither run appears to be winning consistently anymore.
+             */
+            do {
+                assert len1 &gt; 0 &amp;&amp; len2 &gt; 1;
+                count1 = len1 - gallopRight(tmp[cursor2], a, base1, len1, len1 - 1, c);
+                if (count1 != 0) {
+                    dest -= count1;
+                    cursor1 -= count1;
+                    len1 -= count1;
+                    System.arraycopy(a, cursor1 + 1, a, dest + 1, count1);
+                    if (len1 == 0)
+                        break outer;
+                }
+                a[dest--] = tmp[cursor2--];
+                if (--len2 == 1)
+                    break outer;
+
+                count2 = len2 - gallopLeft(a[cursor1], tmp, 0, len2, len2 - 1, c);
+                if (count2 != 0) {
+                    dest -= count2;
+                    cursor2 -= count2;
+                    len2 -= count2;
+                    System.arraycopy(tmp, cursor2 + 1, a, dest + 1, count2);
+                    if (len2 &lt;= 1)  // len2 == 1 || len2 == 0
+                        break outer;
+                }
+                a[dest--] = a[cursor1--];
+                if (--len1 == 0)
+                    break outer;
+                minGallop--;
+            } while (count1 &gt;= MIN_GALLOP | count2 &gt;= MIN_GALLOP);
+            if (minGallop &lt; 0)
+                minGallop = 0;
+            minGallop += 2;  // Penalize for leaving gallop mode
+        }  // End of &quot;outer&quot; loop
+        this.minGallop = minGallop &lt; 1 ? 1 : minGallop;  // Write back to field
+
+        if (len2 == 1) {
+            assert len1 &gt; 0;
+            dest -= len1;
+            cursor1 -= len1;
+            System.arraycopy(a, cursor1 + 1, a, dest + 1, len1);
+            a[dest] = tmp[cursor2];  // Move first elt of run2 to front of merge
+        } else if (len2 == 0) {
+            throw new IllegalArgumentException(
+                    &quot;Comparison method violates its general contract!&quot;);
+        } else {
+            assert len1 == 0;
+            assert len2 &gt; 0;
+            System.arraycopy(tmp, 0, a, dest - (len2 - 1), len2);
+        }
+    }
+
+    /**
+     * 保证临时数组的大小能够容纳所有的临时元素，在需要的时候要扩展临时数组的大小。
+     * 数组的大小程指数增长，来保证线性的复杂度。
+     *
+     * 一次申请步长太小，申请的次数必然会增多，浪费时间；一次申请的空间足够大，必然会
+     * 浪费空间。正常情况下，归并排序的临时空间每次大的合并都会 * 2，
+     * 最大长度不会超过数组长度的1/2。 这个长度于2 有着紧密的联系。
+     *
+     * @param minCapacity 临时数组需要的最小空间
+     * @return tmp 临时数组
+     */
+    private T[] ensureCapacity(int minCapacity) {
+        // 如果临时数组长度不够，那需要重新计算临时数组长度；
+        // 如果长度够，直接返回当前临时数组
+        if (tmp.length &lt; minCapacity) {
+            // 这里是计算最小的大于minCapacity的2的幂。方法不常见，这里分析一下。
+            //
+            // 假设有无符号整型 k,它的字节码如下：
+            // 00000000 10000000 00000000 00000000  k
+            // 00000000 11000000 00000000 00000000  k |= k &gt;&gt; 1;
+            // 00000000 11110000 00000000 00000000  k |= k &gt;&gt; 2;
+            // 00000000 11111111 00000000 00000000  k |= k &gt;&gt; 4;
+            // 00000000 11111111 11111111 00000000  k |= k &gt;&gt; 8;
+            // 00000000 11111111 11111111 11111111  k |= k &gt;&gt; 16
+            // 上面的移位事实上只跟最高位有关系，移位的结果是最高位往后的bit全部变成了1
+            // 最后 k++ 的结果 就是刚好是比 minCapacity 大的2的幂
+            // 写的真是6
+            int newSize = minCapacity;
+            newSize |= newSize &gt;&gt; 1;
+            newSize |= newSize &gt;&gt; 2;
+            newSize |= newSize &gt;&gt; 4;
+            newSize |= newSize &gt;&gt; 8;
+            newSize |= newSize &gt;&gt; 16;
+            newSize++;
+
+            if (newSize &lt; 0) // Not bloody likely! 估计作者在这里遇到bug了
+                newSize = minCapacity;
+            else
+                newSize = Math.min(newSize, a.length &gt;&gt;&gt; 1);
+
+            @SuppressWarnings({&quot;unchecked&quot;, &quot;UnnecessaryLocalVariable&quot;})
+            T[] newArray = (T[]) new Object[newSize];
+            tmp = newArray;
+        }
+        return tmp;
+    }
+
+    /**
+     * 检查范围fromIndex到toIndex是否在数组内，如果不是抛异常
+     *
+     * @param arrayLen  整个数组的长度
+     * @param fromIndex 该范围的起点
+     * @param toIndex   该范围的终点
+     * @throws IllegalArgumentException       if fromIndex &gt; toIndex
+     * @throws ArrayIndexOutOfBoundsException if fromIndex &lt; 0 or toIndex &gt; arrayLen
+     */
+    private static void rangeCheck(int arrayLen, int fromIndex, int toIndex) {
+        if (fromIndex &gt; toIndex)
+            throw new IllegalArgumentException(&quot;fromIndex(&quot; + fromIndex +
+                    &quot;) &gt; toIndex(&quot; + toIndex + &quot;)&quot;);
+        if (fromIndex &lt; 0)
+            throw new ArrayIndexOutOfBoundsException(fromIndex);
+        if (toIndex &gt; arrayLen)
+            throw new ArrayIndexOutOfBoundsException(toIndex);
+    }
+}
+</code></pre>]]></content>
+    </entry>
+    
+    <entry>
+      <title><![CDATA[DualPivotQuickSort 双轴快速排序]]></title>
+      <url>http://yoursite.com/2016/06/07/DualPivotQuickSort-%E5%8F%8C%E8%BD%B4%E5%BF%AB%E9%80%9F%E6%8E%92%E5%BA%8F/</url>
+      <content type="html"><![CDATA[<p>这个算法是Arrays.java中给基本类型的数据排序使用的具体实现<br><a id="more"></a></p>
+<p>这个算法是Arrays.java中给基本类型的数据排序使用的具体实现。它针对每种基本类型都做了实现，实现的方式有稍微的差异，但是思路都是相同的，所以这里只挑了int类型的排序来看。</p>
+<p>整个实现中的思路是 首先检查数组的长度，比一个阈值小的时候直接使用双轴快排。其它情况下，先检查数组中数据的顺序连续性。把数组中连续升序或者连续降序的信息记录下来，顺便把连续降序的部分倒置。这样数据就被切割成一段段连续升序的数列。</p>
+<p>如果顺序连续性好，直接使用TimSort算法。这个我们之前介绍过，TimSort算法的核心在于利用数列中的原始顺序，所以可以提高很多效率。这里的TimSort算法是之前介绍的TimSort算法的精简版，剪掉了动态阈值的那一部分。</p>
+<p>顺序连续性不好的数组直接使用了 双轴快排 + 成对插入排序。成对插入排序是插入排序的改进版，它采用了同时插入两个元素的方式调高效率。双轴快排是从传统的单轴快排到3-way快排演化过来的，网上之前已经有很多博客介绍这种算法。这里推荐<a href="http://rerun.me/2013/06/13/quicksorting-3-way-and-dual-pivot/" target="_blank" rel="external">国外一篇文章</a>，它的3张图和下面的代码帮助我理解了快排，3-way和双轴快排之间的关系。</p>
+<p>代码风格来看感觉不如之前TimSort的代码风格好。代码中的变量命名大部分都是a, b, i, k, j, t这种，让人不好理解。所以建议大家日常写代码也不要使用这种不明含义的命名。最好能做到让其它人一看就懂，比如说用index代替i, 用 temp代替t等等。好在它的核心代码部分注释很全，看起来到不麻烦。</p>
+<pre><code>final class DualPivotQuicksort{
+    /**
+     * 保护这个类不被实例化
+     */
+    private DualPivotQuickSort(){}
+
+    /**
+     * 待合并的序列的最大数量
+     */
+    private static final int MAX_RUN_COUNT = 67;
+
+    /**
+     * 待合并的序列的最大长度
+     */
+    private static final int MAX_RUN_LENGTH = 33;
+
+    /**
+     * 如果参与排序的数组长度小于这个值，优先使用快速排序而不是归并排序
+     */
+    private static final int QUICKSORT_THRESHOLD = 286;
+
+    /**
+     * 如果参与排序的数组长度小于这个值，有限考虑插入排序，而不是快速排序
+     */
+    private static final int INSERTION_SORT_THRESHOLD = 47; 
+
+    /**
+     * 给指定数组排序
+     *
+     * @param 指定的数组
+     */
+    public static void sort(int[] a) {
+        sort(a, 0, a.length - 1);
+    }
+
+    /**
+     * 给指定数组的指定范围排序
+     * @param 指定的数组
+     * @param 指定范围的第一个元素(包括)
+     * @param 指定范围的最后一个元素(不包括)
+     */
+    public static void sort(int[] a, int left, int right) {
+
+        if(right-left &lt; QUICKSORT_THRESHOLD){
+            sort(a, left, right, true);
+            return;
+        }
+
+        /**
+         * run[i] 意味着第i个有序数列开始的位置，（升序或者降序）
+         **/
+        int[] run =new int[MAX_RUN_COUNT + 1];
+        int count=0; run[0] = left;
+
+        // 检查数组是不是已经接近有序状态
+        for(int k = left; k &lt; right; run[count] = k) {
+            if(a[k] &lt; a[k + 1]){ // 升序
+                while(++k &lt;= right &amp;&amp; a[k - 1] &lt;= a[k]) ;
+            } else if(a[k] &gt; a[k + 1]) { // 降序
+                while(++k &lt;=right &amp;&amp; a[k - 1] &gt;= a[k]);
+                //如果是降序的，找出k之后，把数列倒置
+                for (int lo = run[count],hi = k;++lo &lt; --hi) {
+                    int t = a[lo]; a[lo] = a[hi]; a[hi] = t;
+                }
+            } else { // 相等
+                for(int m = MAX_RUN_LENGTH; ++k &lt;=right &amp;&amp; a[k - 1] == a[k];) {
+                    // 数列中有至少MAX_RUN_LENGTH的数据相等的时候，直接使用快排。
+                    // 这里为什么这么处理呢？
+                    if(--m == 0){
+                        sort(a, left, right, true);
+                        return;
+                    }
+                }
+            }
+
+            /**
+             * 数组并非高度有序，使用快速排序,因为数组中有序数列的个数超过了MAX_RUN_COUNT
+             */
+            if(++count == MAX_RUN_COUNT) {
+                sort(a, left, right, true);
+                return;
+            }
+        }
+        //检查特殊情况
+        if(run[count] == right++){ // 最后一个有序数列只有最后一个元素
+            run[++count] =right; // 那给最后一个元素的后面加一个哨兵
+        } else if(count == 1) { // 整个数组中只有一个有序数列，说明数组已经有序啦，不需要排序了
+            return;
+        }
+
+        /**
+         * 创建合并用的临时数组。
+         * 注意： 这里变量right被加了1，它在数列最后一个元素位置+1的位置
+         * 这里没看懂，没发现后面的奇数处理和偶数处理有什么不同
+         */
+        int[] b; byte odd=0;
+        for(int n=1; (n &lt;&lt;= 1) &lt; count; odd ^=1);
+
+        if(odd == 0) {
+            b=a;a= new int[b.length];
+            for(int i=left -1; ++i &lt; right; a[i] = b[i]);
+        } else {
+            b=new int[a.length];
+        }
+
+        // 合并
+        // 最外层循环，直到count为1，也就是栈中待合并的序列只有一个的时候，标志合并成功
+        // a 做原始数组，b 做目标数组
+        for(int last; count &gt; 1; count = last) { 
+            // 遍历数组，合并相邻的两个升序序列
+            for(int k = (last = 0) + 2; k &lt;= count; k += 2) {
+                // 合并run[k-2] 与 run[k-1]两个序列
+                int hi = run[k], mi = run[k - 1];
+                for(int i = run[k - 2], p = i,q = mi; i &lt; hi; ++i){
+                    // 这里我给源码加了一个括号，这样好理解一点。 之前总觉得它会出现数组越界问题，
+                    // 后来加了这个括号之后发现是没有问题的
+                    if(q &gt;= hi  ||  (p &lt; mi &amp;&amp; a[p] &lt;= a[q])) {
+                        b[i] = a[p++];
+                    } else {
+                        b[i] = a[q++];
+                    }
+                }
+                // 这里把合并之后的数列往前移动
+                run[++last] = hi;
+            }
+            // 如果栈的长度为奇数，那么把最后落单的有序数列copy过对面
+            if((count &amp; 1) != 0) {
+                for(int i = right, lo =run[count -1]; --i &gt;= lo; b[i] = a[i]);
+                run[++last] = right;
+            }
+            //临时数组，与原始数组对调，保持a做原始数组，b 做目标数组
+            int[] t = a; a = b; b = t;
+        }
+
+    }
+
+    /**
+     * 使用双轴快速排序给指定数组的指定范围排序
+     * @param a 参与排序的数组
+     * @param left 范围内最左边的元素的位置(包括该元素)
+     * @param right 范围内最右边的元素的位置(包括该元素)
+     * @param leftmost 指定的范围是否在数组的最左边
+     */
+     private static void sort(int[] a, int left, int right, boolean leftmost) {
+        int length = right - left + 1;
+
+        // 小数组使用插入排序
+        if (length &lt; INSERTION_SORT_THRESHOLD) {
+            if(leftmost) {
+                /**
+                 * 经典的插入排序算法，不带哨兵。做了优化，在leftmost情况下使用
+                 */
+                for(int i = left, j = i; i &lt; right; j = ++i) {
+                    int ai = a[i + 1];
+                    while(ai &lt; a[j]){
+                        a[j + 1] = a[j];
+                        if(j-- == left){
+                            break;
+                        }
+                    }
+                    a[j + 1] = ai;
+                }
+            } else {
+
+               /**
+                * 首先跨过开头的升序的部分
+                */
+                do {
+                    if(left &gt; right) {
+                        return;
+                    }
+                }while(a[++left] &gt;= a[left - 1]);
+
+                /**
+                 * 这里用到了成对插入排序方法，它比简单的插入排序算法效率要高一些
+                 * 因为这个分支执行的条件是左边是有元素的
+                 * 所以可以直接从left开始往前查找。
+                 */
+                for(int k = left; ++left &lt;= right; k = ++left) {
+                    int a1 = a[k], a2 = a[left];
+
+                    //保证a1&gt;=a2
+                    if(a1 &lt; a2) {
+                        a2 = a1; a1 = a[left];
+                    }
+                    //先把两个数字中较大的那个移动到合适的位置
+                    while(a1 &lt; a[--k]) {
+                        a[k + 2] = a[k]; //这里每次需要向左移动两个元素
+                    }
+                    a[++k + 1] = a1;
+                    //再把两个数字中较小的那个移动到合适的位置
+                    while(a2 &lt; a[--k]) {
+                        a[k + 1] = a[k]; //这里每次需要向左移动一个元素
+                    }
+                    a[k + 1] = a2;
+                }
+                int last = a[right];
+
+                while(last &lt; a[--right]) {
+                    a[right + 1] = last;
+                }
+                a[right + 1] = last;
+            }
+            return;
+        }
+
+        // length / 7 的一种低复杂度的实现, 近似值(length * 9 / 64 + 1)
+        int seventh = (length &gt;&gt; 3) + (length &gt;&gt; 6) + 1;
+
+        // 对5段靠近中间位置的数列排序，这些元素最终会被用来做轴(下面会讲)
+        // 他们的选定是根据大量数据积累经验确定的
+        int e3 = (left + right) &gt;&gt;&gt; 1; //中间值
+        int e2 = e3 - seventh;
+        int e1 = e2 - seventh;
+        int e4 = e3 + seventh;
+        int e5 = e4 + seventh;
+
+        //这里是手写的冒泡排序，没有for循环
+        if(a[e2] &lt; a[e1]){ int t = a[e2]; a[e2] = a[e1]; a[e1] = t; }
+        if (a[e3] &lt; a[e2]) {
+            int t = a[e3]; a[e3] = a[e2]; a[e2] = t;
+            if (t &lt; a[e1]) {
+                a[e2] = a[e1]; a[e1] = t; 
+            }
+        }
+        if (a[e4] &lt; a[e3]) {
+            int t = a[e4]; a[e4] = a[e3]; a[e3] = t;
+            if (t &lt; a[e2]) {
+                a[e3] = a[e2]; a[e2] = t;
+                if (t &lt; a[e1]) {
+                    a[e2] = a[e1]; a[e1] = t;
+                }
+            }
+        }
+        if (a[e5] &lt; a[e4]) {
+            int t = a[e5]; a[e5] = a[e4]; a[e4] = t;
+            if (t &lt; a[e3]) {
+                a[e4] = a[e3]; a[e3] = t;
+                if (t &lt; a[e2]) {
+                    a[e3] = a[e2]; a[e2] = t;
+                    if (t &lt; a[e1]) {
+                        a[e2] = a[e1]; a[e1] = t;
+                    }
+                }
+            }
+        }
+
+        //指针
+        int less = left;   // 中间区域的首个元素的位置
+        int great = right; //右边区域的首个元素的位置
+        if (a[e1] != a[e2] &amp;&amp; a[e2] != a[e3] &amp;&amp; a[e3] != a[e4] &amp;&amp; a[e4] != a[e5]) {
+            /*
+             * 使用5个元素中的2，4两个位置，他们两个大致处在四分位的位置上。
+             * 需要注意的是pivot1 &lt;= pivot2
+             */
+            int pivot1 = a[e2];
+            int pivot2 = a[e4];
+
+            /*
+             * The first and the last elements to be sorted are moved to the
+             * locations formerly occupied by the pivots. When partitioning
+             * is complete, the pivots are swapped back into their final
+             * positions, and excluded from subsequent sorting.
+             * 第一个和最后一个元素被放到两个轴所在的位置。当阶段性的分段结束后
+             * 他们会被分配到最终的位置并从子排序阶段排除
+             */
+            a[e2] = a[left];
+            a[e4] = a[right];
+
+            /*
+             * 跳过一些队首的小于pivot1的值，跳过队尾的大于pivot2的值
+             */
+            while (a[++less] &lt; pivot1);
+            while (a[--great] &gt; pivot2);
+
+            /*
+             * Partitioning:
+             *
+             *   left part           center part                   right part
+             * +--------------------------------------------------------------+
+             * |  &lt; pivot1  |  pivot1 &lt;= &amp;&amp; &lt;= pivot2  |    ?    |  &gt; pivot2  |
+             * +--------------------------------------------------------------+
+             *               ^                          ^       ^
+             *               |                          |       |
+             *              less                        k     great
+             *
+             * Invariants:
+             *
+             *              all in (left, less)   &lt; pivot1
+             *    pivot1 &lt;= all in [less, k)     &lt;= pivot2
+             *              all in (great, right) &gt; pivot2
+             *
+             * Pointer k is the first index of ?-part.
+             */
+            outer:
+            for (int k = less - 1; ++k &lt;= great; ) {
+                int ak = a[k];
+                if (ak &lt; pivot1) { // Move a[k] to left part
+                    a[k] = a[less];
+                    /*
+                     * 这里考虑的好细致，&quot;a[i] = b; i++&quot;的效率要好过
+                     * &apos;a[i++] = b&apos;
+                     */
+                    a[less] = ak;
+                    ++less;
+                } else if (ak &gt; pivot2) { // Move a[k] to right part
+                    while (a[great] &gt; pivot2) {
+                        if (great-- == k) { // k遇到great本次分割
+                            break outer;
+                        }
+                    }
+                    if (a[great] &lt; pivot1) { // a[great] &lt;= pivot2
+                        a[k] = a[less];
+                        a[less] = a[great];
+                        ++less;
+                    } else { // pivot1 &lt;= a[great] &lt;= pivot2
+                        a[k] = a[great];
+                    }
+                    /*
+                     * 同上，用&quot;a[i]=b;i--&quot;代替&quot;a[i--] = b&quot;
+                     */
+                    a[great] = ak;
+                    --great;
+                }
+            } // 分割阶段结束出来的位置,上一个outer结束的位置
+
+            // 把两个放在外面的轴放回他们应该在的位置上 
+            a[left]  = a[less  - 1]; a[less  - 1] = pivot1;
+            a[right] = a[great + 1]; a[great + 1] = pivot2;
+
+            // 把左边和右边递归排序，跟普通的快速排序差不多
+            sort(a, left, less - 2, leftmost);
+            sort(a, great + 2, right, false);
+
+            /*
+             * If center part is too large (comprises &gt; 4/7 of the array),
+             * swap internal pivot values to ends.
+             * 如果中心区域太大，超过数组长度的 4/7。就先进行预处理，再参与递归排序。
+             * 预处理的方法是把等于pivot1的元素统一放到左边，等于pivot2的元素统一
+             * 放到右边,最终产生一个不包含pivot1和pivot2的数列，再拿去参与快排中的递归。
+             */
+            if (less &lt; e1 &amp;&amp; e5 &lt; great) {
+                /*
+                 * Skip elements, which are equal to pivot values.
+                 */
+                while (a[less] == pivot1) {
+                    ++less;
+                }
+
+                while (a[great] == pivot2) {
+                    --great;
+                }
+
+                /*
+                 * Partitioning:
+                 *
+                 *   left part         center part                  right part
+                 * +----------------------------------------------------------+
+                 * | == pivot1 |  pivot1 &lt; &amp;&amp; &lt; pivot2  |    ?    | == pivot2 |
+                 * +----------------------------------------------------------+
+                 *              ^                        ^       ^
+                 *              |                        |       |
+                 *             less                      k     great
+                 *
+                 * Invariants:
+                 *
+                 *              all in (*,  less) == pivot1
+                 *     pivot1 &lt; all in [less,  k)  &lt; pivot2
+                 *              all in (great, *) == pivot2
+                 *
+                 * Pointer k is the first index of ?-part.
+                 */
+                outer:
+                for (int k = less - 1; ++k &lt;= great; ) {
+                    int ak = a[k];
+                    if (ak == pivot1) { // Move a[k] to left part
+                        a[k] = a[less];
+                        a[less] = ak;
+                        ++less;
+                    } else if (ak == pivot2) { // Move a[k] to right part
+                        while (a[great] == pivot2) {
+                            if (great-- == k) {
+                                break outer;
+                            }
+                        }
+                        if (a[great] == pivot1) { // a[great] &lt; pivot2
+                            a[k] = a[less];
+                            /*
+                             * Even though a[great] equals to pivot1, the
+                             * assignment a[less] = pivot1 may be incorrect,
+                             * if a[great] and pivot1 are floating-point zeros
+                             * of different signs. Therefore in float and
+                             * double sorting methods we have to use more
+                             * accurate assignment a[less] = a[great].
+                             */
+                            a[less] = pivot1;
+                            ++less;
+                        } else { // pivot1 &lt; a[great] &lt; pivot2
+                            a[k] = a[great];
+                        }
+                        a[great] = ak;
+                        --great;
+                    }
+                } // outer结束的位置
+            }
+
+            // Sort center part recursively
+            sort(a, less, great, false);
+
+        } else { // 这里选取的5个元素刚好相等，使用传统的3-way快排 
+
+            /*
+             * 在5个元素中取中值
+             */
+            int pivot = a[e3];
+
+            /*
+             * 
+             * Partitioning degenerates to the traditional 3-way
+             * (or &quot;Dutch National Flag&quot;) schema:
+             *
+             *   left part    center part              right part
+             * +-------------------------------------------------+
+             * |  &lt; pivot  |   == pivot   |     ?    |  &gt; pivot  |
+             * +-------------------------------------------------+
+             *              ^              ^        ^
+             *              |              |        |
+             *             less            k      great
+             *
+             * Invariants:
+             *
+             *   all in (left, less)   &lt; pivot
+             *   all in [less, k)     == pivot
+             *   all in (great, right) &gt; pivot
+             *
+             * Pointer k is the first index of ?-part.
+             */
+            for (int k = less; k &lt;= great; ++k) {
+                if (a[k] == pivot) {
+                    continue;
+                }
+                int ak = a[k];
+                if (ak &lt; pivot) { // 把a[k]移动到左边去，把center区向右滚动一个单位
+                    a[k] = a[less];
+                    a[less] = ak;
+                    ++less;
+                } else { // a[k] &gt; pivot - 把a[k]移动到右边
+                    while (a[great] &gt; pivot) { // 先找到右边最后一个比pivot小的值
+                        --great;
+                    }
+                    if (a[great] &lt; pivot) { // a[great] &lt;= pivot ，把他移到左边
+                        a[k] = a[less];
+                        a[less] = a[great];
+                        ++less;
+                    } else { // a[great] == pivot //如果相等，中心区直接扩展
+                        /*
+                         * 这里因为是整型值，所以a[k] == a[less] == pivot;
+                         */
+                        a[k] = pivot;
+                    }
+                    a[great] = ak;
+                    --great;
+                }
+            }
+
+            /*
+             * 左右两边还没有完全排序，所以递归解决
+             * 中心区只有一个值，不再需要排序
+             */
+            sort(a, left, less - 1, leftmost);
+            sort(a, great + 1, right, false);
+        }
+     }
+}
+</code></pre>]]></content>
+    </entry>
+    
+    <entry>
+      <title><![CDATA[Java泛型里的协变和逆变]]></title>
+      <url>http://yoursite.com/2016/05/31/Java%E6%B3%9B%E5%9E%8B%E9%87%8C%E7%9A%84%E5%8D%8F%E5%8F%98%E5%92%8C%E9%80%86%E5%8F%98/</url>
+      <content type="html"><![CDATA[<p>实例讲解Java泛型里的协变和逆变。<br><a id="more"></a></p>
+<h2 id="Java泛型里的协变和逆变"><a href="#Java泛型里的协变和逆变" class="headerlink" title="Java泛型里的协变和逆变"></a>Java泛型里的协变和逆变</h2><p>通过实例来看问题，</p>
+<pre><code>// 定义三个类: Benz -&gt; Car -&gt; Vehicle，它们之间是顺次继承关系
+class Vehicle {}
+class Car extends Vehicle {}
+class Benz extends Car {}
+
+// 定义一个util类，其中用到泛型里的协变和逆变
+class Utils&lt;T&gt; {
+    T get(List&lt;? extends T&gt; list, int i) {
+        return list.get(i);
+    }
+
+    void put(List&lt;? super T&gt; list, T item) {
+        list.add(item);
+    }
+
+    void copy(List&lt;? super T&gt; to, List&lt;? extends T&gt; from) {
+        for(T item : from) {
+            to.add(item);
+        }
+    }
+}
+
+// 测试函数
+void test() {
+    List&lt;Vehicle&gt; vehicles = new ArrayList&lt;&gt;();
+    List&lt;Benz&gt; benzs = new ArrayList&lt;&gt;();
+    Utils&lt;Car&gt; carUtils = new Utils&lt;&gt;();
+
+    carUtils.put(vehicles, new Car());
+    Car car = carUtils.get(benzs, 0);
+    carUtils.copy(vehicles, benzs);
+}
+</code></pre><p>我们只需关注Utils<car>.copy()函数即可，两个参数from, to均为list，</car></p>
+<ul>
+<li>对from的要求：其中的对象必须是Car或者Car的子类，即可以用Car来引用这些对象</li>
+<li>对to的要求：它必须可以保存Car类型的对象，即其元素的类型必须是Car或者Car的父类</li>
+</ul>
+<p>接下来看看该函数的使用情况，carUtils.copy(vehicles, benzs);，参数的含义是：</p>
+<ul>
+<li>List&lt;? extents Car&gt;：这个类型集合(List<car>, List<benz>)里的元素可以使用替换原则</benz></car></li>
+<li>List&lt;? super Car&gt;：这个类型集合(List<car>,List<vehicle>)里的元素也可以使用替换原则</vehicle></car></li>
+</ul>
+<p>都可以使用替换原则了，但是他们有何区别呢？</p>
+<ul>
+<li>List&lt;? extents Car&gt;：List&lt;? extents Car&gt;与? extends Car的序关系是一致的</li>
+<li>List&lt;? super Car&gt;：List&lt;? super Car&gt;与? super Car的序关系是相反的</li>
+</ul>
+<p>其中，? extends Car, ? super Car, List&lt;? extents Car&gt;, List&lt;? super Car&gt;<br>均为类型集合，序关系小的可以替换序关系大的。其实在类型系统里面，Liskov替换原则可以<br>进一步推广为： 任何序关系大的类型可以出现的地方，序关系小的类型一定可以出现。<br>而继承关系是一种特殊的序关系，当然这需要语言的类型系统支持才可以。</p>
+<h2 id="协变和逆变"><a href="#协变和逆变" class="headerlink" title="协变和逆变"></a>协变和逆变</h2><h3 id="定义-wikipedia"><a href="#定义-wikipedia" class="headerlink" title="定义(wikipedia)"></a>定义(wikipedia)</h3><pre><code>covariant if it preserves the ordering of types (≤), which orders types from more specific to more generic;
+contravariant if it reverses this ordering;
+bivariant if both of these apply (i.e., both I&lt;A&gt; ≤ I&lt;B&gt; and I&lt;B&gt; ≤ I&lt;A&gt; at the same time);
+invariant or nonvariant if neither of these applies.
+</code></pre><h3 id="理解"><a href="#理解" class="headerlink" title="理解"></a>理解</h3><p>设T是一个类型集合(type set)，其中的元素是一个个类型，如Vehicle, Car, Benz，<br>S<t>是一个根据T生成的类型集合(如List<t>)，其中的元素也是一个个类型，如S<vehicle>,<br>S<car>, S<benz>，那么我们有如下定义，</benz></car></vehicle></t></t></p>
+<pre><code>如果集合S&lt;T&gt;里的序关系跟集合T里的序关系一致，那么就说S&lt;T&gt;跟T是协变关系
+如果集合S&lt;T&gt;里的序关系跟集合T里的序关系相反，那么就说S&lt;T&gt;跟T是逆变关系
+</code></pre><p>然后，根据序关系的大小就可以使用替换原则了。那函数Utils<car>.copy()的参数<br>为啥要用? extends T，? super T而不直接使用T呢，void copy(List<t> to, List<t> from)，<br>把T替换成Car之后，要使用这个函数就只能使用List<car>了，但是很明显，我们完全可以<br>将一个List<benz> copy 到一个List<car>或者List<vehicle>里面，要怎么解决呢？<br>当然是使用协变和逆变：</vehicle></car></benz></car></t></t></car></p>
+<pre><code>对于from参数，? extends T表示跟T满足协变关系的List&lt;T&gt;就可以使用替换原则
+对于to参数，? super T表示跟T满足逆变关系的List&lt;T&gt;就可以使用替换原则
+</code></pre><p>这样就不用仅仅局限到List<car>了。</car></p>
+<h3 id="协变、逆变使用的时机"><a href="#协变、逆变使用的时机" class="headerlink" title="协变、逆变使用的时机"></a>协变、逆变使用的时机</h3><p>然后问题又来了，什么时候使用协变，什么时候使用逆变呢？<br>仔细观察（C#里面已经观察好久了）就会发现，</p>
+<pre><code>如果只是读取的话，那么满足协变关系的类型可以使用替换原则
+如果只是写入的话，那么满足逆变关系的类型可以使用替换原则
+</code></pre><p>比如上面的函数，void copy(List&lt;? super Car&gt; to, List&lt;? extends Car&gt; from);，<br>从from里面读取数据，则完全可以从List<car>，List<benz>里面读取，<br>而往to里面写入数据，则完全可以往List<car>，List<vehicle>里面写入，<br>所以from使用满足协变关系的类型而to使用满足逆变关系的类型。事实上，在C#，Kotlin里，<br>直接使用out, in来表示协变关系和逆变关系，比如Kotlin里面这样定义copy函数，<br>fun copy(to: List<in car="">, from: List<out car="">)，然后就可以这样使用了，</out></in></vehicle></car></benz></car></p>
+<pre><code>copy(cars, benzs)
+copy(cars, cars)
+copy(vehicles, benzs)
+copy(vehicles, cars)
+</code></pre><p>(over)</p>
+]]></content>
+    </entry>
+    
+    <entry>
+      <title><![CDATA[Redis Cluster环境部署-Windows]]></title>
+      <url>http://yoursite.com/2016/05/25/Redis-Cluster%E7%8E%AF%E5%A2%83%E9%83%A8%E7%BD%B2-Windows/</url>
+      <content type="html"><![CDATA[<p>windows下使用RedisCluster集群简单实例<br><a id="more"></a></p>
+<h2 id="一、开发环境"><a href="#一、开发环境" class="headerlink" title="一、开发环境"></a>一、开发环境</h2><p>1.win7<br>2.redis 3.0 64位<br>3.ruby 环境<br>  测试用到的所有安装包及我的测试配置 <a href="http://pan.baidu.com/s/1qXmO3fQ" target="_blank" rel="external">http://pan.baidu.com/s/1qXmO3fQ</a></p>
+<h4 id="redis-安装"><a href="#redis-安装" class="headerlink" title="redis 安装"></a>redis 安装</h4><p>Redis对于Linux是官方支持的,安装和使用没有什么好说的,普通使用按照官方指导，5分钟以内就能搞定。详情请参考:<a href="http://redis.io/download" target="_blank" rel="external">http://redis.io/download</a></p>
+<p>Redis官方是不支持windows的，只是 Microsoft Open Tech group 在 GitHub上开发了一个Win64的版本,官方说明：</p>
+<pre><code>Win64 Unofficial The Redis project does not directly support
+Windows, however the Microsoft Open Tech group develops and maintains an Windows port targeting Win64. 
+</code></pre><p>项目地址：<a href="https://github.com/MSOpenTech/redis" target="_blank" rel="external">https://github.com/MSOpenTech/redis</a> 打开以后，可以直接使用浏览器下载，或者git克隆。在release页面可以下载需要的redis包</p>
+<p><img src="http://7xsp7e.com1.z0.glb.clouddn.com/image/jpg/tech/redis/1463793-b7d446f160bab8cf.png" alt="hyperlink syntax"></p>
+<p>下载解压，没什么好说的，在解压后的bin目录下有以下这些文件：</p>
+<pre><code>redis-benchmark.exe #基准测试
+redis-check-aof.exe # aof
+redis-check-dump.exe # dump
+redis-cli.exe # 客户端
+redis-server.exe # 服务器
+redis.windows.conf # 配置文件 
+</code></pre><h4 id="ruby环境准备"><a href="#ruby环境准备" class="headerlink" title="ruby环境准备"></a>ruby环境准备</h4><p>下载 64位的 RubyInstaller并安装 地址<a href="http://rubyinstaller.org/downloads/" target="_blank" rel="external">http://rubyinstaller.org/downloads/</a><br>勾选下面三个不用配置环境变量</p>
+<p><img src="http://7xsp7e.com1.z0.glb.clouddn.com/image/jpg/tech/redis/1463793-45de1a7750fa14c7.png" alt="hyperlink syntax"></p>
+<h4 id="安装RubyGems"><a href="#安装RubyGems" class="headerlink" title="安装RubyGems"></a>安装RubyGems</h4><p>下载下来是一个压缩包，解压运行里面的 setup.rb 安装 rubyGems<br>由于墙的原因ruby自带的源有时候很慢，我们换成淘宝的源，不然下面安装redis依赖会失败＼（－－）／</p>
+<p>在cmd下运行</p>
+<pre><code>gem sources --remove https://rubygems.org/ 删掉原来的源
+gem sources -a http://ruby.taobao.org 添加淘宝源
+gem sources -l 查看现有的源
+gem install redis 安装redis依赖
+</code></pre><h2 id="二-、使用redis-cluster"><a href="#二-、使用redis-cluster" class="headerlink" title="二 、使用redis cluster"></a>二 、使用redis cluster</h2><p>按照文档的说明步骤来做就行了，详情在这 <a href="http://doc.redisfans.com/topic/cluster-tutorial.html#id5" target="_blank" rel="external">http://doc.redisfans.com/topic/cluster-tutorial.html#id5</a></p>
+<p>要让集群正常运作至少需要三个主节点，因此我们创建6个节点，三个主节点三个从节点，详细请查看文档，我简化一下文档的步骤即：</p>
+<h4 id="1-创建-6个文件夹分别为-7000-7005"><a href="#1-创建-6个文件夹分别为-7000-7005" class="headerlink" title="1.创建 6个文件夹分别为 7000-7005"></a>1.创建 6个文件夹分别为 7000-7005</h4><p>这里就是做集群时各个机器所安装的redis，在每个文件夹放一份下载下来的redis，例如</p>
+<p><img src="http://7xsp7e.com1.z0.glb.clouddn.com/image/jpg/tech/redis/1463793-dca8fd8cf42f8021.png" alt="hyperlink syntax"></p>
+<h4 id="2-创建配置文件-redis-conf"><a href="#2-创建配置文件-redis-conf" class="headerlink" title="2.创建配置文件 redis.conf"></a>2.创建配置文件 redis.conf</h4><p>其他几个7000-7004文件夹以此类推，注意修改对应的端口号</p>
+<pre><code>port 7005
+cluster-enabled yes
+cluster-config-file nodes.conf
+cluster-node-timeout 5000
+appendonly yes
+</code></pre><p>文件中的<br>cluster-enabled 选项用于开实例的集群模式，<br>cluster-conf-file 选项则设定了保存节点配置文件的路径， 默认值为nodes.conf 。<br>nodes.conf 节点配置文件无须人为修改， 它由 Redis 集群在启动时创建， 并在有需要时自动进行更新。</p>
+<h4 id="3-创建启动脚本7005-bat"><a href="#3-创建启动脚本7005-bat" class="headerlink" title="3.创建启动脚本7005.bat"></a>3.创建启动脚本7005.bat</h4><p>这样不用总是敲命令 ,名字随意改，其他几个文件夹同理</p>
+<pre><code>@echo off
+redis-server.exe redis.conf
+@pause
+</code></pre><h4 id="4-创建集群"><a href="#4-创建集群" class="headerlink" title="4.创建集群"></a>4.创建集群</h4><pre><code>1.按照上面所说的配置好各个实例，主要是改端口号，运行 7000.bat- 7005.bat脚本启动六个redis实例
+2.cd到 redis-trib.rb 所在的目录下运行命令
+redis-trib.rb create --replicas 1 127.0.0.1:7000 127.0.0.1:7001 127.0.0.1:7002 127.0.0.1:7003 127.0.0.1:7004 127.0.0.1:7005
+</code></pre><p><img src="http://7xsp7e.com1.z0.glb.clouddn.com/image/jpg/tech/redis/1463793-00d1bf433174d687.png" alt="hyperlink syntax"></p>
+<p>打印出配置信息，现在的master是 7000 7001 7002这三台机，redis会对key 做 CRC16 校验和后分别存储这三台机上。没问题就输入 yes</p>
+<p>例如 7000 这台机 slots:0-5460 的意思是：</p>
+<p>对key 做 CRC16 校验和后 值在 0-5460范围内都会存到这台机器里<br>例如 key=288 对应的CRC16校验和 为 4258，应该存在7000这台机里</p>
+<p>PS：使用前应该对业务做梳理，根据系统中key的特点来调整各个机器的slots范围，<br>不然系统的key基本集中在一两台机器上集群的效果就不大了</p>
+<p>redis-trib.rb文件在下载下来的redis包里可能是没有的，可以到<br><a href="https://github.com/antirez/redis/tree/unstable/src" target="_blank" rel="external">https://github.com/antirez/redis/tree/unstable/src</a> 目录下下载<br>之前的ruby环境就是为运行这个文件做准备的</p>
+<p>命令的意义如下：</p>
+<pre><code>redis-trib.rb
+create， 这表示我们希望创建一个新的集群。
+选项 --replicas 1 表示我们希望为集群中的每个主节点创建一个从节点。
+之后跟着的其他参数则是实例的地址列表， 我们希望程序使用这些地址所指示的实例来创建新集群。
+</code></pre><p>简单来说， 以上命令的意思就是让 redis-trib 程序创建一个包含三个主节点和三个从节点的集群。</p>
+<p>看看node.conf文件里生成了什么</p>
+<p><img src="http://7xsp7e.com1.z0.glb.clouddn.com/image/jpg/tech/redis/1463793-33a8460b4e76dcf3.png" alt="hyperlink syntax"></p>
+<p>里面记录了master 和 slave的对应关系，例如图片里的 7000是master 而对应的 slave是7003这台机，绿色的一长串数字是对应机器的Id，redis以此来标记一台机器。</p>
+<h2 id="三、Jedis编程使用集群"><a href="#三、Jedis编程使用集群" class="headerlink" title="三、Jedis编程使用集群"></a>三、Jedis编程使用集群</h2><p>github地址 <a href="https://github.com/xetorthio/jedis" target="_blank" rel="external">https://github.com/xetorthio/jedis</a><br>按上面两步配置好，创建并启动集群。测试代码如下：</p>
+<p>添加Jedis依赖</p>
+<pre><code>&lt;dependency&gt;
+      &lt;groupId&gt;org.apache.commons&lt;/groupId&gt;
+      &lt;artifactId&gt;commons-pool2&lt;/artifactId&gt;
+      &lt;version&gt;2.4.2&lt;/version&gt;
+&lt;/dependency&gt;
+&lt;dependency&gt;
+     &lt;groupId&gt;redis.clients&lt;/groupId&gt;
+      &lt;artifactId&gt;jedis&lt;/artifactId&gt;
+      &lt;version&gt;2.7.3&lt;/version&gt;
+&lt;/dependency&gt;
+</code></pre><p>测试代码：</p>
+<pre><code>@Test
+   public  void cluster(){
+      String key = &quot;1417&quot;;
+      Set&lt;HostAndPort&gt; jedisClusterNodes = new HashSet&lt;HostAndPort&gt;();
+      jedisClusterNodes.add(new HostAndPort(&quot;127.0.0.1&quot;, 7000));   
+      JedisCluster jc = new JedisCluster(jedisClusterNodes);
+
+      jc.setnx(key, &quot;bar&quot;);
+      String value = jc.get(key);
+      System.out.println(&quot;key-&quot;+key+&quot; slot-&quot;+JedisClusterCRC16.getSlot(key)+&quot; value-&quot;+value);
+
+      String key2 = &quot;288&quot;;
+      jc.setnx(key2, &quot;bar2&quot;);
+      String value2 = jc.get(key);
+      System.out.println(&quot;key-&quot;+key2+&quot; slot-&quot;+JedisClusterCRC16.getSlot(key2)+&quot; value-&quot;+value2);
+   }
+</code></pre><p><img src="http://7xsp7e.com1.z0.glb.clouddn.com/image/jpg/tech/redis/1463793-8ab2fd0bb862b3fc.png" alt="hyperlink syntax"></p>
+<p>github上有这一句，Jedis Cluster 会自动去发现集群中的节点，所以JedisClusterNodes只需要 add一个实例</p>
+<p>运行得到结果<br><img src="http://7xsp7e.com1.z0.glb.clouddn.com/image/jpg/tech/redis/1463793-495b43cd591ecfcc.png" alt="hyperlink syntax"></p>
+<p>接下来用redis客户端看看这两个key=1417 、key=288的值存到哪个节点下<br>看回最初的配置</p>
+<p><img src="http://7xsp7e.com1.z0.glb.clouddn.com/image/jpg/tech/redis/1463793-1d9100e1992146a0.png" alt="hyperlink syntax"></p>
+<p>key=288算出来的 CRC16校验和是 4258，根据配置 应该存在 7000这台机上<br>key=1417 算出来的 CRC16校验和是 13096，根据配置 应该存在 7002 这台机上</p>
+<p>用redis 客户端查看数据存到哪台机器上</p>
+<p><img src="http://7xsp7e.com1.z0.glb.clouddn.com/image/jpg/tech/redis/1463793-8f1ca96a2fe051ff.png" alt="hyperlink syntax"></p>
+<p>进去7000这台机上<br>get 288拿到了value bar2<br>get 1417 得到提示让去 7002这台机查</p>
+<p>从redis客户端看到的结果与配置一致</p>
+<h2 id="四、简单集成Spring"><a href="#四、简单集成Spring" class="headerlink" title="四、简单集成Spring"></a>四、简单集成Spring</h2><p>JedisFactory类<br>传入host 、port 和JedisPoolConfig 类</p>
+<pre><code>package your path;
+import java.util.HashSet;
+import java.util.Set;
+import redis.clients.jedis.HostAndPort;
+import redis.clients.jedis.JedisCluster;
+import redis.clients.jedis.JedisPoolConfig;
+
+/**
+ * &lt;p&gt;Title: JedisClusterFactory.java&lt;／p&gt;
+ * &lt;p&gt;Description: &lt;／p&gt;
+ * @date 2016-1-14
+ * @version 1.0
+ */
+public class JedisClusterFactory {
+
+/** 
+ * @Description 
+ * @date 2016-1-14 上午11:00:18 
+ * @param args
+ */
+
+ private JedisCluster jedisCluster;
+
+ public JedisCluster getJedisCluster() {
+     return jedisCluster;
+ }
+
+ public JedisClusterFactory(JedisPoolConfig jedisPoolConfig,String host,int port){    
+     Set&lt;HostAndPort&gt; jedisClusterNodes= new HashSet&lt;HostAndPort&gt;();
+     //Jedis Cluster will attempt to discover cluster nodes automatically
+     jedisClusterNodes.add(new HostAndPort(host,port));
+     jedisCluster=new JedisCluster(jedisClusterNodes,jedisPoolConfig);
+ }
+}
+</code></pre><p>JedisProvide.java工具类，主要是封装些常用的操作</p>
+<pre><code>package your path;
+import your path.CacheSecondLevel;
+import redis.clients.jedis.JedisCluster;
+
+/**
+ * &lt;p&gt;Title: RedisProvide.java&lt;／p&gt;
+ * &lt;p&gt;Description: &lt;／p&gt;
+ * @author qiaowei liu
+ * @date 2016-1-8
+ * @version 1.0
+ */
+public class RedisProvide implements CacheSecondLevel {
+
+private JedisCluster jedisCluster;
+
+public RedisProvide(JedisClusterFactory jedisClusterFactory){
+       jedisCluster=jedisClusterFactory.getJedisCluster();
+}
+
+@Override
+public Object get(String key){
+    return jedisCluster.get(key);        
+}
+
+@Override
+public Object[] gets(String[] keys) {
+    // TODO Auto-generated method stub
+    return null;
+}
+
+@Override
+public void set(String key, Object obj) {
+    // TODO Auto-generated method stub
+    jedisCluster.set(key, obj.toString());
+}
+
+@Override
+public void delete(String key) {
+    // TODO Auto-generated method stub
+    jedisCluster.del(key);
+}
+}
+</code></pre><p>applicationContext.xml配置</p>
+<pre><code>    &lt;!--==================== redis配置 start ====================--&gt;         
+&lt;bean id=&quot;jedisPoolConfig&quot; class=&quot;redis.clients.jedis.JedisPoolConfig&quot;&gt;    
+     &lt;property name=&quot;maxTotal&quot;  value=&quot;${redis.maxTotal}&quot; /&gt; 
+   &lt;property name=&quot;maxIdle&quot; value=&quot;${redis.maxIdle}&quot; /&gt; 
+    &lt;property name=&quot;timeBetweenEvictionRunsMillis&quot; value=&quot;${redis.timeBetweenEvictionRunsMillis}&quot; /&gt;
+   &lt;property name=&quot;minEvictableIdleTimeMillis&quot; value=&quot;${redis.minEvictableIdleTimeMillis}&quot; /&gt;
+   &lt;property name=&quot;testOnBorrow&quot; value=&quot;${redis.testOnBorrow}&quot; /&gt;
+&lt;/bean&gt;
+
+&lt;bean id=&quot;jedisClusterFactory&quot; class=&quot;xxx.xxx.JedisClusterFactory&quot; &gt; 
+   &lt;constructor-arg  ref =&quot;jedisPoolConfig&quot;/&gt;
+   &lt;constructor-arg  name=&quot;host&quot; value=&quot;${redis.host}&quot;/&gt;
+   &lt;constructor-arg  name=&quot;port&quot; value=&quot;${redis.port}&quot;/&gt;           
+&lt;/bean&gt;
+
+&lt;bean id=&quot;redisProvide&quot; class=&quot;xxx.xxx.RedisProvide&quot;&gt;
+   &lt;constructor-arg  ref =&quot;jedisClusterFactory&quot; /&gt;
+&lt;/bean&gt;
+</code></pre><!--==================== redis配置 end ====================-->
+<p>conf/perproties</p>
+<pre><code>//redis config
+redis.host=127.0.0.1
+redis.port=7000
+redis.timeout=100000
+redis.maxIdle=300
+redis.maxTotal=600 
+redis.timeBetweenEvictionRunsMillis=30000  
+redis.minEvictableIdleTimeMillis=30000 
+redis.testOnBorrow=true
+</code></pre><h2 id="参考资料"><a href="#参考资料" class="headerlink" title="参考资料"></a>参考资料</h2><p>redis安装<br>参考 <a href="http://blog.csdn.net/renfufei/article/details/38474435" target="_blank" rel="external">http://blog.csdn.net/renfufei/article/details/38474435</a></p>
+<p>redis集群<br><a href="http://doc.redisfans.com/topic/cluster-tutorial.html#id5" target="_blank" rel="external">http://doc.redisfans.com/topic/cluster-tutorial.html#id5</a></p>
+<p>redis命令参考<br><a href="http://doc.redisfans.com/" target="_blank" rel="external">http://doc.redisfans.com/</a></p>
+]]></content>
+    </entry>
+    
+    <entry>
+      <title><![CDATA[Redis Cluster学习笔记]]></title>
+      <url>http://yoursite.com/2016/05/25/Redis-Cluster%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0/</url>
+      <content type="html"><![CDATA[<p>Redis在3.0版正式引入了集群这个特性。Redis集群是一个分布式（distributed）、容错（fault-tolerant）的 Redis内存K/V服务， 集群可以使用的功能是普通单机 Redis 所能使用的功能的一个子集（subset），比如Redis集群并不支持处理多个keys的命令,因为这需要在不同的节点间移动数据,从而达不到像Redis那样的性能,在高负载的情况下可能会导致不可预料的错误。<br><a id="more"></a></p>
+<p>Redis集群的几个重要特征：</p>
+<p>(1).Redis 集群的分片特征在于将键空间分拆了16384个槽位，每一个节点负责其中一些槽位。</p>
+<p>(2).Redis提供一定程度的可用性,可以在某个节点宕机或者不可达的情况下继续处理命令.</p>
+<p>(3).Redis 集群中不存在中心（central）节点或者代理（proxy）节点， 集群的其中一个主要设计目标是达到线性可扩展性（linear scalability）。</p>
+<h2 id="1-Redis的数据分片（Sharding）"><a href="#1-Redis的数据分片（Sharding）" class="headerlink" title="1. Redis的数据分片（Sharding）"></a>1. Redis的数据分片（Sharding）</h2><p>Redis 集群的键空间被分割为 16384 （2^14)个槽（slot）， 集群的最大节点数量也是 16384 个（推荐的最大节点数量为 1000 个），同理每个主节点可以负责处理1到16384个槽位。</p>
+<p>当16384个槽位都有主节点负责处理时，集群进入”稳定“上线状态，可以开始处理数据命令。当集群没有处理稳定状态时，可以通过执行重配置（reconfiguration）操作，使得每个哈希槽都只由一个节点进行处理。</p>
+<p>重配置指的是将某个/某些槽从一个节点移动到另一个节点。一个主节点可以有任意多个从节点， 这些从节点用于在主节点发生网络断线或者节点失效时， 对主节点进行替换。</p>
+<p>集群的使用公式CRC16（Key）&amp;16383计算key属于哪个槽：<br>HASH_SLOT = CRC16(key) mod 16384</p>
+<p>CRC16其结果长度为16位。</p>
+<h2 id="2-Redis集群节点"><a href="#2-Redis集群节点" class="headerlink" title="2. Redis集群节点"></a>2. Redis集群节点</h2><p>部分内容摘自附录2。Redis 集群中的节点不仅要记录键和值的映射，还需要记录集群的状态，包括键到正确节点的映射。它还具有自动发现其他节点，识别工作不正常的节点，并在有需要时，在从节点中选举出新的主节点的功能。</p>
+<p>为了执行以上列出的任务， 集群中的每个节点都与其他节点建立起了“集群连接（cluster bus）”， 该连接是一个 TCP 连接， 使用二进制协议进行通讯。</p>
+<p>节点之间使用 Gossip 协议 来进行以下工作：</p>
+<p>a).传播（propagate）关于集群的信息，以此来发现新的节点。</p>
+<p>b).向其他节点发送 PING 数据包，以此来检查目标节点是否正常运作。</p>
+<p>c).在特定事件发生时，发送集群信息。</p>
+<p>除此之外， 集群连接还用于在集群中发布或订阅信息。</p>
+<p>集群节点不能前端代理命令请求， 所以客户端应该在节点返回 -MOVED或者 -ASK转向（redirection）错误时， 自行将命令请求转发至其他节点。</p>
+<p>客户端可以自由地向集群中的任何一个节点发送命令请求， 并可以在有需要时， 根据转向错误所提供的信息， 将命令转发至正确的节点， 所以在理论上来说， 客户端是无须保存集群状态信息的。但如果客户端可以将键和节点之间的映射信息保存起来， 可以有效地减少可能出现的转向次数， 籍此提升命令执行的效率。</p>
+<p>每个节点在集群中由一个独一无二的 ID标识， 该 ID 是一个十六进制表示的 160 位随机数，在节点第一次启动时由 /dev/urandom 生成。节点会将它的 ID 保存到配置文件， 只要这个配置文件不被删除， 节点就会一直沿用这个 ID 。一个节点可以改变它的 IP 和端口号， 而不改变节点 ID 。 集群可以自动识别出IP/端口号的变化， 并将这一信息通过 Gossip协议广播给其他节点知道。</p>
+<p>下面是每个节点都有的关联信息， 并且节点会将这些信息发送给其他节点：</p>
+<p>a).节点所使用的 IP 地址和 TCP 端口号。</p>
+<p>b).节点的标志（flags）。</p>
+<p>c).节点负责处理的哈希槽。</p>
+<p>b).节点最近一次使用集群连接发送 PING 数据包（packet）的时间。</p>
+<p>e).节点最近一次在回复中接收到 PONG 数据包的时间。</p>
+<p>f).集群将该节点标记为下线的时间。</p>
+<p>g).该节点的从节点数量。<br>如果该节点是从节点的话，那么它会记录主节点的节点 ID 。 如果这是一个主节点的话，那么主节点 ID 这一栏的值为 0000000。</p>
+<p>在了解Redis Cluster的集群基本特征后，我们首先搭建出这个Redis Cluster集群。</p>
+<h2 id="3-安装Redis-3-0-x"><a href="#3-安装Redis-3-0-x" class="headerlink" title="3. 安装Redis 3.0.x"></a>3. 安装Redis 3.0.x</h2><p>当前最新版为3.0.1</p>
+<pre><code>wget http://download.redis.io/releases/redis-3.0.1.tar.gz
+tar xvzf redis-3.0.1.tar.gz
+cd redis-3.0.1/
+make -j
+apt-get install tcl
+make test
+//将redis安装到/usr/local/redis3上
+cd src &amp;&amp; make PREFIX=/usr/local/redis3 install
+//创建符号链接
+ls /usr/local/redis3/bin/redis-* /usr/local/redis3/bin/redis-benchmark /usr/local/redis3/bin/redis-check-dump /usr/local/redis3/bin/redis-sentinel /usr/local/redis3/bin/redis-check-aof /usr/local/redis3/bin/redis-cli /usr/local/redis3/bin/redis-server
+for i in `cd /usr/local/redis3/bin; ls redis-*` do ln -s /usr/local/redis3/bin/$i /usr/local/bin/$i done;
+mkdir -p /usr/local/redis3/conf
+ln -sf /usr/local/redis3/conf /etc/redis3
+//检查版本信息
+redis-cli -v
+redis-cli 3.0.1
+</code></pre><h2 id="4-Redis-Cluster配置"><a href="#4-Redis-Cluster配置" class="headerlink" title="4. Redis Cluster配置"></a>4. Redis Cluster配置</h2><p>运行在集群模式的Redis实例与普通的Redis实例有所不同，集群模式需要通过配置启用cluster特性，开启集群模式后的Redis实例便可以使用集群特有的命令和特性了.下面是一个最少选项的集群的配置文件 : 注意如果使用的是单机测试，最好把cluster-config-file nodes.conf设置为对应的 端口 nodes-xxx.conf，还有就是 pid 设置为当前 目录下 pidfile ./redis.pid</p>
+<pre><code>port 7001
+cluster-enabled yes
+cluster-config-file nodes.conf
+cluster-node-timeout 5000
+appendonly yes
+</code></pre><p>文件中的 cluster-enabled 选项用于开实例的集群模式， 而 cluster-conf-file 选项则设定了保存节点配置文件的路径， 默认值为 nodes.conf。该节点配置文件无须人为修改，它由Redis集群在启动时自动创建， 并在有需要时自动进行更新。</p>
+<p>若要让集群正常运作至少需要三个主节点，我们的环境中，每个主节点附带一个从节点，所以一共六个节点。端口为7001-7006。</p>
+<p>在/app/redis3， 并创建六个以端口号为名字的子目录， 稍后我们在将每个目录中运行一个 Redis 实例：</p>
+<pre><code>cd /app/redis3
+mkdir 7001 7002 7003 7004 7005 7006
+cp /etc/redis3/conf/redis.conf  /app/redis3/7001/
+......
+cp /etc/redis3/conf/redis.conf  /app/redis3/7006/
+</code></pre><p>将redis.conf里的端口号修改为对应的端口。下面我们打开对应的目录，启动redis实例即可，启动的时候要进入到对应的目录然后启动。</p>
+<pre><code>cd /app/redis3/7001;nohup redis-server redis.conf &amp;
+cd /app/redis3/7002;nohup redis-server redis.conf &amp;
+......
+</code></pre><p>实例打印的日志显示， 因为 nodes.conf 文件不存在， 所以每个节点都为它自身指定了一个新的 ID ,</p>
+<pre><code>/app/redis3/7006# tail -f nohup.out
+27040:M 09 May 22:53:50.197 * No cluster configuration found, I&apos;m 1984c27297c6ef50bbfcbd35c11b93cc40ba17e4
+/app/redis3/7006# cat nodes.conf 
+d2b437ca8b9007dcdb63ac16210f6540860361e3 :0 myself,master - 0 0 0 connected
+vars currentEpoch 0 lastVoteEpoch 0
+</code></pre><p>现在我们已经有了六个正在运行中的 Redis 实例， 接下来我们需要使用这些实例来创建集群。通过使用 Redis 集群命令行工具 redis-trib ， 编写节点配置文件的工作可以非常容易地完成： redis-trib 位于 Redis 源码的 src 文件夹中， 它是一个 Ruby 程序， 这个程序通过向实例发送特殊命令来完成创建新集群， 检查集群， 或者对集群进行重新分片（reshared）等工作。这里通过create命令来创建集群，指定replicas=1，即每一个主实例有一个从实例。redis-trib 会打印出一份预想中的配置给你看， 如果你觉得没问题的话， 就可以输入 yes ， redis-trib 就会将这份配置应用到集群当中,让各个节点开始互相通讯,最后可以得到如下信息</p>
+<pre><code>~/redis-3.0.1/src# apt-get install ruby gem
+~/redis-3.0.1/src# gem sources -a http://ruby.taobao.org/
+~/redis-3.0.1/src# gem install redis
+~/redis-3.0.1/src# cp redis-trib.rb /usr/local/redis3/bin/
+~/redis-3.0.1/src# ln -sf /usr/local/redis3/bin/redis-trib.rb /usr/bin/redis-trib.rb
+~/redis-3.0.1/src# redis-trib.rb create --replicas 1  127.0.0.1:7001 127.0.0.1:7002 127.0.0.1:7003 127.0.0.1:7004 127.0.0.1:7005 127.0.0.1:7006
+M: 1984c27297c6ef50bbfcbd35c11b93cc40ba17e4 127.0.0.1:7001
+   slots:0-5460 (5461 slots) master
+M: 481e256be4c724f5a2c64a761e52b4be61ca45b4 127.0.0.1:7002
+   slots:5461-10922 (5462 slots) master
+M: b5b652fa02d9999861e66c843b01fd2700c02adf 127.0.0.1:7003
+   slots:10923-16383 (5461 slots) master
+S: 821ec823dc0c2d4f65319e84fe74157fb1014155 127.0.0.1:7004
+   replicates 1984c27297c6ef50bbfcbd35c11b93cc40ba17e4
+S: b3b8541b9520d707180d56a2fb3cf3ee6895ed10 127.0.0.1:7005
+   replicates 481e256be4c724f5a2c64a761e52b4be61ca45b4
+S: d2b437ca8b9007dcdb63ac16210f6540860361e3 127.0.0.1:7006
+   replicates b5b652fa02d9999861e66c843b01fd2700c02adf
+Can I set the above configuration? (type &apos;yes&apos; to accept):
+[OK] All nodes agree about slots configuration.
+&gt;&gt;&gt; Check for open slots...
+&gt;&gt;&gt; Check slots coverage...
+[OK] All 16384 slots covered.
+</code></pre><p>以上信息的其中一部分可以通过向集群中的任意节点（主节点或者从节点都可以）发送 CLUSTER NODES 命令来获得。该命令还可以获得节点 ID ， IP 地址和端口号， 标志（flag）， 最后发送 PING 的时间， 最后接收 PONG 的时间， 连接状态， 节点负责处理的槽。</p>
+<pre><code>redis-cli -p 7001 cluster nodes
+481e256be4c724f5a2c64a761e52b4be61ca45b4 127.0.0.1:7002 master - 0 1431186119174 2 connected 5461-10922
+b3b8541b9520d707180d56a2fb3cf3ee6895ed10 127.0.0.1:7005 slave 481e256be4c724f5a2c64a761e52b4be61ca45b4 0 1431186120677 5 connected
+d2b437ca8b9007dcdb63ac16210f6540860361e3 127.0.0.1:7006 slave b5b652fa02d9999861e66c843b01fd2700c02adf 0 1431186119174 6 connected
+b5b652fa02d9999861e66c843b01fd2700c02adf 127.0.0.1:7003 master - 0 1431186118673 3 connected 10923-16383
+821ec823dc0c2d4f65319e84fe74157fb1014155 127.0.0.1:7004 slave 1984c27297c6ef50bbfcbd35c11b93cc40ba17e4 0 1431186120176 4 connected
+1984c27297c6ef50bbfcbd35c11b93cc40ba17e4 127.0.0.1:7001 myself,master - 0 0 1 connected 0-5460
+</code></pre><h2 id="5-连接Redis集群"><a href="#5-连接Redis集群" class="headerlink" title="5. 连接Redis集群"></a>5. 连接Redis集群</h2><p>通过上面的输出，我们可以看出Redis三个主节点的slot范围。一个 Redis 客户端可以向集群中的任意节点（包括从节点）发送命令请求。我们首先连接第一个节点：</p>
+<pre><code>redis-cli -p 7001
+127.0.0.1:7001&gt; set a 1 
+(error) MOVED 15495 127.0.0.1:7003
+127.0.0.1:7001&gt; get a
+(error) MOVED 15495 127.0.0.1:7003
+127.0.0.1:7001&gt; set b 1
+OK
+</code></pre><p>节点会对命令请求进行分析和key的slot计算，并且会查找这个命令所要处理的键所在的槽。如果要查找的哈希槽正好就由接收到命令的节点负责处理， 那么节点就直接执行这个命令。</p>
+<p>另一方面， 如果所查找的槽不是由该节点处理的话， 节点将查看自身内部所保存的哈希槽到节点 ID 的映射记录， 并向客户端回复一个 MOVED 错误。上面的错误信息包含键 x 所属的哈希槽15495， 以及负责处理这个槽的节点的 IP 和端口号 127.0.0.1:7003 。</p>
+<p>虽然我们用Node ID来标识集群中的节点， 但是为了让客户端的转向操作尽可能地简单， 节点在 MOVED 错误中直接返回目标节点的 IP 和端口号， 而不是目标节点的 ID 。客户端应该记录槽15495由节点127.0.0.1:7003负责处理“这一信息， 这样当再次有命令需要对槽15495执行时， 客户端就可以加快寻找正确节点的速度。这样，当集群处于稳定状态时，所有客户端最终都会保存有一个哈希槽至节点的映射记录，使得集群非常高效： 客户端可以直接向正确的节点发送命令请求， 无须转向、代理或者其他任何可能发生单点故障（single point failure）的实体（entiy）。</p>
+<h2 id="6-java-连接Redis集群"><a href="#6-java-连接Redis集群" class="headerlink" title="6.java 连接Redis集群"></a>6.java 连接Redis集群</h2><p>使用 jedis-2.7.2.jar jar 包</p>
+<pre><code>import java.util.HashSet;
+import java.util.Set;
+
+import redis.clients.jedis.HostAndPort;
+import redis.clients.jedis.JedisCluster;
+import redis.clients.jedis.JedisPoolConfig;
+
+public class JedisClusterTest {
+ public static void main(String[] args) {
+    JedisPoolConfig config = new JedisPoolConfig();
+    config.setMaxTotal(20);
+    config.setMaxIdle(2);
+
+    HostAndPort hp0 = new HostAndPort(&quot;localhost&quot;, 7000);
+    HostAndPort hp1 = new HostAndPort(&quot;localhost&quot;, 7001);
+    HostAndPort hp2 = new HostAndPort(&quot;localhost&quot;, 7002);
+    HostAndPort hp3 = new HostAndPort(&quot;localhost&quot;, 7003);
+    HostAndPort hp4 = new HostAndPort(&quot;localhost&quot;, 7004);
+    HostAndPort hp5 = new HostAndPort(&quot;localhost&quot;, 7005);
+
+    Set&lt;HostAndPort&gt; hps = new HashSet&lt;HostAndPort&gt;();
+    hps.add(hp0);
+    hps.add(hp1);
+    hps.add(hp2);
+    hps.add(hp3);
+    hps.add(hp4);
+    hps.add(hp5);
+
+    // 超时，最大的转发数，最大链接数，最小链接数都会影响到集群
+    JedisCluster jedisCluster = new JedisCluster(hps, 5000, 10, config);
+
+    long start = System.currentTimeMillis();
+    for (int i = 0; i &lt; 100; i++) {
+        jedisCluster.set(&quot;sn&quot; + i, &quot;n&quot; + i);
+    }
+    long end = System.currentTimeMillis();
+
+    System.out.println(&quot;Simple  @ Sharding Set : &quot; + (end - start) / 10000);
+
+    for (int i = 0; i &lt; 1000; i++) {
+        System.out.println(jedisCluster.get(&quot;sn&quot; + i));
+    }
+    jedisCluster.close();
+ }
+}
+</code></pre><h2 id="7-java-连接Redis集群常见错误"><a href="#7-java-连接Redis集群常见错误" class="headerlink" title="7.java 连接Redis集群常见错误"></a>7.java 连接Redis集群常见错误</h2><h4 id="7-1-Too-many-Cluster-redirections"><a href="#7-1-Too-many-Cluster-redirections" class="headerlink" title="7.1.Too many Cluster redirections"></a>7.1.Too many Cluster redirections</h4><p>这种情况一般情况下都是 redis 绑定ip问题，默认情况下 redis 绑定的 ip 是本机的 127.0.0.1 如果redis 部署在其他机器上，而本地测试程序想要通过网络链接到 redis 集群，那么就需要注意，在 redis.conf 文件中配置 bind xxx.xxx.xxx.xxx 注意这个地方要配置成客户端链接的 ip</p>
+<p>注意：如果 redis 绑定了指定的 ip 地址了，这时候在启动集群的时候也需要注意，需要指定ip地址了，本来启动集群的方式是这样的：</p>
+<pre><code>./redis-trib.rb create --replicas 1 127.0.0.1:7000  127.0.0.1:7001 127.0.0.1:7002 127.0.0.1:7003 127.0.0.1:7004 127.0.0.1:7005
+</code></pre><p>现在就是这样的</p>
+<pre><code>./redis-trib.rb create --replicas 1 xxx.xxx.xxx.xxx:7000  xxx.xxx.xxx.xxx:7001 xxx.xxx.xxx.xxx:7002 xxx.xxx.xxx.xxx:7003 xxx.xxx.xxx.xxx:7004 xxx.xxx.xxx.xxx:7005./redis-trib.rb create --replicas 1 127.0.0.1:7000  127.0.0.1:7001 127.0.0.1:7002 127.0.0.1:7003 127.0.0.1:7004 127.0.0.1:7005
+</code></pre>]]></content>
+    </entry>
+    
+    <entry>
+      <title><![CDATA[红黑树-Java之TreeMap实探]]></title>
+      <url>http://yoursite.com/2016/04/13/%E7%BA%A2%E9%BB%91%E6%A0%91-Java%E4%B9%8BTreeMap%E5%AE%9E%E6%8E%A2/</url>
+      <content type="html"><![CDATA[<p>TreeMap的实现是红黑树算法的实现，通过本篇博文我们能对TreeMap有更深的认识。<br><a id="more"></a></p>
+<p>TreeMap的实现是红黑树算法的实现，所以要了解TreeMap就必须对红黑树有一定的了解,通过这篇博文你可以获得如下知识点：</p>
+<p>1、红黑树的基本概念。</p>
+<p>2、红黑树增加节点、删除节点的实现过程。</p>
+<p>3、红黑树左旋转、右旋转的复杂过程。</p>
+<p>4、Java 中TreeMap是如何通过put、deleteEntry两个来实现红黑树增加、删除节点的。</p>
+<p>我想通过这篇博文你对TreeMap一定有了更深的认识。好了，下面先简单普及红黑树知识。</p>
+<h2 id="一、红黑树简介"><a href="#一、红黑树简介" class="headerlink" title="一、红黑树简介"></a>一、红黑树简介</h2><p>红黑树又称红-黑二叉树，它首先是一颗二叉树，它具体二叉树所有的特性。同时红黑树更是一颗自平衡的排序二叉树。<br>我们知道一颗基本的二叉树他们都需要满足一个基本性质–即树中的任何节点的值大于它的左子节点，且小于它的右子节点。按照这个基本性质使得树的检索效率大大提高。我们知道在生成二叉树的过程是非常容易失衡的，最坏的情况就是一边倒（只有右/左子树），这样势必会导致二叉树的检索效率大大降低（O(n)），所以为了维持二叉树的平衡，大牛们提出了各种实现的算法，如：AVL，SBT，伸展树，TREAP ，红黑树等等。</p>
+<p>平衡二叉树必须具备如下特性：它是一棵空树或它的左右两个子树的高度差的绝对值不超过1，并且左右两个子树都是一棵平衡二叉树。也就是说该二叉树的任何一个等等子节点，其左右子树的高度都相近。<br><img src="http://7xsp7e.com2.z0.glb.clouddn.com/image/jpg/tech/algorithms/rbtree/2014051700001_thumb.png" alt="hyperlink syntax"></p>
+<p>红黑树顾名思义就是节点是红色或者黑色的平衡二叉树，它通过颜色的约束来维持着二叉树的平衡。对于一棵有效的红黑树二叉树而言我们必须增加如下规则：</p>
+<p>1、每个节点都只能是红色或者黑色</p>
+<p>2、根节点是黑色</p>
+<p>3、每个叶节点（NIL节点，空节点）是黑色的。</p>
+<p>4、如果一个结点是红的，则它两个子节点都是黑的。也就是说在一条路径上不能出现相邻的两个红色结点。</p>
+<p>5、从任一节点到其每个叶子的所有路径都包含相同数目的黑色节点。</p>
+<p>这些约束强制了红黑树的关键性质: 从根到叶子的最长的可能路径不多于最短的可能路径的两倍长。结果是这棵树大致上是平衡的。因为操作比如插入、删除和查找某个值的最坏情况时间都要求与树的高度成比例，这个在高度上的理论上限允许红黑树在最坏情况下都是高效的，而不同于普通的二叉查找树。所以红黑树它是复杂而高效的，其检索效率O(log n)。下图为一颗典型的红黑二叉树。</p>
+<p><img src="http://7xsp7e.com2.z0.glb.clouddn.com/image/jpg/tech/algorithms/rbtree/2014051700002_thumb.png" alt="hyperlink syntax"></p>
+<p>对于红黑二叉树而言它主要包括三大基本操作：左旋、右旋、着色。</p>
+<p>左旋：　　　　　　　　　　　　　　　　　　　　　　右旋：</p>
+<p><img src="http://7xsp7e.com2.z0.glb.clouddn.com/image/jpg/tech/algorithms/rbtree/2014051700004_thumb.gif" alt="hyperlink syntax"><br><img src="http://7xsp7e.com2.z0.glb.clouddn.com/image/jpg/tech/algorithms/rbtree/2014051700005_thumb.gif" alt="hyperlink syntax"></p>
+<p>注：由于本文主要是讲解Java中TreeMap，所以并没有对红黑树进行非常深入的了解和研究，如果诸位想对其进行更加深入的研究Lz提供几篇较好的博文：</p>
+<p><a href="http://blog.csdn.net/v_JULY_v/article/category/774945" target="_blank" rel="external">1、红黑树系列集锦</a></p>
+<p><a href="http://www.cnblogs.com/fanzhidongyzby/p/3187912.html" target="_blank" rel="external">2、红黑树数据结构剖析</a></p>
+<p><a href="http://blog.csdn.net/eric491179912/article/details/6179908" target="_blank" rel="external">3、红黑树</a></p>
+<h2 id="二、TreeMap数据结构"><a href="#二、TreeMap数据结构" class="headerlink" title="二、TreeMap数据结构"></a>二、TreeMap数据结构</h2><p>回归主角：TreeMap</p>
+<p>TreeMap的定义如下：</p>
+<pre><code>public class TreeMap&lt;K,V&gt;
+  extends AbstractMap&lt;K,V&gt;
+  implements NavigableMap&lt;K,V&gt;, Cloneable, java.io.Serializable
+</code></pre><p>TreeMap继承AbstractMap，实现NavigableMap、Cloneable、Serializable三个接口。其中AbstractMap表明TreeMap为一个Map即支持key-value的集合， NavigableMap（更多）则意味着它支持一系列的导航方法，具备针对给定搜索目标返回最接近匹配项的导航方法 。</p>
+<p>TreeMap中同时也包含了如下几个重要的属性：</p>
+<pre><code>//比较器，因为TreeMap是有序的，通过comparator接口我们可以对TreeMap的内部排序进行精密的控制
+private final Comparator&lt;? super K&gt; comparator;
+//TreeMap红-黑节点，为TreeMap的内部类
+private transient Entry&lt;K,V&gt; root = null;
+//容器大小
+private transient int size = 0;
+//TreeMap修改次数
+private transient int modCount = 0;
+//红黑树的节点颜色--红色
+private static final boolean RED = false;
+//红黑树的节点颜色--黑色
+private static final boolean BLACK = true;
+</code></pre><p>对于叶子节点Entry是TreeMap的内部类，它有几个重要的属性：</p>
+<pre><code>//键
+K key;
+//值
+V value;
+//左孩子
+Entry&lt;K,V&gt; left = null;
+//右孩子
+Entry&lt;K,V&gt; right = null;
+//父亲
+Entry&lt;K,V&gt; parent;
+//颜色
+boolean color = BLACK;  
+</code></pre><p>注：前面只是开胃菜，下面是本篇博文的重中之重，在下面两节我将重点讲解treeMap的put()、delete()方法。通过这两个方法我们会了解红黑树增加、删除节点的核心算法。</p>
+<h2 id="三、TreeMap-put-方法"><a href="#三、TreeMap-put-方法" class="headerlink" title="三、TreeMap put()方法"></a>三、TreeMap put()方法</h2><p>在了解TreeMap的put()方法之前，我们先了解红黑树增加节点的算法。<br>红黑树增加节点</p>
+<p>红黑树在新增节点过程中比较复杂，复杂归复杂它同样必须要依据上面提到的五点规范，同时由于规则1、2、3基本都会满足，下面我们主要讨论规则4、5。假设我们这里有一棵最简单的树，我们规定新增的节点为N、它的父节点为P、P的兄弟节点为U、P的父节点为G。</p>
+<p><img src="http://7xsp7e.com2.z0.glb.clouddn.com/image/jpg/tech/algorithms/rbtree/2014051700007_thumb.png" alt="hyperlink syntax"></p>
+<p>对于新节点的插入有如下三个关键地方：</p>
+<p>1、插入新节点总是红色节点 。</p>
+<p>2、如果插入节点的父节点是黑色, 能维持性质 。</p>
+<p>3、如果插入节点的父节点是红色, 破坏了性质. 故插入算法就是通过重新着色或旋转, 来维持性质 。</p>
+<p>为了保证下面的阐述更加清晰和根据便于参考，我这里将红黑树的五点规定再贴一遍：</p>
+<p>1、每个节点都只能是红色或者黑色</p>
+<p>2、根节点是黑色</p>
+<p>3、每个叶节点（NIL节点，空节点）是黑色的。</p>
+<p>4、如果一个结点是红的，则它两个子节点都是黑的。也就是说在一条路径上不能出现相邻的两个红色结点。</p>
+<p>5、从任一节点到其每个叶子的所有路径都包含相同数目的黑色节点。</p>
+<p>一、为根节点</p>
+<p>若新插入的节点N没有父节点，则直接当做根据节点插入即可，同时将颜色设置为黑色。（如图一（1））</p>
+<p>二、父节点为黑色</p>
+<p>这种情况新节点N同样是直接插入，同时颜色为红色，由于根据规则四它会存在两个黑色的叶子节点，值为null。同时由于新增节点N为红色，所以通过它的子节点的路径依然会保存着相同的黑色节点数，同样满足规则5。（如图一（2））</p>
+<p><img src="http://7xsp7e.com2.z0.glb.clouddn.com/image/jpg/tech/algorithms/rbtree/2014051700008_thumb.png" alt="hyperlink syntax"></p>
+<p>（图一）</p>
+<p>三、若父节点P和P的兄弟节点U都为红色</p>
+<p>对于这种情况若直接插入肯定会出现不平衡现象。怎么处理？P、U节点变黑、G节点变红。这时由于经过节点P、U的路径都必须经过G所以在这些路径上面的黑节点数目还是相同的。但是经过上面的处理，可能G节点的父节点也是红色，这个时候我们需要将G节点当做新增节点递归处理。</p>
+<p><img src="http://7xsp7e.com2.z0.glb.clouddn.com/image/jpg/tech/algorithms/rbtree/2014051700009_thumb.png" alt="hyperlink syntax"></p>
+<p>四、若父节点P为红色，叔父节点U为黑色或者缺少，且新增节点N为P节点的右孩子</p>
+<p>对于这种情况我们对新增节点N、P进行一次左旋转。这里所产生的结果其实并没有完成，还不是平衡的（违反了规则四），这是我们需要进行情况5的操作。</p>
+<p><img src="http://7xsp7e.com2.z0.glb.clouddn.com/image/jpg/tech/algorithms/rbtree/20140517000010_thumb.png" alt="hyperlink syntax"></p>
+<p>五、父节点P为红色，叔父节点U为黑色或者缺少，新增节点N为父节点P左孩子</p>
+<p>这种情况有可能是由于情况四而产生的，也有可能不是。对于这种情况先已P节点为中心进行右旋转，在旋转后产生的树中，节点P是节点N、G的父节点。但是这棵树并不规范，它违反了规则4，所以我们将P、G节点的颜色进行交换，使之其满足规范。开始时所有的路径都需要经过G其他们的黑色节点数一样，但是现在所有的路径改为经过P，且P为整棵树的唯一黑色节点，所以调整后的树同样满足规范5。</p>
+<p><img src="http://7xsp7e.com2.z0.glb.clouddn.com/image/jpg/tech/algorithms/rbtree/20140517000011_thumb.png" alt="hyperlink syntax"></p>
+<p>上面展示了红黑树新增节点的五种情况，这五种情况涵盖了所有的新增可能，不管这棵红黑树多么复杂，都可以根据这五种情况来进行生成。下面就来分析Java中的TreeMap是如何来实现红黑树的。</p>
+<p>TreeMap put()方法实现分析</p>
+<p>在TreeMap的put()的实现方法中主要分为两个步骤，第一：构建排序二叉树，第二：平衡二叉树。</p>
+<p>对于排序二叉树的创建，其添加节点的过程如下：</p>
+<p>1、以根节点为初始节点进行检索。</p>
+<p>2、与当前节点进行比对，若新增节点值较大，则以当前节点的右子节点作为新的当前节点。否则以当前节点的左子节点作为新的当前节点。</p>
+<p>3、循环递归2步骤知道检索出合适的叶子节点为止。</p>
+<p>4、将新增节点与3步骤中找到的节点进行比对，如果新增节点较大，则添加为右子节点；否则添加为左子节点。</p>
+<p>按照这个步骤我们就可以将一个新增节点添加到排序二叉树中合适的位置。如下：</p>
+<pre><code>public V put(K key, V value) {
+   //用t表示二叉树的当前节点
+    Entry&lt;K,V&gt; t = root;
+    //t为null表示一个空树，即TreeMap中没有任何元素，直接插入
+    if (t == null) {
+        //比较key值，个人觉得这句代码没有任何意义，空树还需要比较、排序？
+        compare(key, key); // type (and possibly null) check
+        //将新的key-value键值对创建为一个Entry节点，并将该节点赋予给root
+        root = new Entry&lt;&gt;(key, value, null);
+        //容器的size = 1，表示TreeMap集合中存在一个元素
+        size = 1;
+        //修改次数 + 1
+        modCount++;
+        return null;
+    }
+    int cmp;     //cmp表示key排序的返回结果
+    Entry&lt;K,V&gt; parent;   //父节点
+    // split comparator and comparable paths
+    Comparator&lt;? super K&gt; cpr = comparator;    //指定的排序算法
+    //如果cpr不为空，则采用既定的排序算法进行创建TreeMap集合
+    if (cpr != null) {
+        do {
+            parent = t;      //parent指向上次循环后的t
+            //比较新增节点的key和当前节点key的大小
+            cmp = cpr.compare(key, t.key);
+            //cmp返回值小于0，表示新增节点的key小于当前节点的key，则以当前节点的左子节点作为新的当前节点
+            if (cmp &lt; 0)
+                t = t.left;
+            //cmp返回值大于0，表示新增节点的key大于当前节点的key，则以当前节点的右子节点作为新的当前节点
+            else if (cmp &gt; 0)
+                t = t.right;
+            //cmp返回值等于0，表示两个key值相等，则新值覆盖旧值，并返回新值
+            else
+                return t.setValue(value);
+        } while (t != null);
+    }
+    //如果cpr为空，则采用默认的排序算法进行创建TreeMap集合
+    else {
+        if (key == null)     //key值为空抛出异常
+            throw new NullPointerException();
+        /* 下面处理过程和上面一样 */
+        Comparable&lt;? super K&gt; k = (Comparable&lt;? super K&gt;) key;
+        do {
+            parent = t;
+            cmp = k.compareTo(t.key);
+            if (cmp &lt; 0)
+                t = t.left;
+            else if (cmp &gt; 0)
+                t = t.right;
+            else
+                return t.setValue(value);
+        } while (t != null);
+    }
+    //将新增节点当做parent的子节点
+    Entry&lt;K,V&gt; e = new Entry&lt;&gt;(key, value, parent);
+    //如果新增节点的key小于parent的key，则当做左子节点
+    if (cmp &lt; 0)
+        parent.left = e;
+  //如果新增节点的key大于parent的key，则当做右子节点
+    else
+        parent.right = e;
+    /*
+     *  上面已经完成了排序二叉树的的构建，将新增节点插入该树中的合适位置
+     *  下面fixAfterInsertion()方法就是对这棵树进行调整、平衡，具体过程参考上面的五种情况
+     */
+    fixAfterInsertion(e);
+    //TreeMap元素数量 + 1
+    size++;
+    //TreeMap容器修改次数 + 1
+    modCount++;
+    return null;
+}
+</code></pre><p>上面代码中do{}代码块是实现排序二叉树的核心算法，通过该算法我们可以确认新增节点在该树的正确位置。找到正确位置后将插入即可，这样做了其实还没有完成，因为我知道TreeMap的底层实现是红黑树，红黑树是一棵平衡排序二叉树，普通的排序二叉树可能会出现失衡的情况，所以下一步就是要进行调整。fixAfterInsertion(e); 调整的过程务必会涉及到红黑树的左旋、右旋、着色三个基本操作。代码如下：</p>
+<pre><code>/**
+ * 新增节点后的修复操作
+ * x 表示新增节点
+*/
+private void fixAfterInsertion(Entry&lt;K,V&gt; x) {
+     x.color = RED;    //新增节点的颜色为红色
+
+     //循环 直到 x不是根节点，且x的父节点不为红色
+     while (x != null &amp;&amp; x != root &amp;&amp; x.parent.color == RED) {
+         //如果X的父节点（P）是其父节点的父节点（G）的左节点
+         if (parentOf(x) == leftOf(parentOf(parentOf(x)))) {
+             //获取X的叔节点(U)
+             Entry&lt;K,V&gt; y = rightOf(parentOf(parentOf(x)));
+             //如果X的叔节点（U） 为红色（情况三）
+             if (colorOf(y) == RED) {     
+                 //将X的父节点（P）设置为黑色
+                 setColor(parentOf(x), BLACK);
+                 //将X的叔节点（U）设置为黑色
+                 setColor(y, BLACK);
+                 //将X的父节点的父节点（G）设置红色
+                 setColor(parentOf(parentOf(x)), RED);
+                 x = parentOf(parentOf(x));
+             }
+             //如果X的叔节点（U为黑色）；这里会存在两种情况（情况四、情况五）
+             else {   
+                 //如果X节点为其父节点（P）的右子树，则进行左旋转（情况四）
+                 if (x == rightOf(parentOf(x))) {
+                     //将X的父节点作为X
+                     x = parentOf(x);
+                     //右旋转
+                     rotateLeft(x);
+                 }
+                 //（情况五）
+                 //将X的父节点（P）设置为黑色
+                 setColor(parentOf(x), BLACK);
+                 //将X的父节点的父节点（G）设置红色
+                 setColor(parentOf(parentOf(x)), RED);
+                 //以X的父节点的父节点（G）为中心右旋转
+                 rotateRight(parentOf(parentOf(x)));
+             }
+         }
+         //如果X的父节点（P）是其父节点的父节点（G）的右节点
+         else {
+             //获取X的叔节点（U）
+             Entry&lt;K,V&gt; y = leftOf(parentOf(parentOf(x)));
+           //如果X的叔节点（U） 为红色（情况三）
+             if (colorOf(y) == RED) {
+                 //将X的父节点（P）设置为黑色
+                 setColor(parentOf(x), BLACK);
+                 //将X的叔节点（U）设置为黑色
+                 setColor(y, BLACK);
+                 //将X的父节点的父节点（G）设置红色
+                 setColor(parentOf(parentOf(x)), RED);
+                 x = parentOf(parentOf(x));
+             }
+           //如果X的叔节点（U为黑色）；这里会存在两种情况（情况四、情况五）
+             else {
+                 //如果X节点为其父节点（P）的右子树，则进行左旋转（情况四）
+                 if (x == leftOf(parentOf(x))) {
+                     //将X的父节点作为X
+                     x = parentOf(x);
+                    //右旋转
+                     rotateRight(x);
+                 }
+                 //（情况五）
+                 //将X的父节点（P）设置为黑色
+                 setColor(parentOf(x), BLACK);
+                 //将X的父节点的父节点（G）设置红色
+                 setColor(parentOf(parentOf(x)), RED);
+                 //以X的父节点的父节点（G）为中心右旋转
+                 rotateLeft(parentOf(parentOf(x)));
+             }
+         }
+     }
+     //将根节点G强制设置为黑色
+     root.color = BLACK;
+ }
+</code></pre><p>对这段代码的研究我们发现,其处理过程完全符合红黑树新增节点的处理过程。所以在看这段代码的过程一定要对红黑树的新增节点过程有了解。在这个代码中还包含几个重要的操作。左旋(rotateLeft())、右旋（rotateRight()）、着色（setColor()）。</p>
+<p>左旋：rotateLeft()</p>
+<p>所谓左旋转，就是将新增节点（N）当做其父节点（P），将其父节点P当做新增节点（N）的左子节点。即：G.left —&gt; N ,N.left —&gt; P。</p>
+<pre><code> private void rotateLeft(Entry&lt;K,V&gt; p) {
+   if (p != null) {
+     //获取P的右子节点，其实这里就相当于新增节点N（情况四而言）
+     Entry&lt;K,V&gt; r = p.right;
+     //将R的左子树设置为P的右子树
+     p.right = r.left;
+     //若R的左子树不为空，则将P设置为R左子树的父亲
+     if (r.left != null)
+         r.left.parent = p;
+     //将P的父亲设置R的父亲
+     r.parent = p.parent;
+     //如果P的父亲为空，则将R设置为跟节点
+     if (p.parent == null)
+         root = r;
+     //如果P为其父节点（G）的左子树，则将R设置为P父节点(G)左子树
+     else if (p.parent.left == p)
+         p.parent.left = r;
+     //否则R设置为P的父节点（G）的右子树
+     else
+         p.parent.right = r;
+     //将P设置为R的左子树
+     r.left = p;
+     //将R设置为P的父节点
+     p.parent = r;
+  }
+}
+</code></pre><p>右旋：rotateRight()</p>
+<p>所谓右旋转即，P.right —&gt; G、G.parent —&gt; P。</p>
+<pre><code>private void rotateRight(Entry&lt;K,V&gt; p) {
+  if (p != null) {
+    //将L设置为P的左子树
+    Entry&lt;K,V&gt; l = p.left;
+    //将L的右子树设置为P的左子树
+    p.left = l.right;
+    //若L的右子树不为空，则将P设置L的右子树的父节点
+    if (l.right != null) 
+        l.right.parent = p;
+    //将P的父节点设置为L的父节点
+    l.parent = p.parent;
+    //如果P的父节点为空，则将L设置根节点
+    if (p.parent == null)
+        root = l;
+    //若P为其父节点的右子树，则将L设置为P的父节点的右子树
+    else if (p.parent.right == p)
+        p.parent.right = l;
+    //否则将L设置为P的父节点的左子树
+    else 
+        p.parent.left = l;
+    //将P设置为L的右子树
+    l.right = p;
+    //将L设置为P的父节点
+    p.parent = l;
+  }
+}
+</code></pre><p>左旋、右旋的示意图如下：</p>
+<p>左旋：　　　　　　　　　　　　　　　　　　　　　　右旋：</p>
+<p><img src="http://7xsp7e.com2.z0.glb.clouddn.com/image/jpg/tech/algorithms/rbtree/2014051700004_thumb.gif" alt="hyperlink syntax"><br><img src="http://7xsp7e.com2.z0.glb.clouddn.com/image/jpg/tech/algorithms/rbtree/2014051700005_thumb.gif" alt="hyperlink syntax"></p>
+<p>着色：setColor()</p>
+<p>着色就是改变该节点的颜色，在红黑树中，它是依靠节点的颜色来维持平衡的。</p>
+<pre><code>private static &lt;K,V&gt; void setColor(Entry&lt;K,V&gt; p, boolean c) {
+  if (p != null)
+    p.color = c;
+}
+</code></pre><h2 id="四、TreeMap-delete-方法"><a href="#四、TreeMap-delete-方法" class="headerlink" title="四、TreeMap delete()方法"></a>四、TreeMap delete()方法</h2><p>红黑树删除节点</p>
+<p>针对于红黑树的增加节点而言，删除显得更加复杂，使原本就复杂的红黑树变得更加复杂。同时删除节点和增加节点一样，同样是找到删除的节点，删除之后调整红黑树。但是这里的删除节点并不是直接删除，而是通过走了“弯路”通过一种捷径来删除的：找到被删除的节点D的子节点C，用C来替代D，不是直接删除D，因为D被C替代了，直接删除C即可。所以这里就将删除父节点D的事情转变为了删除子节点C的事情，这样处理就将复杂的删除事件简单化了。子节点C的规则是：右分支最左边，或者 左分支最右边的。</p>
+<p><img src="http://7xsp7e.com2.z0.glb.clouddn.com/image/jpg/tech/algorithms/rbtree/20140517000012_thumb.png" alt="hyperlink syntax"></p>
+<p>红-黑二叉树删除节点，最大的麻烦是要保持 各分支黑色节点数目相等。 因为是删除，所以不用担心存在颜色冲突问题——插入才会引起颜色冲突。</p>
+<p>红黑树删除节点同样会分成几种情况，这里是按照待删除节点有几个儿子的情况来进行分类：</p>
+<p>1、没有儿子，即为叶结点。直接把父结点的对应儿子指针设为NULL，删除儿子结点就OK了。</p>
+<p>2、只有一个儿子。那么把父结点的相应儿子指针指向儿子的独生子，删除儿子结点也OK了。</p>
+<p>3、有两个儿子。这种情况比较复杂，但还是比较简单。上面提到过用子节点C替代代替待删除节点D，然后删除子节点C即可。</p>
+<p>下面就论各种删除情况来进行图例讲解，但是在讲解之前请允许我再次啰嗦一句，请时刻牢记红黑树的5点规定：</p>
+<p>1、每个节点都只能是红色或者黑色</p>
+<p>2、根节点是黑色</p>
+<p>3、每个叶节点（NIL节点，空节点）是黑色的。</p>
+<p>4、如果一个结点是红的，则它两个子节点都是黑的。也就是说在一条路径上不能出现相邻的两个红色结点。</p>
+<p>5、从任一节点到其每个叶子的所有路径都包含相同数目的黑色节点。</p>
+<p>（注：已经讲三遍了，再不记住我就怀疑你是否适合搞IT了 O(∩_∩)O~）</p>
+<p>诚然，既然删除节点比较复杂，那么在这里我们就约定一下规则：</p>
+<p>1、下面要讲解的删除节点一定是实际要删除节点的后继节点（N），如前面提到的C。</p>
+<p>2、下面提到的删除节点的树都是如下结构，该结构所选取的节点是待删除节点的右树的最左边子节点。这里我们规定真实删除节点为N、父节点为P、兄弟节点为W兄弟节点的两个子节点为X1、X2。如下图（2.1）。</p>
+<p><img src="http://7xsp7e.com2.z0.glb.clouddn.com/image/jpg/tech/algorithms/rbtree/20140517000013_thumb.png" alt="hyperlink syntax"></p>
+<p>现在我们就上面提到的三种情况进行分析、处理。</p>
+<p>情况一、无子节点（红色节点）</p>
+<p>这种情况对该节点直接删除即可，不会影响树的结构。因为该节点为叶子节点它不可能存在子节点—–如子节点为黑，则违反黑节点数原则（规定5），为红，则违反“颜色”原则（规定4）。 如上图（2.2）。</p>
+<p>情况二、有一个子节点</p>
+<p>这种情况处理也是非常简单的，用子节点替代待删除节点，然后删除子节点即可。如上图（2.3）</p>
+<p>情况三、有两个子节点</p>
+<p>这种情况可能会稍微有点儿复杂。它需要找到一个替代待删除节点（N）来替代它，然后删除N即可。它主要分为四种情况。</p>
+<p>1、N的兄弟节点W为红色</p>
+<p>2、N的兄弟w是黑色的，且w的俩个孩子都是黑色的。</p>
+<p>3、N的兄弟w是黑色的，w的左孩子是红色，w的右孩子是黑色。</p>
+<p>4、N的兄弟w是黑色的，且w的右孩子时红色的。</p>
+<p>情况3.1、N的兄弟节点W为红色</p>
+<p>W为红色，那么其子节点X1、X2必定全部为黑色，父节点P也为黑色。处理策略是：改变W、P的颜色，然后进行一次左旋转。这样处理就可以使得红黑性质得以继续保持。N的新兄弟new w是旋转之前w的某个孩子，为黑色。这样处理后将情况3.1、转变为3.2、3.3、3.4中的一种。如下：</p>
+<p><img src="http://7xsp7e.com2.z0.glb.clouddn.com/image/jpg/tech/algorithms/rbtree/20140517000014_thumb.png" alt="hyperlink syntax"></p>
+<p>情况3.2、N的兄弟w是黑色的，且w的俩个孩子都是黑色的。</p>
+<p>这种情况其父节点可红可黑，由于W为黑色，这样导致N子树相对于其兄弟W子树少一个黑色节点，这时我们可以将W置为红色。这样，N子树与W子树黑色节点一致，保持了平衡。如下</p>
+<p><img src="http://7xsp7e.com2.z0.glb.clouddn.com/image/jpg/tech/algorithms/rbtree/20140517000015_thumb.png" alt="hyperlink syntax"></p>
+<p>将W由黑转变为红，这样就会导致新节点new N相对于它的兄弟节点会少一个黑色节点。但是如果new x为红色，我们直接将new x转变为黑色，保持整棵树的平衡。否则情况3.2 会转变为情况3.1、3.3、3.4中的一种。</p>
+<p>情况3.3、N的兄弟w是黑色的，w的左孩子是红色，w的右孩子是黑色。</p>
+<p>针对这种情况是将节点W和其左子节点进行颜色交换，然后对W进行右旋转处理。</p>
+<p><img src="http://7xsp7e.com2.z0.glb.clouddn.com/image/jpg/tech/algorithms/rbtree/20140517000016_thumb.png" alt="hyperlink syntax"></p>
+<p>此时N的新兄弟X1(new w)是一个有红色右孩子的黑结点，于是将情况3转化为情况4.</p>
+<p>情况3.4、N的兄弟w是黑色的，且w的右孩子时红色的。</p>
+<p>交换W和父节点P的颜色，同时对P进行左旋转操作。这样就把左边缺失的黑色节点给补回来了。同时将W的右子节点X2置黑。这样左右都达到了平衡。</p>
+<p><img src="http://7xsp7e.com2.z0.glb.clouddn.com/image/jpg/tech/algorithms/rbtree/20140517000017_thumb.png" alt="hyperlink syntax"></p>
+<p>总结</p>
+<p>个人认为这四种情况比较难理解，首先他们都不是单一的某种情况，他们之间是可以进行互转的。相对于其他的几种情况，情况3.2比较好理解，仅仅只是一个颜色的转变，通过减少右子树的一个黑色节点使之保持平衡，同时将不平衡点上移至N与W的父节点，然后进行下一轮迭代。情况3.1，是将W旋转将其转成情况2、3、4情况进行处理。而情况3.3通过转变后可以化成情况3.4来进行处理，从这里可以看出情况3.4应该最终结。情况3.4、右子节点为红色节点，那么将缺失的黑色节点交由给右子节点，通过旋转达到平衡。</p>
+<p>通过上面的分析，我们已经初步了解了红黑树的删除节点情况，相对于增加节点而言它确实是选的较为复杂。下面我将看到在Java TreeMap中是如何实现红黑树删除的。<br>TreeMap deleteEntry()方法实现分析</p>
+<p>通过上面的分析我们确认删除节点的步骤是：找到一个替代子节点C来替代P，然后直接删除C，最后调整这棵红黑树。下面代码是寻找替代节点、删除替代节点。</p>
+<pre><code>private void deleteEntry(Entry&lt;K,V&gt; p) {
+  modCount++;      //修改次数 +1
+  size--;          //元素个数 -1
+
+  /*
+   * 被删除节点的左子树和右子树都不为空，那么就用 p节点的中序后继节点代替 p 节点
+   * successor(P)方法为寻找P的替代节点。规则是右分支最左边，或者 左分支最右边的节点
+   * ---------------------（1）
+  */
+  if (p.left != null &amp;&amp; p.right != null) {  
+    Entry&lt;K,V&gt; s = successor(p);
+    p.key = s.key;
+    p.value = s.value;
+    p = s;
+  }
+
+  //replacement为替代节点，如果P的左子树存在那么就用左子树替代，否则用右子树替代
+  Entry&lt;K,V&gt; replacement = (p.left != null ? p.left : p.right);
+
+  /*
+   * 删除节点，分为上面提到的三种情况
+   * -----------------------（2）
+  */
+  //如果替代节点不为空
+  if (replacement != null) {
+    replacement.parent = p.parent;
+    /*
+     *replacement来替代P节点
+     */
+    //若P没有父节点，则跟节点直接变成replacement
+    if (p.parent == null)
+        root = replacement;
+    //如果P为左节点，则用replacement来替代为左节点
+    else if (p == p.parent.left)
+        p.parent.left  = replacement;
+    //如果P为右节点，则用replacement来替代为右节点
+    else
+        p.parent.right = replacement;
+
+    //同时将P节点从这棵树中剔除掉
+    p.left = p.right = p.parent = null;
+
+    /*
+     * 若P为红色直接删除，红黑树保持平衡
+     * 但是若P为黑色，则需要调整红黑树使其保持平衡
+     */
+    if (p.color == BLACK)
+        fixAfterDeletion(replacement);
+  } else if (p.parent == null) {     //p没有父节点，表示为P根节点，直接删除即可
+    root = null;
+  } else {      //P节点不存在子节点，直接删除即可
+    if (p.color == BLACK)         //如果P节点的颜色为黑色，对红黑树进行调整
+        fixAfterDeletion(p);
+
+    //删除P节点
+    if (p.parent != null) {
+        if (p == p.parent.left)
+            p.parent.left = null;
+        else if (p == p.parent.right)
+            p.parent.right = null;
+        p.parent = null;
+    }
+  }
+}
+</code></pre><p>（1）除是寻找替代节点replacement，其实现方法为successor()。如下：</p>
+<pre><code> static &lt;K,V&gt; TreeMap.Entry&lt;K,V&gt; successor(Entry&lt;K,V&gt; t) {
+   if (t == null)
+     return null;
+   /*
+    * 寻找右子树的最左子树
+   */
+   else if (t.right != null) {
+     Entry&lt;K,V&gt; p = t.right;
+     while (p.left != null)
+         p = p.left;
+     return p;
+   } 
+   /*
+   * 选择左子树的最右子树
+   */
+   else {
+     Entry&lt;K,V&gt; p = t.parent;
+     Entry&lt;K,V&gt; ch = t;
+     while (p != null &amp;&amp; ch == p.right) {
+         ch = p;
+         p = p.parent;
+     }
+     return p;
+  }
+}
+</code></pre><p>（2）处是删除该节点过程。它主要分为上面提到的三种情况，它与上面的if…else if… else一一对应 。如下：</p>
+<p>1、有两个儿子。这种情况比较复杂，但还是比较简单。上面提到过用子节点C替代代替待删除节点D，然后删除子节点C即可。</p>
+<p>2、没有儿子，即为叶结点。直接把父结点的对应儿子指针设为NULL，删除儿子结点就OK了。</p>
+<p>3、只有一个儿子。那么把父结点的相应儿子指针指向儿子的独生子，删除儿子结点也OK了。</p>
+<p>删除完节点后，就要根据情况来对红黑树进行复杂的调整：fixAfterDeletion()。</p>
+<pre><code>private void fixAfterDeletion(Entry&lt;K,V&gt; x) {
+  // 删除节点需要一直迭代，知道 直到 x 不是根节点，且 x 的颜色是黑色
+   while (x != root &amp;&amp; colorOf(x) == BLACK) {
+      if (x == leftOf(parentOf(x))) {      //若X节点为左节点
+         //获取其兄弟节点
+         Entry&lt;K,V&gt; sib = rightOf(parentOf(x));
+
+         /*
+          * 如果兄弟节点为红色----（情况3.1）
+          * 策略：改变W、P的颜色，然后进行一次左旋转
+          */
+         if (colorOf(sib) == RED) {     
+             setColor(sib, BLACK);     
+             setColor(parentOf(x), RED);  
+             rotateLeft(parentOf(x));
+             sib = rightOf(parentOf(x));
+         }
+
+         /*
+          * 若兄弟节点的两个子节点都为黑色----（情况3.2）
+          * 策略：将兄弟节点编程红色
+          */
+         if (colorOf(leftOf(sib))  == BLACK &amp;&amp;
+             colorOf(rightOf(sib)) == BLACK) {
+             setColor(sib, RED);
+             x = parentOf(x);
+         } 
+         else {
+             /*
+              * 如果兄弟节点只有右子树为黑色----（情况3.3）
+              * 策略：将兄弟节点与其左子树进行颜色互换然后进行右转
+              * 这时情况会转变为3.4
+              */
+             if (colorOf(rightOf(sib)) == BLACK) {
+                 setColor(leftOf(sib), BLACK);
+                 setColor(sib, RED);
+                 rotateRight(sib);
+                 sib = rightOf(parentOf(x));
+             }
+             /*
+              *----情况3.4
+              *策略：交换兄弟节点和父节点的颜色，
+              *同时将兄弟节点右子树设置为黑色，最后左旋转
+              */
+             setColor(sib, colorOf(parentOf(x)));
+             setColor(parentOf(x), BLACK);
+             setColor(rightOf(sib), BLACK);
+             rotateLeft(parentOf(x));
+             x = root;
+         }
+      } 
+
+      /**
+       * X节点为右节点与其为做节点处理过程差不多，这里就不在累述了
+       */
+      else {
+         Entry&lt;K,V&gt; sib = leftOf(parentOf(x));
+
+         if (colorOf(sib) == RED) {
+             setColor(sib, BLACK);
+             setColor(parentOf(x), RED);
+             rotateRight(parentOf(x));
+             sib = leftOf(parentOf(x));
+         }
+
+         if (colorOf(rightOf(sib)) == BLACK &amp;&amp;
+             colorOf(leftOf(sib)) == BLACK) {
+             setColor(sib, RED);
+             x = parentOf(x);
+         } else {
+             if (colorOf(leftOf(sib)) == BLACK) {
+                 setColor(rightOf(sib), BLACK);
+                 setColor(sib, RED);
+                 rotateLeft(sib);
+                 sib = leftOf(parentOf(x));
+             }
+             setColor(sib, colorOf(parentOf(x)));
+             setColor(parentOf(x), BLACK);
+             setColor(leftOf(sib), BLACK);
+             rotateRight(parentOf(x));
+             x = root;
+         }
+      }
+   }
+   setColor(x, BLACK);
+ }
+</code></pre><p>这是红黑树在删除节点后，对树的平衡性进行调整的过程，其实现过程与上面四种复杂的情况一一对应，所以在这个源码的时候一定要对着上面提到的四种情况看。</p>
+<h2 id="五、写在最后"><a href="#五、写在最后" class="headerlink" title="五、写在最后"></a>五、写在最后</h2><p>这篇博文确实是有点儿长，在这里非常感谢各位看客能够静下心来读完，我想你通过读完这篇博文一定收获不小。同时这篇博文很大篇幅都在阐述红黑树的实现过程，对Java 的TreeMap聊的比较少，但是我认为如果理解了红黑树的实现过程，对TreeMap那是手到擒来，小菜一碟。</p>
+<p>同时这篇博文我写了四天，看了、参考了大量的博文。同时不免会有些地方存在借鉴之处，在这里对其表示感谢。LZ大二开始学习数据结构，自认为学的不错，现在发现数据结构我还有太多的地方需要学习了，同时也再一次体味了算法的魅力！！！！</p>
+]]></content>
+    </entry>
+    
+    <entry>
+      <title><![CDATA[WEB压力测试工具wrk]]></title>
+      <url>http://yoursite.com/2016/04/08/WEB%E5%8E%8B%E5%8A%9B%E6%B5%8B%E8%AF%95%E5%B7%A5%E5%85%B7wrk/</url>
+      <content type="html"><![CDATA[<p>wrk 是一个比较先进的 HTTP 压力测试工具。<br><a id="more"></a></p>
+<h2 id="一、什么是WRK"><a href="#一、什么是WRK" class="headerlink" title="一、什么是WRK"></a>一、什么是WRK</h2><p>WRK的全称是“Windows Research Kernel”，它是微软为高校操作系统课程提供的可修改和跟踪的操作系统教学平台。它给出了Windows这个成功的商业操作系统的内核大部分代码，可以对其进行修改、编译，并且可以用这个内核启动Windows操作系统。可让学生将操作系统基本原理和商业操作系统内核联系起来，进一步加深对操作系统整体的理解。</p>
+<h2 id="二、安装WRK"><a href="#二、安装WRK" class="headerlink" title="二、安装WRK"></a>二、安装WRK</h2><p>Linux版本</p>
+<p>下载 ：git clone <a href="https://github.com/wg/wrk.git" target="_blank" rel="external">https://github.com/wg/wrk.git</a></p>
+<p>安装：进入wrk 目录，执行make</p>
+<h2 id="三、执行WRK"><a href="#三、执行WRK" class="headerlink" title="三、执行WRK"></a>三、执行WRK</h2><p>wrk命令参数：</p>
+<pre><code>Usage: wrk &lt;options&gt; &lt;url&gt;                            
+Options:                                            
+-c, --connections &lt;N&gt;  Connections to keep open   
+-d, --duration    &lt;T&gt;  Duration of test           
+-t, --threads     &lt;N&gt;  Number of threads to use   
+-s, --script      &lt;S&gt;  Load Lua script file       
+-H, --header      &lt;H&gt;  Add header to request      
+    --latency          Print latency statistics   
+    --timeout     &lt;T&gt;  Socket/request timeout     
+-v, --version          Print version details
+</code></pre><p>执行 ./wrk -t8 -c400 <a href="http://localhost:8080/index.html" target="_blank" rel="external">http://localhost:8080/index.html</a></p>
+<pre><code> Running 10s test @ http://localhost:8080/index.html
+   8 threads and 400 connections
+   Thread Stats   Avg      Stdev     Max   +/- Stdev
+      Latency   119.63ms  258.48ms   1.97s    85.39%
+      Req/Sec     3.57k     4.21k   15.40k    83.58%
+   140788 requests in 10.03s, 525.64MB read
+   Socket errors: connect 0, read 0, write 0, timeout 13
+Requests/sec:  14031.81
+Transfer/sec:  52.39MB
+</code></pre>]]></content>
+    </entry>
+    
+    <entry>
+      <title><![CDATA[使用SSH密钥连接Github]]></title>
+      <url>http://yoursite.com/2016/03/24/%E4%BD%BF%E7%94%A8SSH%E5%AF%86%E9%92%A5%E8%BF%9E%E6%8E%A5Github/</url>
+      <content type="html"><![CDATA[<p>使用Github，也许大家觉得比较麻烦的就是在每次push的时候，都需要输入用户名和密码。如果使用SSH，就可以记住用户名，并创建属于自己的密码来保证安全操作，还有神奇的一招可以“不用输入密码”哦。下面将介绍如何创建SSH Keys并将公钥加到GitHub账户中，使用SSH Keys在本机和GitHub之间建立一个安全的连接。<br><a id="more"></a></p>
+<h2 id="一、Windows环境下生成SSH-key且连接GitHub"><a href="#一、Windows环境下生成SSH-key且连接GitHub" class="headerlink" title="一、Windows环境下生成SSH key且连接GitHub"></a>一、Windows环境下生成SSH key且连接GitHub</h2><h3 id="第一步、看看是否存在SSH密钥-keys"><a href="#第一步、看看是否存在SSH密钥-keys" class="headerlink" title="第一步、看看是否存在SSH密钥(keys)"></a>第一步、看看是否存在SSH密钥(keys)</h3><p>首先，我们需要看看是否看看本机是否存在SSH keys,打开Git Bash,并运行:</p>
+<pre><code>$cd ~/.ssh#
+</code></pre><p>检查你本机用户home目录下是否存在.ssh目录<br>如果，不存在此目录，则进行第二步操作，否则，你本机已经存在ssh公钥和私钥，可以略过第二步，直接进入第三步操作。</p>
+<h3 id="第二步、创建一对新的SSH密钥-keys"><a href="#第二步、创建一对新的SSH密钥-keys" class="headerlink" title="第二步、创建一对新的SSH密钥(keys)"></a>第二步、创建一对新的SSH密钥(keys)</h3><p>输入如下命令：</p>
+<pre><code>$ssh-keygen -t rsa -C “your_email@example.com”
+</code></pre><p>#这将按照你提供的邮箱地址，创建一对密钥<br>Generating public/private rsa key pair.<br>Enter file in which to save the key (/c/Users/you/.ssh/id_rsa): [Press enter]</p>
+<p>直接回车，则将密钥按默认文件进行存储。此时也可以输入特定的文件名，比如/c/Users/you/.ssh/github_rsa<br>接着，根据提示，你需要输入密码和确认密码（说到这里，如果你很放心，其实可以不用密码，就是到输密码的地方，都直接回车，所以每次push就只管回车就行了。所谓的最安全的密码，就是没有密码 – – 哈哈）。相关提示如下：</p>
+<pre><code>Enter passphrase (empty for no passphrase): [Type a passphrase]
+Enter same passphrase again: [Type passphrase again]
+</code></pre><p>输入完成之后，屏幕会显示如下信息：</p>
+<pre><code>Your identification has been saved in /c/Users/you/.ssh/id_rsa.
+Your public key has been saved in /c/Users/you/.ssh/id_rsa.pub.
+The key fingerprint is:
+01:0f:f4:3b:ca:85:d6:17:a1:7d:f0:68:9d:f0:a2:db your_email@example.com
+</code></pre><h3 id="第三步、在GitHub账户中添加你的公钥"><a href="#第三步、在GitHub账户中添加你的公钥" class="headerlink" title="第三步、在GitHub账户中添加你的公钥"></a>第三步、在GitHub账户中添加你的公钥</h3><p>运行如下命令，将公钥的内容复制到系统粘贴板(clipboard)中。</p>
+<pre><code>clip &lt; ~/.ssh/id_rsa.pub
+</code></pre><p>接着：</p>
+<pre><code>登陆GitHub,进入你的Account Settings.
+userbar-account-settings
+在左边菜单，点击”SSH Keys”.
+settings-sidebar-ssh-keys
+点击”Add SSH key”按钮.
+ssh-add-ssh-key
+粘贴你的密钥到key输入框中.
+ssh-key-paste
+点击”Add Key”按钮。
+ssh-add-key
+再弹出窗口，输入你的GitHub密码，点击确认按钮。
+到此，大功告成了！
+</code></pre><h3 id="第四步、测试"><a href="#第四步、测试" class="headerlink" title="第四步、测试"></a>第四步、测试</h3><p>为了确认我们可以通过SSH连接GitHub，我们输入下面命令。输入后，会要求我们提供验证密码，输入之前创建的密码就ok了。</p>
+<pre><code>$ssh -T git@github.com
+</code></pre><p>你可能会看到告警信息，如下：</p>
+<pre><code>The authenticity of host ‘github.com (207.97.227.239)’ can’t be established.
+RSA key fingerprint is 16:27:ac:a5:76:28:2d:36:63:1b:56:4d:eb:df:a6:48.
+Are you sure you want to continue connecting (yes/no)?
+</code></pre><p>不用担心，直接输入yes。<br>如果看到下面信息，就说明一切完美！</p>
+<pre><code>Hi username! You’ve successfully authenticated, but GitHub does not provide shell access.
+</code></pre><h2 id="二、Mac环境下生成SSH-key且连接GitHub"><a href="#二、Mac环境下生成SSH-key且连接GitHub" class="headerlink" title="二、Mac环境下生成SSH key且连接GitHub"></a>二、Mac环境下生成SSH key且连接GitHub</h2><h3 id="第一步、看看是否存在SSH密钥-keys-1"><a href="#第一步、看看是否存在SSH密钥-keys-1" class="headerlink" title="第一步、看看是否存在SSH密钥(keys)"></a>第一步、看看是否存在SSH密钥(keys)</h3><p>首先，我们需要看看是否看看本机是否存在SSH keys,打开终端(Terminal),并运行:</p>
+<pre><code>$cd ~/.ssh
+</code></pre><p>检查你本机用户home目录下是否存在.ssh目录<br>如果，不存在此目录，则进行第二步操作，否则，你本机已经存在ssh公钥和私钥，可以略过第二步，直接进入第三步操作。</p>
+<h3 id="第二步、创建一对新的SSH密钥-keys-1"><a href="#第二步、创建一对新的SSH密钥-keys-1" class="headerlink" title="第二步、创建一对新的SSH密钥(keys)"></a>第二步、创建一对新的SSH密钥(keys)</h3><p>输入如下命令：</p>
+<pre><code>$ssh-keygen -t rsa -C “your_email@example.com”
+</code></pre><p>#这将按照你提供的邮箱地址，创建一对密钥</p>
+<pre><code>Generating public/private rsa key pair.
+Enter file in which to save the key (/Users/you/.ssh/id_rsa): [Press enter]
+</code></pre><p>直接回车，则将密钥按默认文件进行存储。此时也可以输入特定的文件名，比如/Users/you/.ssh/github_rsa<br>接着，根据提示，你需要输入密码和确认密码。相关提示如下：</p>
+<pre><code>Enter passphrase (empty for no passphrase): [Type a passphrase]
+Enter same passphrase again: [Type passphrase again]
+</code></pre><p>输入完成之后，屏幕会显示如下信息：</p>
+<pre><code>Your identification has been saved in /Users/you/.ssh/id_rsa.
+Your public key has been saved in /Users/you/.ssh/id_rsa.pub.
+The key fingerprint is:
+01:0f:f4:3b:ca:85:d6:17:a1:7d:f0:68:9d:f0:a2:db your_email@example.com
+</code></pre><h3 id="第三步、在GitHub账户中添加你的公钥-1"><a href="#第三步、在GitHub账户中添加你的公钥-1" class="headerlink" title="第三步、在GitHub账户中添加你的公钥"></a>第三步、在GitHub账户中添加你的公钥</h3><p>运行如下命令，将公钥的内容复制到系统粘贴板(clipboard)中。</p>
+<pre><code>pbcopy &lt; ~/.ssh/id_rsa.pub
+</code></pre><p>接着：</p>
+<pre><code>登陆GitHub,进入你的Account Settings.
+userbar-account-settings
+在左边菜单，点击”SSH Keys”.
+settings-sidebar-ssh-keys
+点击”Add SSH key”按钮.
+ssh-add-ssh-key
+粘贴你的密钥到key输入框中.
+ssh-key-paste
+点击”Add Key”按钮。
+ssh-add-key
+再弹出窗口，输入你的GitHub密码，点击确认按钮。
+到此，大功告成了！
+</code></pre><h3 id="第四步、测试-1"><a href="#第四步、测试-1" class="headerlink" title="第四步、测试"></a>第四步、测试</h3><p>为了确认我们可以通过SSH连接GitHub，我们输入下面命令。输入后，会要求我们提供验证密码，输入之前创建的密码就ok了。</p>
+<pre><code>$ ssh -T git@github.com
+</code></pre><p>你可能会看到告警信息，如下：</p>
+<pre><code>The authenticity of host ‘github.com (207.97.227.239)’ can’t be established.
+RSA key fingerprint is 16:27:ac:a5:76:28:2d:36:63:1b:56:4d:eb:df:a6:48.
+Are you sure you want to continue connecting (yes/no)?=
+</code></pre><p>不用担心，直接输入yes。<br>如果看到下面信息，就说明一切完美！</p>
+<pre><code>Hi username! You’ve successfully authenticated, but GitHub does not provide shell access.
+</code></pre><p>【注意】<br>如果前面没有将生成的密钥存放在默认的文件id_rsa中（而是my_rsa中）,那么ssh -T git@github.com命令就需要添加参数来执行。如下：</p>
+<pre><code>$ ssh -T -i my_rsa git@github.com
+</code></pre><h2 id="三、单机如何控制不同的SSH-Keys连不同的Git环境"><a href="#三、单机如何控制不同的SSH-Keys连不同的Git环境" class="headerlink" title="三、单机如何控制不同的SSH Keys连不同的Git环境?"></a>三、单机如何控制不同的SSH Keys连不同的Git环境?</h2><p>其实，一套SSH密钥是可以用在不同的SSH环境的.<br>但是如果由于某种要求，需要用不同的SSH密钥连接不同的Git环境。假设具体场景是，已经建了密钥github_rsa，还需要创建work_rsa连接工作环境git仓库，那么，可以按下面操作进行：</p>
+<pre><code>创建另一对密钥work_rsa.
+$ssh-keygen -t rsa -C “work@mail.com”
+#保存密钥为work_rsa
+添加新身份信息
+$ssh-add ～/.ssh/work_rsa
+配置.ssh/config
+</code></pre><p>我们需要通过Host别名，将不同的账号区分开来。</p>
+<pre><code>Host me.github.com
+HostName github.com
+PreferredAuthentications publickey
+IdentityFile ~/.ssh/github_rsa
+
+Host work.comp.com
+HostName comp.com
+PreferredAuthentications publickey
+IdentityFile ~/.ssh/work_rsa
+</code></pre><p>参考文档:GitHub官方文档Generating SSH Keys</p>
+]]></content>
+    </entry>
+    
+    <entry>
+      <title><![CDATA[Hexo+GitHub搭建博客]]></title>
+      <url>http://yoursite.com/2016/03/24/Hexo-GitHub%E6%90%AD%E5%BB%BA%E5%8D%9A%E5%AE%A2/</url>
+      <content type="html"><![CDATA[<p>经过各种找资料，踩过何种坑，终于搭建好了hexo，域名目前用得时github的，我的hexo是3.1.1版本，hexo不同的版本，很多配置都不一样。好吧，废话不多说了，开始吧。<br><a id="more"></a></p>
+<h1 id="正文："><a href="#正文：" class="headerlink" title="正文："></a>正文：</h1><p>  这边教程是针对与Mac的，参考链接，由于原文讲到的hexo是以前的老版本，所以现在的版本配置的时候会有些改动。<br>  之前是想着写博客，一方面是给自己做笔记，可以提升自己的写作、总结能力，一个技术点我们会使用，并不难，但是要做到让让别人也能听懂我们讲得，还是需要一定的技巧和经验的。很多类似于CSDN、博客园也都可以写文章，但是页面的样式我，不是太喜欢，简书还算好点得。最近看到一些大神们的博客（在我的友情链接里有），貌似都是用hexo写得，我也依葫芦画瓢的搭建了一个。不罗嗦了，直接上搭建步骤。</p>
+<p>配置环境<br>安装Node（必须）<br>作用：用来生成静态页面的<br>到Node.js官网下载相应平台的最新版本，一路安装即可。</p>
+<p>安装Git（必须）<br>作用：把本地的hexo内容提交到github上去.<br>安装Xcode就自带有Git，我就不多说了。</p>
+<p>申请GitHub（必须）<br>作用：是用来做博客的远程创库、域名、服务器之类的，怎么与本地hexo建立连接等下讲。<br>github账号我也不再啰嗦了,没有的话直接申请就行了，跟一般的注册账号差不多，SSH Keys，看你自己了，可以不配制，不配置的话以后每次对自己的博客有改动提交的时候就要手动输入账号密码，配置了就不需要了，怎么配置我就不多说了，网上有很多教程。</p>
+<p>正式安装HEXO<br>Node和Git都安装好后，可执行如下命令安装hexo：</p>
+<pre><code>npm install -g hexo
+</code></pre><p>初始化<br>然后，执行init命令初始化hexo到你指定的目录，我是直接cd到目标目录执行hexo init的。命令：</p>
+<pre><code>hexo init
+</code></pre><p>好啦，至此，全部安装工作已经完成！<br>生成静态页面<br>cd 到你的init目录，执行如下命令，生成静态页面至hexo\public\目录。</p>
+<pre><code>hexo generate （hexo g  也可以）
+</code></pre><p>本地启动</p>
+<pre><code>启动本地服务，进行文章预览调试，命令：
+hexo server
+浏览器输入http://localhost:4000
+我不知道你们能不能，反正我不能，因为我还有环境没配置好
+我把我报的一些错，和解决方式列出来：
+</code></pre><p>报错 一</p>
+<pre><code>ERROR Plugin load failed: hexo-server
+原因：Besides, utilities are separated into a standalone module. hexo.util is not reachable anymore.
+解决方法，执行命令：
+sudo npm install hexo-server
+</code></pre><p>报错 二</p>
+<pre><code>执行命令hexo server，有如下提示：
+Usage: hexo
+….
+原因：我认为是没有生成本地服务
+</code></pre><p>解决方法，执行命令：</p>
+<pre><code>npm install hexo-server --save
+提示：hexo-server@0.1.2 node_modules/hexo-server
+….
+</code></pre><p>表示成功了参考<br>这个时候再执行：</p>
+<pre><code>hexo-server
+</code></pre><p>得到:</p>
+<pre><code>INFO  Hexo is running at http://0.0.0.0:4000/. Press Ctrl+C to stop.
+</code></pre><p>这个时候再点击<a href="http://0.0.0.0:4000" target="_blank" rel="external">http://0.0.0.0:4000</a> ，正常情况下应该是最原始的画面，但是我看到的是：</p>
+<pre><code>白板和Cannot GET / 几个字
+</code></pre><p>原因：<br>由于2.6以后就更新了，我们需要手动配置些东西，我们需要输入下面三行命令：</p>
+<pre><code>npm install hexo-renderer-ejs --save
+npm install hexo-renderer-stylus --save
+npm install hexo-renderer-marked --save
+</code></pre><p>这个时候再重新生成静态文件，命令：</p>
+<pre><code>hexo generate （或hexo g）
+</code></pre><p>启动本地服务器：</p>
+<pre><code>hexo server （或hexo s）
+</code></pre><p>再点击网址<a href="http://0.0.0.0:4000" target="_blank" rel="external">http://0.0.0.0:4000</a> OK终于可以看到属于你自己的blog啦，虽然很简陋，但好歹有了一个属于自己的小窝了。参考链接，本地已经简单的设置好了，但是现在域名和服务器都是基于自己的电脑，接下来需要跟github进行关联。<br>配置Github<br>建立Repository<br>建立与你用户名对应的仓库，仓库名必须为【your_user_name.github.io】，固定写法，然后建立关联，我的blog在本地/Users/leopard/blog，blog是我之前建的东西也全在这里面，有：</p>
+<pre><code>_config.yml    node_modules    publicsourcedb.json      package.json    scaffolds    themes
+</code></pre><p>现在我们需要_config.yml文件，来建立关联，命令：</p>
+<pre><code>vim _config.yml
+</code></pre><p>翻到最下面，改成我这样子的</p>
+<pre><code>deploy:type: git 
+repository: https://github.com/leopardpan/leopardpan.github.io.git  
+branch: master
+</code></pre><p>网上会有很多说法，有的type是github, 还有repository 最后面的后缀也不一样，是github.com.git，我也踩了很多坑，我现在的版本是hexo: 3.1.1，执行命令hexo -vsersion就出来了,貌似3.0后全部改成我上面这种格式了。如果采用SSH协议，参看另外一篇-使用SSH密钥连接Github文章<br>然后，执行配置命令：</p>
+<pre><code>hexo deploy
+</code></pre><p>然后再浏览器中输入<a href="http://leopardpan.github.io/" target="_blank" rel="external">http://leopardpan.github.io/</a>就行了，我的github的账户叫leopardpan,把这个改成你github的账户名就行了<br>部署步骤<br>每次部署的步骤，可按以下三步来进行。</p>
+<pre><code>hexo clean
+hexo generate
+hexo deploy
+</code></pre><p>如发生 ERROR Deployer not found: git 或者 ERROR Deployer not found: github<br>解决方法： npm install hexo-deployer-git  –save（在项目目录中执行）<br>一些常用命令：</p>
+<pre><code>hexo new&quot;postName&quot; #新建文章 
+hexo new page&quot;pageName&quot; #新建页面
+hexo generate #生成静态页面至public目录
+hexo server #开启预览访问端口（默认端口4000，&apos;ctrl + c&apos;关闭server）
+hexo deploy #将.deploy目录部署到GitHub
+hexo help #查看帮助
+hexo version #查看Hexo的版本
+</code></pre><p>这里有大量的主题列表使用方法里面</p>
+<p>都有详细的介绍，我就不多说了。<br>我这里有几款个人认为不错的主题，免去你们，一个一个的选了，欢迎吐槽我的审美，😄<br>Cover- A chic theme with facebook-like cover photo<br>Oishi- A white theme based on Landscape plus and Writing.<br>Sidebar- Another theme based on Light with a simple sidebar<br>TKL- A responsive design theme for Hexo. 一个设计优雅的响应式主题<br>Tinnypp- A clean, simple theme based on Tinny<br>Writing- A small and simple hexo theme based on Light<br>Yilia- Responsive and simple style 优雅简洁响应式主题，我用得就是这个。<br>Pacman voidy- A theme with dynamic tagcloud and dynamic snow</p>
+<p>一些基本路径<br>文章在source/_posts，如果你不怕麻烦的话可以跟我一样直接用vim去编辑，支持markdown语法，你有好的编辑软件，给我也推荐下，感激不尽。如果想修改头像可以直接在主题的_config.yml文件里面修改，友情链接，之类的都在这里，修改名字在public/index.html里修改，开始打理你的博客吧，有什么问题或者建议，都可以提出来，我会继续完善的。</p>
+]]></content>
+    </entry>
+    
+    <entry>
+      <title><![CDATA[Hello World]]></title>
+      <url>http://yoursite.com/2016/03/24/hello-world/</url>
+      <content type="html"><![CDATA[<p>Welcome to <a href="https://hexo.io/" target="_blank" rel="external">Hexo</a>! This is your very first post. Check <a href="https://hexo.io/docs/" target="_blank" rel="external">documentation</a> for more info. If you get any problems when using Hexo, you can find the answer in <a href="https://hexo.io/docs/troubleshooting.html" target="_blank" rel="external">troubleshooting</a> or you can ask me on <a href="https://github.com/hexojs/hexo/issues" target="_blank" rel="external">GitHub</a>.<br><a id="more"></a></p>
+<h2 id="Quick-Start"><a href="#Quick-Start" class="headerlink" title="Quick Start"></a>Quick Start</h2><h3 id="Create-a-new-post"><a href="#Create-a-new-post" class="headerlink" title="Create a new post"></a>Create a new post</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ hexo new <span class="string">"My New Post"</span></span><br></pre></td></tr></table></figure>
+<p>More info: <a href="https://hexo.io/docs/writing.html" target="_blank" rel="external">Writing</a></p>
+<h3 id="Run-server"><a href="#Run-server" class="headerlink" title="Run server"></a>Run server</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ hexo server</span><br></pre></td></tr></table></figure>
+<p>More info: <a href="https://hexo.io/docs/server.html" target="_blank" rel="external">Server</a></p>
+<h3 id="Generate-static-files"><a href="#Generate-static-files" class="headerlink" title="Generate static files"></a>Generate static files</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ hexo generate</span><br></pre></td></tr></table></figure>
+<p>More info: <a href="https://hexo.io/docs/generating.html" target="_blank" rel="external">Generating</a></p>
+<h3 id="Deploy-to-remote-sites"><a href="#Deploy-to-remote-sites" class="headerlink" title="Deploy to remote sites"></a>Deploy to remote sites</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ hexo deploy</span><br></pre></td></tr></table></figure>
+<p>More info: <a href="https://hexo.io/docs/deployment.html" target="_blank" rel="external">Deployment</a></p>
+]]></content>
+    </entry>
+    
+  
+  
+</search>
